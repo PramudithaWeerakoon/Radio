@@ -1,0 +1,177 @@
+"use client";
+
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CalendarIcon, Music, MapPin, Clock } from "lucide-react";
+import { format } from "date-fns";
+
+export function BookingSection() {
+  const [date, setDate] = useState<Date>();
+  const [venue, setVenue] = useState("");
+  const [eventType, setEventType] = useState("");
+
+  return (
+    <section className="py-16 bg-black text-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-12"
+        >
+          <h2 className="text-3xl font-bold mb-4">Book Us for Your Event</h2>
+          <p className="text-gray-400 max-w-2xl mx-auto">
+            From intimate acoustic sessions to full stadium performances, we'll make your event unforgettable
+          </p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.2 }}
+        >
+          <Card className="bg-white/10 border-none text-white">
+            <CardContent className="p-6">
+              <form className="space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label className="text-white">Event Type</Label>
+                    <Select value={eventType} onValueChange={setEventType}>
+                      <SelectTrigger className="bg-white/5 border-white/20 text-white">
+                        <SelectValue placeholder="Select event type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="private">Private Party</SelectItem>
+                        <SelectItem value="corporate">Corporate Event</SelectItem>
+                        <SelectItem value="wedding">Wedding</SelectItem>
+                        <SelectItem value="concert">Concert</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-white">Venue Type</Label>
+                    <Select value={venue} onValueChange={setVenue}>
+                      <SelectTrigger className="bg-white/5 border-white/20 text-white">
+                        <SelectValue placeholder="Select venue type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="indoor">Indoor Venue</SelectItem>
+                        <SelectItem value="outdoor">Outdoor Venue</SelectItem>
+                        <SelectItem value="stadium">Stadium</SelectItem>
+                        <SelectItem value="club">Club</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-white">Preferred Date</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full bg-white/5 border-white/20 text-white justify-start"
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {date ? format(date, "PPP") : <span>Pick a date</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <Calendar
+                          mode="single"
+                          selected={date}
+                          onSelect={setDate}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-white">Expected Guests</Label>
+                    <Input
+                      type="number"
+                      placeholder="Number of guests"
+                      className="bg-white/5 border-white/20 text-white"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-white">Additional Requirements</Label>
+                  <Input
+                    placeholder="Any specific requirements or requests"
+                    className="bg-white/5 border-white/20 text-white"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label className="text-white">Contact Name</Label>
+                    <Input
+                      placeholder="Your name"
+                      className="bg-white/5 border-white/20 text-white"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-white">Contact Email</Label>
+                    <Input
+                      type="email"
+                      placeholder="Your email"
+                      className="bg-white/5 border-white/20 text-white"
+                    />
+                  </div>
+                </div>
+
+                <Button className="w-full bg-white text-black hover:bg-white/90">
+                  Submit Booking Request
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+          {[
+            {
+              icon: Music,
+              title: "Versatile Performance",
+              description: "From acoustic sets to full band performances",
+            },
+            {
+              icon: MapPin,
+              title: "Any Venue",
+              description: "We adapt to your space and requirements",
+            },
+            {
+              icon: Clock,
+              title: "Flexible Duration",
+              description: "Customizable performance length",
+            },
+          ].map((feature, index) => (
+            <motion.div
+              key={feature.title}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1 }}
+              className="text-center"
+            >
+              <feature.icon className="h-8 w-8 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+              <p className="text-gray-400">{feature.description}</p>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
