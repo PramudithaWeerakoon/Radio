@@ -13,6 +13,9 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   FileText,
+  Album,
+  Mic,
+  Radio,
 } from "lucide-react";
 
 const stats = [
@@ -21,7 +24,7 @@ const stats = [
     value: "5",
     change: "+20%",
     trend: "up",
-    icon: Music,
+    icon: Album,
   },
   {
     title: "Active Events",
@@ -31,7 +34,7 @@ const stats = [
     icon: Calendar,
   },
   {
-    title: "Total Members",
+    title: "Band Members",
     value: "4",
     change: "0%",
     trend: "neutral",
@@ -43,6 +46,25 @@ const stats = [
     change: "-5%",
     trend: "down",
     icon: ShoppingBag,
+  },
+];
+
+const quickActions = [
+  {
+    title: "Music",
+    items: [
+      { label: "Add Album", href: "/admin/music/albums/new", icon: Album },
+      { label: "Add Track", href: "/admin/music/tracks/new", icon: Music },
+      { label: "Add Member", href: "/admin/music/members/new", icon: Users },
+    ],
+  },
+  {
+    title: "Content",
+    items: [
+      { label: "New Event", href: "/admin/events/new", icon: Calendar },
+      { label: "New Post", href: "/admin/blog/new", icon: FileText },
+      { label: "Add Product", href: "/admin/merchandise/new", icon: ShoppingBag },
+    ],
   },
 ];
 
@@ -72,6 +94,7 @@ export default function AdminDashboard() {
         <p className="text-muted-foreground">Welcome back, Admin</p>
       </div>
 
+      {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, index) => (
           <motion.div
@@ -116,75 +139,66 @@ export default function AdminDashboard() {
         ))}
       </div>
 
+      {/* Quick Actions Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-        >
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                {recentActivity.map((activity, index) => (
-                  <div key={index} className="flex items-start space-x-4">
-                    <div className="w-2 h-2 mt-2 rounded-full bg-primary" />
-                    <div className="flex-1 space-y-1">
-                      <p className="font-medium">{activity.action}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {activity.description}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {activity.timestamp}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-        >
-          <Card>
-            <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-2 gap-4">
-              <Link href="/admin/events/new">
-                <Button className="w-full">
-                  <Calendar className="mr-2 h-4 w-4" />
-                  Add Event
-                </Button>
-              </Link>
-              <Link href="/admin/blog/new">
-                <Button className="w-full">
-                  <FileText className="mr-2 h-4 w-4" />
-                  New Post
-                </Button>
-              </Link>
-              <Link href="/admin/merchandise/new">
-                <Button className="w-full">
-                  <ShoppingBag className="mr-2 h-4 w-4" />
-                  Add Product
-                </Button>
-              </Link>
-              <Link href="/admin/members/new">
-                <Button className="w-full">
-                  <Users className="mr-2 h-4 w-4" />
-                  Add Member
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-        </motion.div>
+        {quickActions.map((section, sectionIndex) => (
+          <motion.div
+            key={section.title}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 + sectionIndex * 0.1 }}
+          >
+            <Card>
+              <CardHeader>
+                <CardTitle>{section.title}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {section.items.map((item) => (
+                    <Link key={item.label} href={item.href}>
+                      <Button className="w-full h-24 flex flex-col items-center justify-center gap-2">
+                        <item.icon className="h-6 w-6" />
+                        {item.label}
+                      </Button>
+                    </Link>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
       </div>
+
+      {/* Recent Activity */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6 }}
+      >
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Activity</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              {recentActivity.map((activity, index) => (
+                <div key={index} className="flex items-start space-x-4">
+                  <div className="w-2 h-2 mt-2 rounded-full bg-primary" />
+                  <div className="flex-1 space-y-1">
+                    <p className="font-medium">{activity.action}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {activity.description}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {activity.timestamp}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
     </div>
   );
 }
