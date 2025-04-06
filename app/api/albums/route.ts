@@ -70,32 +70,3 @@ export async function GET() {
   }
 }
 
-export async function DELETE(request, { params }) {
-  try {
-    const { id } = params;
-    
-    // First delete all related tracks and credits
-    await prisma.track.deleteMany({
-      where: { album_id: parseInt(id) }
-    });
-    
-    await prisma.albumCredit.deleteMany({
-      where: { album_id: parseInt(id) }
-    });
-    
-    // Then delete the album
-    await prisma.album.delete({
-      where: { id: parseInt(id) }
-    });
-
-    return NextResponse.json({ 
-      message: "Album deleted successfully" 
-    }, { status: 200 });
-  } catch (error) {
-    console.error("Failed to delete album:", error);
-    return NextResponse.json({ 
-      message: "Failed to delete album",
-      error: error.message
-    }, { status: 500 });
-  }
-}

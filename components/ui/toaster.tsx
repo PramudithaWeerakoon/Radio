@@ -1,34 +1,11 @@
 "use client";
-import { useToast } from "@/components/ui/use-toast";
-import {
-  Toast,
-  ToastClose,
-  ToastDescription,
-  ToastProvider,
-  ToastTitle,
-  ToastViewport,
-} from "@/components/ui/toast";
 
-export function Toaster() {
-  const { toasts } = useToast();
+import * as React from "react";
+import { ToastContainer, toast as reactToastifyToast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-  return (
-    <ToastProvider>
-      {toasts.map(function ({ id, title, description, action, ...props }) {
-        return (
-          <Toast key={id} {...props}>
-            <div className="grid gap-1">
-              {title && <ToastTitle>{title}</ToastTitle>}
-              {description && (
-                <ToastDescription>{description}</ToastDescription>
-              )}
-            </div>
-            {action}
-            <ToastClose />
-          </Toast>
-        );
-      })}
-      <ToastViewport />
-    </ToastProvider>
-  );
+export function ToasterComponent() {
+  return <ToastContainer />;
 }
+
+export const toast = reactToastifyToast;

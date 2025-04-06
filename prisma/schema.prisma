@@ -31,7 +31,7 @@ model RecentActivity {
 }
 
 model Album {
-  id            Int       @id @default(autoincrement())
+  id            Int           @id @default(autoincrement())
   title         String
   release_date  DateTime?
   cover_art     String?
@@ -42,13 +42,15 @@ model Album {
 }
 
 model Track {
-  id           Int     @id @default(autoincrement())
+  id           Int           @id @default(autoincrement())
   title        String
   duration     String?
   track_number Int
   lyrics       String?
   album_id     Int
-  album        Album   @relation(fields: [album_id], references: [id])
+  album        Album         @relation(fields: [album_id], references: [id])
+  youtube_id   String?
+  credits      TrackCredit[]
 }
 
 model AlbumCredit {
@@ -57,4 +59,12 @@ model AlbumCredit {
   name     String
   album_id Int
   album    Album   @relation(fields: [album_id], references: [id])
+}
+
+model TrackCredit {
+  id       Int     @id @default(autoincrement())
+  role     String
+  name     String
+  track_id Int
+  track    Track   @relation(fields: [track_id], references: [id])
 }

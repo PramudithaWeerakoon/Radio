@@ -1,3 +1,5 @@
+"use client";
+
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,16 +14,79 @@ import {
   ArrowDownRight,
   FileText,
   Album,
+  Mic,
+  Radio,
 } from "lucide-react";
-import { prisma } from "@/lib/prisma";
 
-// This is a Server Component, so we can fetch data directly
-export default async function AdminDashboard() {
-  // Fetch data directly in the component
-  const stats = await prisma.stat.findMany();
-  const quickActions = await prisma.quickAction.findMany();
-  const recentActivity = await prisma.recentActivity.findMany();
+const stats = [
+  {
+    title: "Total Albums",
+    value: "5",
+    change: "+20%",
+    trend: "up",
+    icon: Album,
+  },
+  {
+    title: "Active Events",
+    value: "12",
+    change: "+15%",
+    trend: "up",
+    icon: Calendar,
+  },
+  {
+    title: "Band Members",
+    value: "4",
+    change: "0%",
+    trend: "neutral",
+    icon: Users,
+  },
+  {
+    title: "Merchandise Sales",
+    value: "$12.5k",
+    change: "-5%",
+    trend: "down",
+    icon: ShoppingBag,
+  },
+];
 
+const quickActions = [
+  {
+    title: "Music",
+    items: [
+      { label: "Add Album", href: "/admin/music/albums/new", icon: Album },
+      { label: "Add Track", href: "/admin/music/tracks/new", icon: Music },
+      { label: "Add Member", href: "/admin/music/members/new", icon: Users },
+    ],
+  },
+  {
+    title: "Content",
+    items: [
+      { label: "New Event", href: "/admin/events/new", icon: Calendar },
+      { label: "New Post", href: "/admin/blog/new", icon: FileText },
+      { label: "Add Product", href: "/admin/merchandise/new", icon: ShoppingBag },
+    ],
+  },
+];
+
+const recentActivity = [
+  {
+    action: "New album added",
+    description: "Echoes of Tomorrow was added to the catalog",
+    timestamp: "2 hours ago",
+  },
+  {
+    action: "Event updated",
+    description: "Summer Stadium Tour date modified",
+    timestamp: "5 hours ago",
+  },
+  {
+    action: "New merchandise",
+    description: "Added new t-shirt designs to the store",
+    timestamp: "1 day ago",
+  },
+];
+
+export default function AdminDashboard() {
   return (
     <div className="space-y-8">
       <div className="flex justify-between items-center">
@@ -32,17 +97,18 @@ export default async function AdminDashboard() {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, index) => (
-          <div
-            key={stat.id}
-            className="opacity-0 translate-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-forwards"
-            style={{ animationDelay: `${index * 100}ms` }}
+          <motion.div
+            key={stat.title}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }}
           >
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">
                   {stat.title}
                 </CardTitle>
-                <Album className="h-4 w-4 text-muted-foreground" />
+                <stat.icon className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stat.value}</div>
@@ -69,17 +135,18 @@ export default async function AdminDashboard() {
                 </div>
               </CardContent>
             </Card>
-          </div>
+          </motion.div>
         ))}
       </div>
 
       {/* Quick Actions Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {quickActions.map((section, sectionIndex) => (
-          <div
-            key={section.id}
-            className="opacity-0 translate-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-forwards"
-            style={{ animationDelay: `${400 + sectionIndex * 100}ms` }}
+          <motion.div
+            key={section.title}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 + sectionIndex * 0.1 }}
           >
             <Card>
               <CardHeader>
@@ -87,10 +154,10 @@ export default async function AdminDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {section.items && section.items.map((item) => (
+                  {section.items.map((item) => (
                     <Link key={item.label} href={item.href}>
                       <Button className="w-full h-24 flex flex-col items-center justify-center gap-2">
-                        <FileText className="h-6 w-6" />
+                        <item.icon className="h-6 w-6" />
                         {item.label}
                       </Button>
                     </Link>
@@ -98,14 +165,15 @@ export default async function AdminDashboard() {
                 </div>
               </CardContent>
             </Card>
-          </div>
+          </motion.div>
         ))}
       </div>
 
       {/* Recent Activity */}
-      <div
-        className="opacity-0 translate-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-forwards"
-        style={{ animationDelay: '600ms' }}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6 }}
       >
         <Card>
           <CardHeader>
@@ -114,7 +182,7 @@ export default async function AdminDashboard() {
           <CardContent>
             <div className="space-y-6">
               {recentActivity.map((activity, index) => (
-                <div key={activity.id} className="flex items-start space-x-4">
+                <div key={index} className="flex items-start space-x-4">
                   <div className="w-2 h-2 mt-2 rounded-full bg-primary" />
                   <div className="flex-1 space-y-1">
                     <p className="font-medium">{activity.action}</p>
@@ -130,7 +198,7 @@ export default async function AdminDashboard() {
             </div>
           </CardContent>
         </Card>
-      </div>
+      </motion.div>
     </div>
   );
 }
