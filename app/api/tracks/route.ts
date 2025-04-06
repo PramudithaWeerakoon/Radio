@@ -76,3 +76,44 @@ export async function GET() {
     );
   }
 }
+
+// Add DELETE endpoint to handle track deletion
+export async function DELETE(request) {
+  try {
+    // Get the ID from the URL
+    const url = new URL(request.url);
+    const id = url.searchParams.get("id");
+    
+    if (!id) {
+      return NextResponse.json(
+        { success: false, message: "Track ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // Delete the track
+    await prisma.track.delete({
+      where: {
+        id: parseInt(id, 10),
+      },
+    });
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Track deleted successfully",
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Failed to delete track:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Failed to delete track",
+        error: error.message,
+      },
+      { status: 500 }
+    );
+  }
+}

@@ -1,32 +1,83 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Plus, Edit, Trash, Music, Clock, ArrowLeft } from "lucide-react";
+import { Search, Plus, Edit, Trash, Music, Clock, ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
-
-const tracks = [
-  {
-    id: 1,
-    title: "Midnight Dreams",
-    album: "Echoes of Tomorrow",
-    duration: "4:32",
-    trackNumber: 1,
-  },
-  {
-    id: 2,
-    title: "Electric Sunset",
-    album: "Echoes of Tomorrow",
-    duration: "3:45",
-    trackNumber: 2,
-  },
-];
+import { toast } from "@/components/ui/toaster";
 
 export default function TracksPage() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [tracks, setTracks] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [deleteLoading, setDeleteLoading] = useState(null);
+
+  // Fetch tracks function
+  const fetchTracks = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch("/api/tracks");
+      
+      if (!response.ok) {
+        throw new Error("Failed to fetch tracks");
+      }
+      
+      const data = await response.json();
+      if (data.success && data.tracks) {
+        // Transform the data to match our component's expected structure
+        const formattedTracks = data.tracks.map(track => ({
+          id: track.id,
+          title: track.title,
+          album: track.album ? track.album.title : "Unknown Album",
+          duration: track.duration || "--:--",
+          trackNumber: track.track_number
+        }));
+        setTracks(formattedTracks);
+      } else {
+        setTracks([]);
+      }
+    } catch (error) {
+      console.error("Error fetching tracks:", error);
+      toast("Failed to load tracks");
+      setTracks([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTracks();
+  }, []);
+
+  // Handle track deletion
+  const handleDeleteTrack = async (trackId) => {
+    if (!confirm("Are you sure you want to delete this track?")) {
+      return;
+    }
+    
+    setDeleteLoading(trackId);
+    try {
+      const response = await fetch(`/api/tracks?id=${trackId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete track");
+      }
+
+      // Refresh the tracks list after successful deletion
+      toast("Track deleted successfully");
+      await fetchTracks();
+    } catch (error) {
+      console.error("Error deleting track:", error);
+      toast("Failed to delete track");
+    } finally {
+      setDeleteLoading(null);
+    }
+  };
 
   const filteredTracks = tracks.filter(track =>
     track.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -64,45 +115,73 @@ export default function TracksPage() {
         </div>
       </div>
 
-      <div className="grid gap-6">
-        {filteredTracks.map((track, index) => (
-          <motion.div
-            key={track.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-          >
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex justify-between items-center">
-                  <div className="space-y-1">
-                    <div className="flex items-center">
-                      <Music className="h-4 w-4 mr-2 text-muted-foreground" />
-                      <h3 className="text-xl font-semibold">{track.title}</h3>
+      {isLoading ? (
+        <div className="flex justify-center items-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <span className="ml-2">Loading tracks...</span>
+        </div>
+      ) : filteredTracks.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">No tracks found.</p>
+          {searchQuery && (
+            <p className="text-sm text-muted-foreground mt-2">
+              Try adjusting your search query.
+            </p>
+          )}
+        </div>
+      ) : (
+        <div className="grid gap-6">
+          {filteredTracks.map((track, index) => (
+            <motion.div
+              key={track.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+            >
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-center">
+                    <div className="space-y-1">
+                      <div className="flex items-center">
+                        <Music className="h-4 w-4 mr-2 text-muted-foreground" />
+                        <h3 className="text-xl font-semibold">{track.title}</h3>
+                      </div>
+                      <div className="flex items-center text-muted-foreground">
+                        <span>Track {track.trackNumber}</span>
+                        <span className="mx-2">•</span>
+                        <span>{track.album}</span>
+                        <span className="mx-2">•</span>
+                        <Clock className="h-4 w-4 mx-1" />
+                        <span>{track.duration}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center text-muted-foreground">
-                      <span>Track {track.trackNumber}</span>
-                      <span className="mx-2">•</span>
-                      <span>{track.album}</span>
-                      <span className="mx-2">•</span>
-                      <Clock className="h-4 w-4 mx-1" />
-                      <span>{track.duration}</span>
+                    <div className="flex gap-2">
+                      <Link href={`/admin/music/tracks/edit/${track.id}`}>
+                        <Button variant="outline" size="icon">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                      <Button 
+                        variant="outline" 
+                        size="icon" 
+                        className="text-destructive"
+                        onClick={() => handleDeleteTrack(track.id)}
+                        disabled={deleteLoading === track.id}
+                      >
+                        {deleteLoading === track.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Trash className="h-4 w-4" />
+                        )}
+                      </Button>
                     </div>
                   </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="icon">
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button variant="outline" size="icon" className="text-destructive">
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
