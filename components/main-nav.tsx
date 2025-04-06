@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Music, Users, Calendar, Star, ShoppingBag } from "lucide-react";
+import { Music, Users, Calendar, MessageSquare, ShoppingBag } from "lucide-react";
 
 const routes = [
   {
@@ -24,8 +24,8 @@ const routes = [
   },
   {
     href: "/chat",
-    label: "Fan Reviews",
-    icon: Star,
+    label: "Fan Chat",
+    icon: MessageSquare,
   },
   {
     href: "/merchandise",

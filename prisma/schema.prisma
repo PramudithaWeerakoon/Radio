@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Stat {
+  id     Int    @id @default(autoincrement())
+  title  String
+  value  String
+  change String
+  trend  String
+}
+
+model QuickAction {
+  id    Int    @id @default(autoincrement())
+  title String
+  label String
+  href  String
+  icon  String
+}
+
+model RecentActivity {
+  id          Int    @id @default(autoincrement())
+  action      String
+  description String
+  timestamp   String
+}
+
+model Album {
+  id            Int       @id @default(autoincrement())
+  title         String
+  release_date  DateTime?
+  cover_art     String?
+  description   String?
+  youtube_id    String?
+  tracks        Track[]
+  album_credits AlbumCredit[]
+}
+
+model Track {
+  id           Int     @id @default(autoincrement())
+  title        String
+  duration     String?
+  track_number Int
+  lyrics       String?
+  album_id     Int
+  album        Album   @relation(fields: [album_id], references: [id])
+}
+
+model AlbumCredit {
+  id       Int     @id @default(autoincrement())
+  role     String
+  name     String
+  album_id Int
+  album    Album   @relation(fields: [album_id], references: [id])
+}
