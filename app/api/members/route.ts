@@ -1,7 +1,6 @@
-import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import crypto from "crypto";
 
 export async function GET() {
   try {
@@ -13,28 +12,67 @@ export async function GET() {
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const data = await request.json();
-
+    const formData = await request.formData();
+    const firstName = formData.get("firstName") as string;
+    const lastName = formData.get("lastName") as string;
+    const role = formData.get("role") as string;
+    const bio = formData.get("bio") as string || undefined;
+    const joinDate = formData.get("joinDate") as string;
+    const socialLinksJson = formData.get("socialLinks") as string;
+    const socialLinks = JSON.parse(socialLinksJson);
+    const profileImage = formData.get("profileImage") as File | null;
+    
+    let imageName = null;
+    let imageData = null;
+    let imageMimeType = null;
+    
+    if (profileImage) {
+      // Store image information
+      imageName = profileImage.name;
+      imageMimeType = profileImage.type;
+      
+      // Read file as ArrayBuffer and convert to Buffer for storage
+      const imageArrayBuffer = await profileImage.arrayBuffer();
+      imageData = Buffer.from(imageArrayBuffer);
+    }
+    
     const newMember = await prisma.member.create({
       data: {
-        firstName: data.firstName,
-        lastName: data.lastName,
-        role: data.role,
-        profileImageUrl: data.profileImageUrl,
-        bio: data.bio,
-        joinDate: new Date(data.joinDate),
-        facebook: data.socialLinks.facebook,
-        twitter: data.socialLinks.twitter,
-        instagram: data.socialLinks.instagram,
-      },
+        firstName,
+        lastName,
+        role,
+        bio,
+        joinDate: joinDate ? new Date(joinDate) : new Date(),
+        imageName,
+        imageData,
+        imageMimeType,
+        facebook: socialLinks.facebook,
+        twitter: socialLinks.twitter,
+        instagram: socialLinks.instagram,
+      }
     });
-
-    return NextResponse.json(newMember, { status: 201 });
+    
+    // Don't include binary data in response
+    const memberResponse = {
+      ...newMember,
+      imageData: newMember.imageData ? "Binary data not included in response" : null
+    };
+    
+    return NextResponse.json({ 
+      success: true, 
+      message: "Member created successfully", 
+      member: memberResponse 
+    }, { status: 201 });
+    
   } catch (error) {
     console.error("Error creating member:", error);
-    return NextResponse.json({ error: "Failed to create member" }, { status: 500 });
+    return NextResponse.json({ 
+      success: false, 
+      message: "Failed to create member",
+      error: error.toString() 
+    }, { status: 500 });
   }
 }
 

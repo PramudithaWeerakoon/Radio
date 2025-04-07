@@ -74,12 +74,20 @@ model Member {
   firstName       String
   lastName        String
   role            String
-  profileImageUrl String?
+  
+  // Change to match the Blog model's approach for storing images in DB
+  imageName       String?  // Store the uploaded image filename
+  imageData       Bytes?   // Store the actual binary image data
+  imageMimeType   String?  // Store the image MIME type
+  
   bio             String?
   joinDate        DateTime
+  
+  // Social media links
   facebook        String?
   twitter         String?
   instagram       String?
+  
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }

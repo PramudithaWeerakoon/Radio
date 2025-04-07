@@ -3,11 +3,11 @@ import { prisma } from '@/lib/db';
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
-    // Make sure to handle params properly in an async context
-    const id = parseInt(params.id);
+    const idParam = context.params.id;
+    const id = parseInt(idParam);
     
     if (isNaN(id)) {
       return NextResponse.json(

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Plus, Edit, Trash, Users, ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 // This will only be used as fallback
 const fallbackMembers = [
@@ -30,7 +31,7 @@ interface Member {
   id: number;
   name: string;
   role: string;
-  image: string;
+  imageUrl: string;
   joinDate: string;
 }
 
@@ -58,7 +59,7 @@ export default function MembersPage() {
           id: member.id,
           name: `${member.firstName} ${member.lastName}`,
           role: member.role,
-          image: member.profileImageUrl || 'https://via.placeholder.com/150',
+          imageUrl: member.imageData ? `/api/members/${member.id}/image` : '/images/default-profile.jpg',
           joinDate: new Date(member.joinDate).getFullYear().toString(),
         }));
         
@@ -67,6 +68,11 @@ export default function MembersPage() {
       } catch (err) {
         console.error('Error fetching members:', err);
         setError('Failed to load members');
+        // Use fallback members in case of error
+        setMembers(fallbackMembers.map(member => ({
+          ...member,
+          imageUrl: '/images/default-profile.jpg'
+        })));
       } finally {
         setLoading(false);
       }
@@ -163,10 +169,15 @@ export default function MembersPage() {
               <Card>
                 <CardContent className="p-6">
                   <div className="grid md:grid-cols-[150px,1fr] gap-6">
-                    <div
-                      className="h-40 bg-cover bg-center rounded-lg"
-                      style={{ backgroundImage: `url(${member.image})` }}
-                    />
+                    <div className="h-40 relative rounded-lg overflow-hidden">
+                      <Image 
+                        src={member.imageUrl}
+                        alt={member.name}
+                        fill
+                        style={{ objectFit: 'cover' }}
+                        unoptimized // For external or dynamic image sources
+                      />
+                    </div>
                     <div className="space-y-4">
                       <div className="flex justify-between items-start">
                         <div>

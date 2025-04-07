@@ -16,7 +16,17 @@ import {
   Album,
   Mic,
   Radio,
+  Loader2,
 } from "lucide-react";
+import { useEffect, useState } from "react";
+
+// Define the activity type
+type Activity = {
+  id: number;
+  action: string;
+  description: string;
+  timestamp: string;
+};
 
 const stats = [
   {
@@ -68,25 +78,38 @@ const quickActions = [
   },
 ];
 
-const recentActivity = [
-  {
-    action: "New album added",
-    description: "Echoes of Tomorrow was added to the catalog",
-    timestamp: "2 hours ago",
-  },
-  {
-    action: "Event updated",
-    description: "Summer Stadium Tour date modified",
-    timestamp: "5 hours ago",
-  },
-  {
-    action: "New merchandise",
-    description: "Added new t-shirt designs to the store",
-    timestamp: "1 day ago",
-  },
-];
-
 export default function AdminDashboard() {
+  // Add state for activities
+  const [recentActivity, setRecentActivity] = useState<Activity[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch activities from the API
+  useEffect(() => {
+    async function fetchActivities() {
+      try {
+        setIsLoading(true);
+        // Use the new endpoint that gets only 3 music-related activities
+        const response = await fetch('/api/recent-music-activities');
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch activities');
+        }
+        
+        const data = await response.json();
+        setRecentActivity(data);
+        setError(null);
+      } catch (err) {
+        setError('Could not load recent activities');
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchActivities();
+  }, []);
+
   return (
     <div className="space-y-8">
       <div className="flex justify-between items-center">
@@ -177,25 +200,35 @@ export default function AdminDashboard() {
       >
         <Card>
           <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
+            <CardTitle>Recent Music Updates</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-6">
-              {recentActivity.map((activity, index) => (
-                <div key={index} className="flex items-start space-x-4">
-                  <div className="w-2 h-2 mt-2 rounded-full bg-primary" />
-                  <div className="flex-1 space-y-1">
-                    <p className="font-medium">{activity.action}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {activity.description}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {activity.timestamp}
-                    </p>
+            {isLoading ? (
+              <div className="flex justify-center items-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : error ? (
+              <div className="text-center py-8 text-muted-foreground">{error}</div>
+            ) : recentActivity.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">No recent music updates found</div>
+            ) : (
+              <div className="space-y-6">
+                {recentActivity.map((activity) => (
+                  <div key={activity.id} className="flex items-start space-x-4">
+                    <div className="w-2 h-2 mt-2 rounded-full bg-primary" />
+                    <div className="flex-1 space-y-1">
+                      <p className="font-medium">{activity.action}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {activity.description}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {activity.timestamp}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </motion.div>

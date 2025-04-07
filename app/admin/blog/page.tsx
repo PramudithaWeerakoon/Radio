@@ -196,7 +196,7 @@ export default function AdminBlogPage() {
                         </div>
                       </div>
                       <div className="flex justify-end pt-4 border-t">
-                        <Link href={`/blog/${post.id}`}>
+                        <Link href={`/admin/blog/view/${post.id}`}>
                           <Button variant="outline">View Post</Button>
                         </Link>
                       </div>

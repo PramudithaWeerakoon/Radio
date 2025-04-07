@@ -11,6 +11,7 @@ import { ArrowLeft } from "lucide-react"; // Ensure this is correctly imported
 import Link from "next/link"; // This should be correct
 import { useRouter } from "next/navigation"; // Add this import
 import { useToast } from "@/components/ui/use-toast"; // Add this import for consistent notifications
+import Image from "next/image"; // Add this for image preview
 
 const roles = [
   "Lead Vocals",
@@ -25,11 +26,12 @@ const roles = [
 export default function NewMemberPage() {
   const router = useRouter(); // Initialize the router
   const { toast } = useToast(); // Initialize toast
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     role: "",
-    profileImageUrl: "",
     bio: "",
     socialLinks: {
       facebook: "",
@@ -45,6 +47,20 @@ export default function NewMemberPage() {
       ...prev,
       [name]: value,
     }));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setSelectedFile(file);
+      
+      // Create an image preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSocialLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -68,12 +84,26 @@ export default function NewMemberPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch("/api/members", { // Ensure this path matches the server-side route
+      // Create FormData for file upload
+      const formDataToSend = new FormData();
+      
+      // Add all text fields to FormData
+      formDataToSend.append('firstName', formData.firstName);
+      formDataToSend.append('lastName', formData.lastName);
+      formDataToSend.append('role', formData.role);
+      formDataToSend.append('bio', formData.bio);
+      formDataToSend.append('joinDate', formData.joinDate);
+      formDataToSend.append('socialLinks', JSON.stringify(formData.socialLinks));
+      
+      // Add the profile image file if it exists
+      if (selectedFile) {
+        formDataToSend.append('profileImage', selectedFile);
+      }
+      
+      const response = await fetch("/api/members", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
+        body: formDataToSend, // Send FormData instead of JSON
+        // No Content-Type header needed as it's automatically set with boundary
       });
 
       if (response.ok) {
@@ -153,13 +183,21 @@ export default function NewMemberPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Profile Image URL</Label>
+              <Label>Profile Image</Label>
               <Input
-                name="profileImageUrl"
-                placeholder="Enter profile image URL"
-                value={formData.profileImageUrl}
-                onChange={handleChange}
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
               />
+              {imagePreview && (
+                <div className="mt-2">
+                  <img
+                    src={imagePreview}
+                    alt="Profile preview"
+                    className="h-40 w-40 object-cover rounded-md border"
+                  />
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">
