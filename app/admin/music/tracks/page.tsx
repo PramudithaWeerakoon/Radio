@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Plus, Edit, Trash, Music, Clock, ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { toast } from "@/components/ui/toaster";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function TracksPage() {
+  const { toast } = useToast(); // Properly initialize the toast function from the hook
   const [searchQuery, setSearchQuery] = useState("");
   const [tracks, setTracks] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -41,7 +42,11 @@ export default function TracksPage() {
       }
     } catch (error) {
       console.error("Error fetching tracks:", error);
-      toast("Failed to load tracks");
+      toast({
+        title: "Error",
+        description: "Failed to load tracks",
+        variant: "destructive"
+      });
       setTracks([]);
     } finally {
       setIsLoading(false);
@@ -69,11 +74,18 @@ export default function TracksPage() {
       }
 
       // Refresh the tracks list after successful deletion
-      toast("Track deleted successfully");
+      toast({
+        title: "Success",
+        description: "Track deleted successfully"
+      });
       await fetchTracks();
     } catch (error) {
       console.error("Error deleting track:", error);
-      toast("Failed to delete track");
+      toast({
+        title: "Error",
+        description: "Failed to delete track",
+        variant: "destructive"
+      });
     } finally {
       setDeleteLoading(null);
     }

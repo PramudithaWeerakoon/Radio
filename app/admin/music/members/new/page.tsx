@@ -1,14 +1,16 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
+import { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card"; // Verify these exports
+import { Button } from "@/components/ui/button"; // Verify this export
+import { Input } from "@/components/ui/input"; // Verify this export
+import { Label } from "@/components/ui/label"; // Verify this export
+import { Textarea } from "@/components/ui/textarea"; // Verify this export
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; // Verify these exports
+import { ArrowLeft } from "lucide-react"; // Ensure this is correctly imported
+import Link from "next/link"; // This should be correct
+import { useRouter } from "next/navigation"; // Add this import
+import { useToast } from "@/components/ui/use-toast"; // Add this import for consistent notifications
 
 const roles = [
   "Lead Vocals",
@@ -17,10 +19,87 @@ const roles = [
   "Bass",
   "Drums",
   "Keyboard",
-  "Other"
+  "Other",
 ];
 
 export default function NewMemberPage() {
+  const router = useRouter(); // Initialize the router
+  const { toast } = useToast(); // Initialize toast
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    role: "",
+    profileImageUrl: "",
+    bio: "",
+    socialLinks: {
+      facebook: "",
+      twitter: "",
+      instagram: "",
+    },
+    joinDate: "",
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSocialLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      socialLinks: {
+        ...prev.socialLinks,
+        [name]: value,
+      },
+    }));
+  };
+
+  const handleRoleChange = (role: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      role,
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await fetch("/api/members", { // Ensure this path matches the server-side route
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Success",
+          description: "Member added successfully"
+        });
+        // Redirect to the members list page
+        router.push("/admin/music/members");
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to add member",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error("Error adding member:", error);
+      toast({
+        title: "Error",
+        description: "An error occurred. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center space-x-4">
@@ -34,22 +113,32 @@ export default function NewMemberPage() {
 
       <Card>
         <CardContent className="p-6">
-          <form className="space-y-8">
+          <form className="space-y-8" onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label>First Name</Label>
-                <Input placeholder="Enter first name" />
+                <Input
+                  name="firstName"
+                  placeholder="Enter first name"
+                  value={formData.firstName}
+                  onChange={handleChange}
+                />
               </div>
 
               <div className="space-y-2">
                 <Label>Last Name</Label>
-                <Input placeholder="Enter last name" />
+                <Input
+                  name="lastName"
+                  placeholder="Enter last name"
+                  value={formData.lastName}
+                  onChange={handleChange}
+                />
               </div>
             </div>
 
             <div className="space-y-2">
               <Label>Role</Label>
-              <Select>
+              <Select onValueChange={handleRoleChange}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select role" />
                 </SelectTrigger>
@@ -65,14 +154,22 @@ export default function NewMemberPage() {
 
             <div className="space-y-2">
               <Label>Profile Image URL</Label>
-              <Input placeholder="Enter profile image URL" />
+              <Input
+                name="profileImageUrl"
+                placeholder="Enter profile image URL"
+                value={formData.profileImageUrl}
+                onChange={handleChange}
+              />
             </div>
 
             <div className="space-y-2">
               <Label>Bio</Label>
               <Textarea
+                name="bio"
                 placeholder="Enter member biography"
                 className="min-h-[150px]"
+                value={formData.bio}
+                onChange={handleChange}
               />
             </div>
 
@@ -81,27 +178,49 @@ export default function NewMemberPage() {
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label>Facebook</Label>
-                  <Input placeholder="Enter Facebook profile URL" />
+                  <Input
+                    name="facebook"
+                    placeholder="Enter Facebook profile URL"
+                    value={formData.socialLinks.facebook}
+                    onChange={handleSocialLinkChange}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Twitter</Label>
-                  <Input placeholder="Enter Twitter profile URL" />
+                  <Input
+                    name="twitter"
+                    placeholder="Enter Twitter profile URL"
+                    value={formData.socialLinks.twitter}
+                    onChange={handleSocialLinkChange}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Instagram</Label>
-                  <Input placeholder="Enter Instagram profile URL" />
+                  <Input
+                    name="instagram"
+                    placeholder="Enter Instagram profile URL"
+                    value={formData.socialLinks.instagram}
+                    onChange={handleSocialLinkChange}
+                  />
                 </div>
               </div>
             </div>
 
             <div className="space-y-2">
               <Label>Join Date</Label>
-              <Input type="date" />
+              <Input
+                type="date"
+                name="joinDate"
+                value={formData.joinDate}
+                onChange={handleChange}
+              />
             </div>
 
             <div className="flex justify-end space-x-4">
-              <Button variant="outline">Cancel</Button>
-              <Button>Add Member</Button>
+              <Button variant="outline" type="button">
+                Cancel
+              </Button>
+              <Button type="submit">Add Member</Button>
             </div>
           </form>
         </CardContent>

@@ -1,4 +1,4 @@
-import { ToasterComponent } from "@/components/ui/toaster";
+import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
 
 export default function RootLayout({
@@ -10,7 +10,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         {children}
-        <ToasterComponent />
+        <Toaster />
       </body>
     </html>
   );

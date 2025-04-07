@@ -11,12 +11,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-// Import toast directly from toaster.tsx to avoid conflicts
-import { toast } from "@/components/ui/toaster";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function NewTrackPage() {
   const router = useRouter();
-  // Remove `useToast` and directly use `toast`
+  const { toast } = useToast(); // Properly initialize the toast function from the hook
   const [isLoading, setIsLoading] = useState(false);
   const [fetchingAlbums, setFetchingAlbums] = useState(true);
   const [albums, setAlbums] = useState([]);
@@ -51,14 +50,18 @@ export default function NewTrackPage() {
         setAlbums(data.albums || []); // Adjust based on the API response structure
       } catch (error) {
         console.error("Error fetching albums:", error);
-        toast.error("Failed to load albums");
+        toast({
+          title: "Error",
+          description: "Failed to load albums",
+          variant: "destructive"
+        });
       } finally {
         setFetchingAlbums(false);
       }
     }
 
     fetchAlbums();
-  }, []);
+  }, [toast]);
   
   // Handle track input changes
   const handleTrackChange = (e) => {
@@ -127,13 +130,18 @@ export default function NewTrackPage() {
         throw new Error("Failed to save track");
       }
 
-      // Simplified success handling
-      toast("Track saved successfully");
+      toast({
+        title: "Success",
+        description: "Track saved successfully"
+      });
       router.push("/admin/music/tracks");
     } catch (error) {
       console.error("Submission Error:", error);
-      // Simplified error handling
-      toast("Failed to save track");
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save track",
+        variant: "destructive"
+      });
     } finally {
       setIsLoading(false);
     }

@@ -1,38 +1,103 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Calendar, MapPin, DollarSign, Search, Plus, Edit, Trash, ArrowLeft } from "lucide-react";
+import { Calendar, MapPin, DollarSign, Search, Plus, Edit, Trash, ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
-
-const events = [
-  {
-    id: 1,
-    title: "Summer Stadium Tour",
-    date: "2024-07-15",
-    time: "19:00",
-    venue: "Madison Square Garden",
-    price: 89.99,
-    image: "https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-    availableSeats: 250,
-  },
-  {
-    id: 2,
-    title: "Acoustic Night",
-    date: "2024-08-02",
-    time: "20:00",
-    venue: "Blue Note Jazz Club",
-    price: 49.99,
-    image: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-    availableSeats: 100,
-  },
-];
+import { useToast } from "@/components/ui/use-toast";
+import { format } from "date-fns";
 
 export default function AdminEventsPage() {
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
+  const [events, setEvents] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [deleteInProgress, setDeleteInProgress] = useState(null);
+
+  // Fetch events from database
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch("/api/events");
+        
+        if (!response.ok) {
+          throw new Error("Failed to fetch events");
+        }
+        
+        const data = await response.json();
+        setEvents(data.events || []);
+      } catch (error) {
+        console.error("Error fetching events:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load events",
+          variant: "destructive",
+        });
+        setEvents([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, [toast]);
+
+  // Handle event deletion
+  const handleDelete = async (eventId) => {
+    if (!confirm("Are you sure you want to delete this event? This cannot be undone.")) {
+      return;
+    }
+    
+    setDeleteInProgress(eventId);
+    try {
+      const response = await fetch(`/api/events/${eventId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete event");
+      }
+
+      // Remove the deleted event from the state
+      setEvents((prev) => prev.filter((event) => event.id !== eventId));
+      
+      toast({
+        title: "Success",
+        description: "Event deleted successfully",
+      });
+    } catch (error) {
+      console.error("Error deleting event:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete event",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleteInProgress(null);
+    }
+  };
+
+  // Format date and time
+  const formatEventDate = (dateString) => {
+    try {
+      return format(new Date(dateString), "PPP");
+    } catch {
+      return "Unknown date";
+    }
+  };
+
+  // Extract time from date
+  const extractTimeFromDate = (dateString) => {
+    try {
+      return format(new Date(dateString), "p");
+    } catch {
+      return "";
+    }
+  };
 
   const filteredEvents = events.filter(event =>
     event.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -70,62 +135,96 @@ export default function AdminEventsPage() {
         </div>
       </div>
 
-      <div className="grid gap-6">
-        {filteredEvents.map((event, index) => (
-          <motion.div
-            key={event.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-          >
-            <Card>
-              <CardContent className="p-6">
-                <div className="grid md:grid-cols-[200px,1fr] gap-6">
-                  <div
-                    className="h-40 bg-cover bg-center rounded-lg"
-                    style={{ backgroundImage: `url(${event.image})` }}
-                  />
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="text-xl font-semibold">{event.title}</h3>
-                        <div className="grid grid-cols-2 gap-4 mt-2">
-                          <div className="flex items-center text-muted-foreground">
-                            <Calendar className="mr-2 h-4 w-4" />
-                            {new Date(event.date).toLocaleDateString()} at {event.time}
-                          </div>
-                          <div className="flex items-center text-muted-foreground">
-                            <MapPin className="mr-2 h-4 w-4" />
-                            {event.venue}
-                          </div>
-                          <div className="flex items-center text-muted-foreground">
-                            <DollarSign className="mr-2 h-4 w-4" />
-                            ${event.price}
+      {isLoading ? (
+        <div className="flex justify-center items-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <span className="ml-2">Loading events...</span>
+        </div>
+      ) : filteredEvents.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">No events found.</p>
+          {searchQuery && (
+            <p className="text-sm text-muted-foreground mt-2">
+              Try adjusting your search query.
+            </p>
+          )}
+        </div>
+      ) : (
+        <div className="grid gap-6">
+          {filteredEvents.map((event, index) => (
+            <motion.div
+              key={event.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+            >
+              <Card>
+                <CardContent className="p-6">
+                  <div className="grid md:grid-cols-[200px,1fr] gap-6">
+                    <div
+                      className="h-40 bg-cover bg-center rounded-lg"
+                      style={{ 
+                        backgroundImage: event.imageUrl 
+                          ? `url(${event.imageUrl})` 
+                          : "url(https://placehold.co/600x400?text=No+Image)" 
+                      }}
+                    />
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="text-xl font-semibold">{event.title}</h3>
+                          <div className="grid grid-cols-2 gap-4 mt-2">
+                            <div className="flex items-center text-muted-foreground">
+                              <Calendar className="mr-2 h-4 w-4" />
+                              {formatEventDate(event.date)} at {extractTimeFromDate(event.date)}
+                            </div>
+                            <div className="flex items-center text-muted-foreground">
+                              <MapPin className="mr-2 h-4 w-4" />
+                              {event.venue}
+                            </div>
+                            <div className="flex items-center text-muted-foreground">
+                              <DollarSign className="mr-2 h-4 w-4" />
+                              ${event.price.toFixed(2)}
+                            </div>
                           </div>
                         </div>
+                        <div className="flex gap-2">
+                          <Link href={`/admin/events/edit/${event.id}`}>
+                            <Button variant="outline" size="icon">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                          <Button 
+                            variant="outline" 
+                            size="icon" 
+                            className="text-destructive"
+                            onClick={() => handleDelete(event.id)}
+                            disabled={deleteInProgress === event.id}
+                          >
+                            {deleteInProgress === event.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
                       </div>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="icon">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="outline" size="icon" className="text-destructive">
-                          <Trash className="h-4 w-4" />
-                        </Button>
+                      <div className="flex justify-between items-center pt-4 border-t">
+                        <span className="text-sm text-muted-foreground">
+                          {event.availableSeats} seats available
+                        </span>
+                        <Link href={`/events/${event.id}`}>
+                          <Button variant="outline">View Details</Button>
+                        </Link>
                       </div>
-                    </div>
-                    <div className="flex justify-between items-center pt-4 border-t">
-                      <span className="text-sm text-muted-foreground">
-                        {event.availableSeats} seats available
-                      </span>
-                      <Button variant="outline">View Details</Button>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
