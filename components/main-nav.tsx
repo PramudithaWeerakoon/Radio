@@ -43,7 +43,7 @@ export function MainNav() {
         <div className="flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center space-x-2">
             <Music className="h-6 w-6" />
-            <span className="font-bold text-xl">Midnight Echo</span>
+            <span className="font-bold text-xl">Radioo Music</span>
           </Link>
           
           <div className="hidden md:flex items-center space-x-4">

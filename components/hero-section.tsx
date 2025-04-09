@@ -26,7 +26,7 @@ export function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          The Midnight Echo
+          The Radioo Music
         </motion.h1>
         <motion.p 
           className="text-xl sm:text-2xl text-gray-200 mb-8 max-w-3xl mx-auto"

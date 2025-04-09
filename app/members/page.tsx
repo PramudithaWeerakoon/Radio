@@ -54,7 +54,7 @@ const fallbackMembers = [
     id: 3,
     name: "Marcus Thompson",
     role: "Drums",
-    bio: "The rhythmic foundation of Midnight Echo, Marcus brings both power and precision to the drums. His dynamic playing style drives the band's high-energy performances.",
+    bio: "The rhythmic foundation of Radioo Music, Marcus brings both power and precision to the drums. His dynamic playing style drives the band's high-energy performances.",
     image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
     social: {
       facebook: "https://facebook.com",
@@ -86,7 +86,7 @@ export default function MembersPage() {
           id: member.id,
           name: `${member.firstName} ${member.lastName}`,
           role: member.role,
-          bio: member.bio || "Band member of Midnight Echo",
+          bio: member.bio || "Band member of Radioo Music",
           image: `/api/members/${member.id}/image`,
           social: {
             facebook: member.facebook || "https://facebook.com",
@@ -133,7 +133,7 @@ export default function MembersPage() {
             Meet the Band
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            The talented musicians behind Midnight Echo's unique sound
+            The talented musicians behind Radioo Music's unique sound
           </p>
           {error && (
             <div className="mt-4 p-3 bg-destructive/10 text-destructive rounded-md inline-block">

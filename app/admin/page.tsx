@@ -66,6 +66,7 @@ const quickActions = [
       { label: "Add Album", href: "/admin/music/albums/new", icon: Album },
       { label: "Add Track", href: "/admin/music/tracks/new", icon: Music },
       { label: "Add Member", href: "/admin/music/members/new", icon: Users },
+      { label: "Music Player", href: "/admin/music/player", icon: Radio }, // Add this new item
     ],
   },
   {

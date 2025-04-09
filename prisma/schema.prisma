@@ -1,10 +1,15 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = []
+  
+  // Add this to disable shadow database that's causing issues
+  shadowDatabaseUrl = null
 }
 
 model Stat {
@@ -51,6 +56,14 @@ model Track {
   album        Album         @relation(fields: [album_id], references: [id])
   youtube_id   String?
   credits      TrackCredit[]
+  
+  // New fields for MP3 storage
+  audioData     Bytes?       // Store the actual MP3 file data
+  audioFileName String?      // Original filename
+  audioMimeType String?      // MIME type (e.g., audio/mpeg)
+  artist        String?      // Artist name
+  isInPlayer    Boolean      @default(false) // Flag to indicate if track should be in the player
+  addedToPlayer DateTime?    // When the track was added to the player
 }
 
 model AlbumCredit {

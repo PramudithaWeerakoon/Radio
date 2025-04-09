@@ -7,7 +7,7 @@ import { Footer } from '@/components/footer';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Midnight Echo - Official Website',
+  title: 'Radioo Music - Official Website',
   description: 'Experience the fusion of classical rock and modern elements',
 };
 

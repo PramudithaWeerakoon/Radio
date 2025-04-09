@@ -111,7 +111,7 @@ export default function Home() {
             {[
               {
                 title: "Meet the Band",
-                description: "Get to know the talented musicians behind Midnight Echo",
+                description: "Get to know the talented musicians behind Radioo Music",
                 image: "https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
                 link: "/members"
               },

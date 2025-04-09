@@ -16,7 +16,7 @@ export function Footer() {
             viewport={{ once: true }}
             className="space-y-4"
           >
-            <h3 className="text-xl font-bold">About Midnight Echo</h3>
+            <h3 className="text-xl font-bold">About Radioo Music</h3>
             <p className="text-gray-400">
               Experience the fusion of classical rock and modern elements in a journey through sound and emotion.
             </p>
@@ -137,7 +137,7 @@ export function Footer() {
         <div className="mt-12 pt-8 border-t border-gray-800">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-400 text-sm">
-              © 2024 Midnight Echo. All rights reserved.
+              © 2024 Radioo Music. All rights reserved.
             </p>
             <div className="flex space-x-4 mt-4 md:mt-0">
               <Link href="/privacy" className="text-gray-400 hover:text-white text-sm transition">
