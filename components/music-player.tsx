@@ -11,6 +11,8 @@ interface Track {
   title: string;
   artist?: string;
   duration: string;
+  playCount?: number;
+  lastPlayed?: string;
 }
 
 export function MusicPlayer() {
@@ -43,7 +45,7 @@ export function MusicPlayer() {
       try {
         setIsLoading(true);
         console.log("Fetching tracks for music player...");
-        const response = await fetch('/api/music-player/tracks');
+        const response = await fetch('/api/player/tracks');
         
         if (!response.ok) {
           const errorData = await response.json().catch(() => null);
@@ -52,16 +54,23 @@ export function MusicPlayer() {
         }
         
         const data = await response.json();
-        console.log("Received tracks:", data);
+        console.log("Received data structure:", data);
         
-        if (!data.tracks || !Array.isArray(data.tracks)) {
-          console.error("Invalid tracks data received:", data);
-          throw new Error("Invalid tracks data format");
+        // Handle different response formats - either {tracks: [...]} or just [...] directly
+        let playerTracks: Track[] = [];
+        
+        if (Array.isArray(data)) {
+          // API returned tracks directly as an array
+          console.log("API returned tracks as an array");
+          playerTracks = data;
+        } else if (data.tracks && Array.isArray(data.tracks)) {
+          // API returned tracks wrapped in a 'tracks' property
+          console.log("API returned tracks in a 'tracks' property");
+          playerTracks = data.tracks;
+        } else {
+          console.error("Unexpected data format received:", data);
+          throw new Error("Unrecognized data format from API");
         }
-        
-        const playerTracks = data.tracks.filter(
-          (track: any) => track.isInPlayer
-        );
         
         console.log("Tracks in player:", playerTracks);
         setTracks(playerTracks);
@@ -86,7 +95,7 @@ export function MusicPlayer() {
   const loadTrack = (trackId: number) => {
     if (audioRef.current) {
       audioRef.current.pause();
-      audioRef.current.src = `/api/music-player/${trackId}`;
+      audioRef.current.src = `/api/player/audio/${trackId}`;
       
       audioRef.current.onloadedmetadata = () => {
         if (audioRef.current) {

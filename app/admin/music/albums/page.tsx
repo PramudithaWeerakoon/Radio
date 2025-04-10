@@ -22,16 +22,24 @@ export default function AlbumsPage() {
         const response = await fetch('/api/albums');
         
         if (!response.ok) {
-          throw new Error('Failed to fetch albums');
+          const errorData = await response.json().catch(() => null);
+          console.error('API Error Response:', errorData);
+          throw new Error(errorData?.details || 'Failed to fetch albums');
         }
         
         const data = await response.json();
+        
+        if (!data.albums || !Array.isArray(data.albums)) {
+          console.error('Invalid data format received:', data);
+          throw new Error('Invalid album data received from server');
+        }
+        
         setAlbums(data.albums);
       } catch (error) {
         console.error('Error fetching albums:', error);
         toast({
           title: "Error",
-          description: "Failed to load albums",
+          description: error.message || "Failed to load albums",
           variant: "destructive"
         });
       } finally {

@@ -1,7 +1,5 @@
-import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { NextResponse } from 'next/server';
+import prisma from '@/lib/prisma';
 
 export async function POST(request) {
   try {
@@ -12,7 +10,7 @@ export async function POST(request) {
       data: {
         title: data.title,
         release_date: new Date(data.releaseDate),
-        cover_art: data.coverArtUrl,
+        cover_art: data.coverArtUrl || null,
         description: data.description,
         youtube_id: data.youtubeId,
         // Create tracks related to this album
@@ -53,18 +51,9 @@ export async function POST(request) {
 export async function GET() {
   try {
     const albums = await prisma.album.findMany({
-      select: {
-        id: true,
-        title: true,
-        release_date: true,
-        cover_art: true,
-        description: true,
-        youtube_id: true,
-        _count: {
-          select: {
-            tracks: true
-          }
-        }
+      include: {
+        tracks: true,
+        album_credits: true
       },
       orderBy: {
         release_date: 'desc'
@@ -75,10 +64,12 @@ export async function GET() {
       id: album.id,
       title: album.title,
       release_date: album.release_date,
-      cover_art: album.cover_art || null,
+      // Replace direct cover_art reference with URL to the cover image API endpoint
+      cover_art: album.coverImageData ? `/api/albums/${album.id}/cover` : '/placeholder-album.jpg',
       description: album.description || null,
       youtube_id: album.youtube_id || null,
-      trackCount: album._count.tracks
+      tracks: album.tracks,
+      album_credits: album.album_credits
     }));
     
     return NextResponse.json({ 
@@ -96,4 +87,3 @@ export async function GET() {
     await prisma.$disconnect();
   }
 }
-

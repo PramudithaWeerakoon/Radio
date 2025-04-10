@@ -1,20 +1,25 @@
 "use client";
 
-import { useState } from "react";
-import { motion } from "framer-motion";
+import React from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Upload } from "lucide-react";
+import { ArrowLeft, Upload, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { toast } from "@/components/ui/use-toast";
+import { useToast } from "@/components/ui/use-toast";
+import Image from "next/image";
 
-export default function NewAlbumPage() {
+export default function EditAlbumPage({ params }) {
+  // Proper way to handle params in client components with Next.js 15+
+  const id = React.use(params).id;
   const router = useRouter();
+  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(true);
   
   // Album state
   const [album, setAlbum] = useState({
@@ -29,17 +34,72 @@ export default function NewAlbumPage() {
   const [coverImagePreview, setCoverImagePreview] = useState("");
   
   // Tracks state
-  const [tracks, setTracks] = useState([
-    { title: "", duration: "" },
-    { title: "", duration: "" },
-    { title: "", duration: "" }
-  ]);
+  const [tracks, setTracks] = useState([]);
   
   // Credits state
-  const [credits, setCredits] = useState([
-    { role: "", name: "" },
-    { role: "", name: "" }
-  ]);
+  const [credits, setCredits] = useState([]);
+
+  // Fetch album data when component mounts
+  useEffect(() => {
+    async function fetchAlbumData() {
+      try {
+        setIsFetching(true);
+        const response = await fetch(`/api/albums/${id}`);
+        
+        if (!response.ok) {
+          throw new Error("Failed to fetch album data");
+        }
+        
+        const albumData = await response.json();
+        
+        // Format the date properly for the input field
+        const releaseDate = albumData.album.release_date 
+          ? new Date(albumData.album.release_date).toISOString().split('T')[0]
+          : "";
+        
+        setAlbum({
+          title: albumData.album.title || "",
+          releaseDate: releaseDate,
+          description: albumData.album.description || "",
+          youtubeId: albumData.album.youtube_id || ""
+        });
+        
+        // Set cover image preview if available
+        if (albumData.album.coverImageUrl) {
+          setCoverImagePreview(albumData.album.coverImageUrl);
+        }
+        
+        // Format tracks
+        const formattedTracks = albumData.album.tracks.map(track => ({
+          id: track.id,
+          title: track.title,
+          duration: track.duration || ""
+        }));
+        setTracks(formattedTracks.length > 0 ? formattedTracks : [{ title: "", duration: "" }]);
+        
+        // Format credits
+        const formattedCredits = albumData.album.album_credits.map(credit => ({
+          id: credit.id,
+          role: credit.role,
+          name: credit.name
+        }));
+        setCredits(formattedCredits.length > 0 ? formattedCredits : [{ role: "", name: "" }]);
+
+      } catch (error) {
+        console.error("Error fetching album:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load album data",
+          variant: "destructive"
+        });
+        router.push("/admin/music/albums");
+      } finally {
+        setIsFetching(false);
+      }
+    }
+    
+    fetchAlbumData();
+  }, [id, toast, router]);
   
   // Handle album input changes
   const handleAlbumChange = (e) => {
@@ -131,33 +191,43 @@ export default function NewAlbumPage() {
       formData.append('tracks', JSON.stringify(validTracks));
       formData.append('credits', JSON.stringify(validCredits));
       
-      const response = await fetch("/api/admin/albums", {
-        method: "POST",
+      const response = await fetch(`/api/albums/${id}`, {
+        method: "PUT",
         body: formData,
-        // Note: Don't set Content-Type header when using FormData
       });
       
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || "Failed to create album");
+        throw new Error(error.message || "Failed to update album");
       }
       
       toast({
         title: "Success",
-        description: "Album created successfully",
+        description: "Album updated successfully",
       });
       
       router.push("/admin/music/albums");
     } catch (error) {
       toast({
         title: "Error",
-        description: error.message || "Failed to create album",
+        description: error.message || "Failed to update album",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
   };
+  
+  if (isFetching) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="flex flex-col items-center space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p>Loading album data...</p>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div className="space-y-6">
@@ -167,7 +237,7 @@ export default function NewAlbumPage() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
         </Link>
-        <h1 className="text-3xl font-bold">Add New Album</h1>
+        <h1 className="text-3xl font-bold">Edit Album</h1>
       </div>
 
       <Card>
@@ -210,12 +280,16 @@ export default function NewAlbumPage() {
               </div>
               {coverImagePreview && (
                 <div className="mt-4">
-                  <p className="text-sm mb-2">Preview:</p>
+                  <p className="text-sm mb-2">Current Cover:</p>
                   <div className="relative w-32 h-32 bg-slate-100 rounded-md overflow-hidden">
-                    <img 
+                    {/* Use next/image with unoptimized to handle dynamic src */}
+                    <Image 
                       src={coverImagePreview} 
                       alt="Cover preview" 
-                      className="w-full h-full object-cover" 
+                      width={128}
+                      height={128}
+                      className="w-full h-full object-cover"
+                      unoptimized={coverImagePreview.startsWith('data:')}
                     />
                   </div>
                 </div>
@@ -337,7 +411,7 @@ export default function NewAlbumPage() {
                 <Button type="button" variant="outline">Cancel</Button>
               </Link>
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Creating..." : "Create Album"}
+                {isLoading ? "Updating..." : "Update Album"}
               </Button>
             </div>
           </form>
