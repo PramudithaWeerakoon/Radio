@@ -221,14 +221,7 @@ export function AlbumDetails({ album }: AlbumDetailsProps) {
             </Button>
           </Link>
           
-          {/* Debug info - hidden in production */}
-          {debugInfo && (
-            <div className="mb-4 p-3 bg-muted rounded-lg text-xs">
-              <p>Debug: {debugInfo}</p>
-              <p>Album YouTube ID: {album.youtubeId}</p>
-              <p>Track YouTube IDs: {trackYoutubeIds.size}</p>
-            </div>
-          )}
+         
 
           <div className="grid grid-cols-1 lg:grid-cols-[400px,1fr] gap-12">
             {/* Album cover and info */}

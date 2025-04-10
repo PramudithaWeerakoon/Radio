@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { YouTubeDialog } from "@/components/youtube-dialog";
 import Image from "next/image";
+import Loading from "@/app/loading"; // Import the main Loading component
 
 // Updated Album interface to match the API response
 interface Track {
@@ -90,9 +91,7 @@ export default function AlbumsPage() {
         </motion.div>
 
         {loading ? (
-          <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-primary"></div>
-          </div>
+          <Loading /> // Use the main Loading component
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {albums.map((album, index) => (
