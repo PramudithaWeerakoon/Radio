@@ -8,7 +8,8 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const id = parseInt(params.id);
+    // Convert id to number after directly accessing it from the destructured params
+    const id = parseInt(params?.id || '');
     
     if (isNaN(id)) {
       return NextResponse.json(

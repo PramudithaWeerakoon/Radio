@@ -1,18 +1,97 @@
 import * as React from 'react';
 import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 import { cn } from '@/lib/utils';
 import { ButtonProps, buttonVariants } from '@/components/ui/button';
 
-const Pagination = ({ className, ...props }: React.ComponentProps<'nav'>) => (
-  <nav
-    role="navigation"
-    aria-label="pagination"
-    className={cn('mx-auto flex w-full justify-center', className)}
-    {...props}
-  />
-);
-Pagination.displayName = 'Pagination';
+interface PaginationProps {
+  totalPages: number;
+  currentPage: number;
+  onPageChange: (page: number) => void;
+}
+
+export function Pagination({ totalPages, currentPage, onPageChange }: PaginationProps) {
+  // Create array of page numbers to show
+  const getPageNumbers = () => {
+    const pageNumbers = [];
+    
+    // Always show first page
+    pageNumbers.push(1);
+    
+    // Current page and surrounding pages
+    for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
+      pageNumbers.push(i);
+    }
+    
+    // Always show last page if there is more than one page
+    if (totalPages > 1) {
+      pageNumbers.push(totalPages);
+    }
+    
+    // Deduplicate and sort
+    return [...new Set(pageNumbers)].sort((a, b) => a - b);
+  };
+  
+  const pageNumbers = getPageNumbers();
+  
+  return (
+    <div className="flex items-center justify-center space-x-2">
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={() => onPageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+        aria-label="Previous page"
+      >
+        <ChevronLeft className="h-4 w-4" />
+      </Button>
+      
+      {pageNumbers.map((page, index) => {
+        // Add ellipsis if needed
+        if (index > 0 && pageNumbers[index - 1] !== page - 1) {
+          return (
+            <React.Fragment key={`ellipsis-${page}`}>
+              <Button variant="outline" size="icon" disabled>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={currentPage === page ? "default" : "outline"}
+                onClick={() => onPageChange(page)}
+                aria-current={currentPage === page}
+                aria-label={`Page ${page}`}
+              >
+                {page}
+              </Button>
+            </React.Fragment>
+          );
+        }
+        
+        return (
+          <Button
+            key={page}
+            variant={currentPage === page ? "default" : "outline"}
+            onClick={() => onPageChange(page)}
+            aria-current={currentPage === page}
+            aria-label={`Page ${page}`}
+          >
+            {page}
+          </Button>
+        );
+      })}
+      
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={() => onPageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+        aria-label="Next page"
+      >
+        <ChevronRight className="h-4 w-4" />
+      </Button>
+    </div>
+  );
+}
 
 const PaginationContent = React.forwardRef<
   HTMLUListElement,
@@ -107,7 +186,6 @@ const PaginationEllipsis = ({
 PaginationEllipsis.displayName = 'PaginationEllipsis';
 
 export {
-  Pagination,
   PaginationContent,
   PaginationEllipsis,
   PaginationItem,

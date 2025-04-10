@@ -4,8 +4,13 @@ import { prisma } from '@/lib/db';
 // Get all events
 export async function GET(request: Request) {
   try {
+    const url = new URL(request.url);
+    const limitParam = url.searchParams.get('limit');
+    const limit = limitParam ? parseInt(limitParam) : undefined;
+
     const events = await prisma.event.findMany({
       orderBy: { date: 'asc' },
+      ...(limit ? { take: limit } : {}),
     });
     
     return NextResponse.json({ events });

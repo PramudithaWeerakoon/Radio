@@ -1,17 +1,48 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Play, Pause, Calendar, Ticket, ArrowRight } from "lucide-react";
-import { useState } from "react";
+import { Play, Pause, Calendar, Ticket, ArrowRight, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { MusicPlayer } from "@/components/music-player";
 import { EventScroller } from "@/components/event-scroller";
 import { HeroSection } from "@/components/hero-section";
 import { BookingSection } from "@/components/booking-section";
 import Link from "next/link";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function Home() {
   const [isPlaying, setIsPlaying] = useState(false);
+  const [events, setEvents] = useState([]);
+  const [eventsLoading, setEventsLoading] = useState(true);
+  const [eventsError, setEventsError] = useState(null);
+  const [email, setEmail] = useState('');
+  const [isSubscribing, setIsSubscribing] = useState(false);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    async function fetchLatestEvents() {
+      try {
+        setEventsLoading(true);
+        const response = await fetch('/api/events?limit=3');
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch events');
+        }
+        
+        const data = await response.json();
+        setEvents(data.events || []);
+        setEventsError(null);
+      } catch (error) {
+        console.error('Error fetching events:', error);
+        setEventsError('Failed to load events');
+      } finally {
+        setEventsLoading(false);
+      }
+    }
+
+    fetchLatestEvents();
+  }, []);
 
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
@@ -24,6 +55,53 @@ export default function Home() {
       transition: {
         staggerChildren: 0.1
       }
+    }
+  };
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email || !email.includes('@')) {
+      toast({
+        title: "Invalid Email",
+        description: "Please enter a valid email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsSubscribing(true);
+    
+    try {
+      const response = await fetch('/api/newsletter/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Subscription failed');
+      }
+      
+      toast({
+        title: "Success!",
+        description: data.message || "You've been subscribed to our newsletter.",
+      });
+      
+      // Clear the email input
+      setEmail('');
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to subscribe. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubscribing(false);
     }
   };
 
@@ -83,7 +161,24 @@ export default function Home() {
               Join us at our next performance
             </motion.p>
           </motion.div>
-          <EventScroller />
+          
+          {eventsLoading ? (
+            <div className="flex flex-col items-center justify-center py-12">
+              <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
+              <p className="text-muted-foreground">Loading events...</p>
+            </div>
+          ) : eventsError ? (
+            <div className="text-center py-12">
+              <p className="text-red-500">{eventsError}</p>
+            </div>
+          ) : events.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No upcoming events found.</p>
+            </div>
+          ) : (
+            <EventScroller events={events} />
+          )}
+          
           <motion.div
             variants={fadeInUp}
             className="text-center mt-12"
@@ -178,15 +273,29 @@ export default function Home() {
             <motion.form
               variants={fadeInUp}
               className="max-w-md mx-auto flex gap-4"
-              onSubmit={(e) => e.preventDefault()}
+              onSubmit={handleSubscribe}
             >
               <input
                 type="email"
                 placeholder="Enter your email"
                 className="flex-1 px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white/50"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
               />
-              <Button className="bg-white text-black hover:bg-white/90">
-                Subscribe
+              <Button 
+                type="submit" 
+                className="bg-white text-black hover:bg-white/90"
+                disabled={isSubscribing}
+              >
+                {isSubscribing ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Subscribing...
+                  </>
+                ) : (
+                  'Subscribe'
+                )}
               </Button>
             </motion.form>
           </motion.div>

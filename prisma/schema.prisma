@@ -8,8 +8,8 @@ datasource db {
   url        = env("DATABASE_URL")
   extensions = []
   
-  // Add this to disable shadow database that's causing issues
-  shadowDatabaseUrl = null
+  // Add this to disable shadow database
+  shadowDatabaseUrl = ""
 }
 
 model Stat {
@@ -130,4 +130,49 @@ model Blog {
   published     Boolean  @default(false)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+}
+
+model BackgroundImage {
+  id            Int      @id @default(autoincrement())
+  title         String?
+  imageData     Bytes    // Store the actual binary image data
+  imageMimeType String   // Store the image MIME type
+  isActive      Boolean  @default(true)
+  order         Int      @default(0)  // For controlling slideshow order
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model User {
+  id            Int       @id @default(autoincrement())
+  email         String    @unique
+  name          String?
+  password      String    // This will store hashed passwords
+  role          String    @default("user") // "user" or "admin"
+  emailVerified Boolean   @default(false)
+  image         String?
+  reviews       Review[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Review {
+  id        Int       @id @default(autoincrement())
+  title     String
+  content   String
+  rating    Int       // 1-5 star rating
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  approved  Boolean   @default(false)  // Admin needs to approve reviews
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Subscriber {
+  id            Int       @id @default(autoincrement())
+  email         String    @unique
+  name          String?
+  subscribed    Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
