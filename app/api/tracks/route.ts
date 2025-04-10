@@ -21,9 +21,25 @@ export async function POST(request) {
         track_number: parseInt(data.track_number, 10),
         lyrics: data.lyrics || null,
         album_id: parseInt(data.album_id, 10),
+        youtube_id: data.youtube_id || null, // Ensure YouTube ID is saved to the database
         // Additional fields if needed
       },
     });
+
+    // If there are credits, create them
+    if (data.credits && Array.isArray(data.credits) && data.credits.length > 0) {
+      await Promise.all(
+        data.credits.map(credit => 
+          prisma.trackCredit.create({
+            data: {
+              role: credit.role,
+              name: credit.name,
+              track_id: track.id
+            }
+          })
+        )
+      );
+    }
 
     return NextResponse.json(
       {
