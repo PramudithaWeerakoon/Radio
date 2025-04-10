@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Calendar, MapPin, DollarSign, Search, Plus, Edit, Trash, ArrowLeft, Loader2 } from "lucide-react";
+import { Calendar, MapPin, DollarSign, Search, Plus, Edit, Trash, ArrowLeft, Loader2, Image as ImageIcon } from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
@@ -29,7 +29,16 @@ export default function AdminEventsPage() {
         }
         
         const data = await response.json();
-        setEvents(data.events || []);
+        
+        // Process events to add image URLs for those with database images
+        const eventsWithImages = data.events.map(event => ({
+          ...event,
+          // If the event has image data, use the API endpoint to fetch it
+          hasImage: !!event.imageName || !!event.imageData,
+          imageUrl: event.imageUrl || (event.imageName ? `/api/events/${event.id}/image` : null)
+        }));
+        
+        setEvents(eventsWithImages || []);
       } catch (error) {
         console.error("Error fetching events:", error);
         toast({
@@ -162,13 +171,19 @@ export default function AdminEventsPage() {
                 <CardContent className="p-6">
                   <div className="grid md:grid-cols-[200px,1fr] gap-6">
                     <div
-                      className="h-40 bg-cover bg-center rounded-lg"
+                      className="h-40 bg-cover bg-center rounded-lg relative"
                       style={{ 
                         backgroundImage: event.imageUrl 
                           ? `url(${event.imageUrl})` 
                           : "url(https://placehold.co/600x400?text=No+Image)" 
                       }}
-                    />
+                    >
+                      {event.hasImage && !event.imageUrl?.startsWith('http') && (
+                        <div className="absolute bottom-2 right-2 bg-black bg-opacity-50 rounded-full p-1">
+                          <ImageIcon className="h-4 w-4 text-white" />
+                        </div>
+                      )}
+                    </div>
                     <div className="space-y-4">
                       <div className="flex justify-between items-start">
                         <div>

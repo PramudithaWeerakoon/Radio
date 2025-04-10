@@ -6,18 +6,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar as CalendarIcon, ArrowLeft } from "lucide-react";
+import { Calendar as CalendarIcon, ArrowLeft, Upload, X } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
 import Link from "next/link";
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useToast } from "@/components/ui/use-toast"; // Update import
+import { useToast } from "@/components/ui/use-toast";
 
 export default function NewEventPage() {
   const router = useRouter();
-  const { toast } = useToast(); // Get toast function from hook
+  const { toast } = useToast();
   const [date, setDate] = useState<Date | undefined>();
   const [formData, setFormData] = useState({
     title: "",
@@ -25,16 +25,40 @@ export default function NewEventPage() {
     venue: "",
     price: "",
     availableSeats: "",
-    imageUrl: "",
     description: "",
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setImageFile(file);
+      
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -52,15 +76,25 @@ export default function NewEventPage() {
     setIsLoading(true);
     
     try {
+      // Create FormData for file upload
+      const submitData = new FormData();
+      
+      // Add all text fields to FormData
+      Object.keys(formData).forEach(key => {
+        submitData.append(key, formData[key]);
+      });
+      
+      // Add date in the required format
+      submitData.append("date", date.toISOString().split('T')[0]);
+      
+      // Add image file if selected
+      if (imageFile) {
+        submitData.append("image", imageFile);
+      }
+      
       const response = await fetch('/api/events', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...formData,
-          date: date.toISOString().split('T')[0],
-        }),
+        body: submitData, // Send as FormData, not JSON
       });
       
       if (!response.ok) {
@@ -189,13 +223,40 @@ export default function NewEventPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="imageUrl">Image URL</Label>
-              <Input 
-                id="imageUrl"
-                name="imageUrl"
-                placeholder="Enter image URL"
-                value={formData.imageUrl}
-                onChange={handleChange}
+              <Label htmlFor="image">Event Image</Label>
+              {imagePreview ? (
+                <div className="relative w-full h-48 bg-slate-100 rounded-md overflow-hidden">
+                  <img 
+                    src={imagePreview} 
+                    alt="Event preview" 
+                    className="w-full h-full object-cover" 
+                  />
+                  <Button 
+                    variant="destructive" 
+                    size="icon" 
+                    className="absolute top-2 right-2 h-6 w-6 rounded-full"
+                    onClick={handleRemoveImage}
+                    type="button"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <div 
+                  className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:bg-gray-50"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Upload className="h-8 w-8 text-gray-400" />
+                  <p className="mt-2 text-sm text-gray-500">Click to upload an image</p>
+                </div>
+              )}
+              <Input
+                id="image"
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleFileChange}
               />
             </div>
 

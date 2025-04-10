@@ -25,23 +25,48 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const data = await request.json();
+    // Parse the form data instead of JSON
+    const formData = await request.formData();
+    
+    // Extract basic event info from form data
+    const title = formData.get('title') as string;
+    const date = formData.get('date') as string;
+    const time = formData.get('time') as string;
+    const venue = formData.get('venue') as string;
+    const price = parseFloat(formData.get('price') as string);
+    const availableSeats = parseInt(formData.get('availableSeats') as string);
+    const description = formData.get('description') as string;
+    
+    // Extract image file if it exists
+    const imageFile = formData.get('image') as File | null;
     
     // Combine date and time into a single DateTime
-    const eventDateTime = new Date(
-      `${data.date}T${data.time || '00:00'}`
-    );
+    const eventDateTime = new Date(`${date}T${time || '00:00'}`);
     
+    // Prepare the event data for database
+    const eventData: any = {
+      title,
+      date: eventDateTime,
+      venue,
+      price,
+      availableSeats,
+      description,
+    };
+    
+    // Process image if provided
+    if (imageFile && imageFile instanceof File) {
+      // Convert file to binary data for database storage
+      const imageBuffer = Buffer.from(await imageFile.arrayBuffer());
+      
+      // Add image data to event
+      eventData.imageName = imageFile.name;
+      eventData.imageData = imageBuffer;
+      eventData.imageMimeType = imageFile.type;
+    }
+    
+    // Create the event with image data
     const event = await prisma.event.create({
-      data: {
-        title: data.title,
-        date: eventDateTime,
-        venue: data.venue,
-        price: parseFloat(data.price),
-        availableSeats: parseInt(data.availableSeats),
-        imageUrl: data.imageUrl,
-        description: data.description,
-      },
+      data: eventData,
     });
     
     return NextResponse.json(event, { status: 201 });
