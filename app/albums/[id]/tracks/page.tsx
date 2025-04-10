@@ -10,7 +10,7 @@ import {
   Pause, 
   Music, 
   Volume2, 
-  VolumeMute,
+  VolumeX, // Changed from VolumeMute to VolumeX
   SkipBack,
   SkipForward,
   Repeat,
@@ -376,7 +376,7 @@ export default function AlbumTracksPage({ params }: { params: { id: string } }) 
                     <div className="flex items-center space-x-2">
                       <Button variant="ghost" size="icon" onClick={toggleMute}>
                         {isMuted ? (
-                          <VolumeMute className="h-4 w-4" />
+                          <VolumeX className="h-4 w-4" />
                         ) : (
                           <Volume2 className="h-4 w-4" />
                         )}

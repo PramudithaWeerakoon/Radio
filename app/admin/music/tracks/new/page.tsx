@@ -73,11 +73,43 @@ export default function NewTrackPage() {
   };
   
   // Handle album selection
-  const handleAlbumChange = (value) => {
+  const handleAlbumChange = async (value) => {
     setTrack(prev => ({
       ...prev,
       album_id: value
     }));
+    
+    if (value) {
+      try {
+        // Fetch tracks for this album
+        const response = await fetch(`/api/albums/${value}/tracks`);
+        
+        if (!response.ok) {
+          throw new Error("Failed to fetch album tracks");
+        }
+        
+        const data = await response.json();
+        
+        // Find the highest track number and add 1
+        let nextTrackNumber = 1;
+        if (data.album && data.album.tracks && data.album.tracks.length > 0) {
+          const highestTrackNumber = Math.max(...data.album.tracks.map(t => t.track_number));
+          nextTrackNumber = highestTrackNumber + 1;
+        }
+        
+        setTrack(prev => ({
+          ...prev,
+          track_number: nextTrackNumber.toString()
+        }));
+      } catch (error) {
+        console.error("Error updating track number:", error);
+        // Set default track number if fetching fails
+        setTrack(prev => ({
+          ...prev,
+          track_number: "1"
+        }));
+      }
+    }
   };
   
   // Handle credit input changes
@@ -113,21 +145,32 @@ export default function NewTrackPage() {
       // Filter out empty credits
       const validCredits = credits.filter(credit => credit.role.trim() !== "" && credit.name.trim() !== "");
       
+      // Clean YouTube ID from any extra spaces
+      const cleanedYoutubeId = track.youtube_id ? track.youtube_id.trim() : "";
+      
+      const requestData = {
+        ...track,
+        album_id: parseInt(track.album_id),
+        track_number: parseInt(track.track_number),
+        youtube_id: cleanedYoutubeId, // Explicitly set the YouTube ID
+        credits: validCredits,
+      };
+      
+      // Log the data being sent for debugging
+      console.log("Sending track data:", requestData);
+      
       const response = await fetch("/api/tracks", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          ...track,
-          album_id: parseInt(track.album_id),
-          track_number: parseInt(track.track_number),
-          credits: validCredits,
-        }),
+        body: JSON.stringify(requestData),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to save track");
+        const errorData = await response.json().catch(() => ({}));
+        console.error("API error response:", errorData);
+        throw new Error(errorData.message || "Failed to save track");
       }
 
       toast({
@@ -213,15 +256,15 @@ export default function NewTrackPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="track_number">Track Number</Label>
+                <Label htmlFor="track_number">Track Number (Auto-generated)</Label>
                 <Input 
                   id="track_number"
                   name="track_number"
                   type="number" 
-                  placeholder="Enter track number"
+                  placeholder={track.album_id ? "Loading..." : "Select an album first"}
                   value={track.track_number}
                   onChange={handleTrackChange}
-                  required 
+                  disabled
                 />
               </div>
             </div>
@@ -285,10 +328,13 @@ export default function NewTrackPage() {
               <Input 
                 id="youtube_id"
                 name="youtube_id"
-                placeholder="Enter YouTube video ID for track preview"
+                placeholder="e.g., ea3Ue-LN5B9U"
                 value={track.youtube_id}
                 onChange={handleTrackChange}
               />
+              <p className="text-xs text-muted-foreground">
+                Enter only the ID portion from a YouTube URL (e.g., from "https://youtube.com/watch?v=ea3Ue-LN5B9U" enter "ea3Ue-LN5B9U")
+              </p>
             </div>
 
             <div className="flex justify-end space-x-4">
