@@ -17,7 +17,8 @@ import {
   X,
   Album,
   Mic2,
-  Image as ImageIcon // Import Image as ImageIcon to avoid conflict with Next.js Image
+  Image as ImageIcon, // Import Image as ImageIcon to avoid conflict with Next.js Image
+  Mail
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -28,7 +29,7 @@ export default function AdminLayout({
 }) {
   const [dummyState, setDummyState] = useState(false); // You can remove this if not needed
 
-  // Add a new item to the sidebarItems array:
+  // Update the sidebarItems array to include Messages
   const sidebarItems = [
     { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
     {
@@ -43,6 +44,10 @@ export default function AdminLayout({
     },
     { icon: Calendar, label: "Events", href: "/admin/events" },
     { icon: ImageIcon, label: "Hero Backgrounds", href: "/admin/background-images" },
+    { icon: ShoppingBag, label: "Merchandise", href: "/admin/merchandise" },
+    { icon: FileText, label: "Blog Posts", href: "/admin/blog" },
+    { icon: Mail, label: "Messages", href: "/admin/messages" },
+    { icon: Settings, label: "Settings", href: "/admin/settings" },
   ];
 
   return (

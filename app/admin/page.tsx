@@ -78,6 +78,8 @@ const quickActions = [
     items: [
       { label: "Add Album", href: "/admin/music/albums/new", icon: Album },
       { label: "Add Track", href: "/admin/music/tracks/new", icon: Music },
+      { label: "View Albums", href: "/admin/music/albums", icon: Album },
+      { label: "View Tracks", href: "/admin/music/tracks", icon: Music },
       { label: "Add Member", href: "/admin/music/members/new", icon: Users },
       { label: "Music Player", href: "/admin/music/player", icon: Radio },
     ],
@@ -86,7 +88,9 @@ const quickActions = [
     title: "Content",
     items: [
       { label: "New Event", href: "/admin/events/new", icon: Calendar },
+      { label: "View Bookings", href: "/admin/bookings", icon: Calendar },
       { label: "New Post", href: "/admin/blog/new", icon: FileText },
+      { label: "View Messages", href: "/admin/messages", icon: Mail },
       { label: "Add Product", href: "/admin/merchandise/new", icon: ShoppingBag },
       { label: "Hero Backgrounds", href: "/admin/background-images", icon: ImageIcon },
       { label: "Manage Reviews", href: "/admin/reviews", icon: MessageSquare },
