@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Calendar as CalendarIcon, MapPin, DollarSign, Clock, Loader2 } from "lucide-react";
+import { Calendar as CalendarIcon, MapPin, DollarSign, Clock, Loader2, Image as ImageIcon } from "lucide-react";
 import { format } from "date-fns";
 
 const venues = ["All Venues", "Madison Square Garden", "Blue Note Jazz Club", "Central Park"];
@@ -32,7 +32,17 @@ export default function EventsPage() {
         }
         
         const data = await response.json();
-        setEvents(data.events || []);
+        
+        // Process events to include image URLs for database images
+        const processedEvents = data.events.map((event: any) => ({
+          ...event,
+          // If the event has image data stored in DB, create a URL to fetch it
+          imageUrl: event.imageName ? `/api/events/${event.id}/image` : null,
+          // Keep any existing image URL or use a placeholder
+          image: event.image || "https://placehold.co/600x400?text=No+Image"
+        }));
+        
+        setEvents(processedEvents || []);
       } catch (err) {
         console.error('Error fetching events:', err);
         setError('Failed to load events. Please try again later.');
@@ -163,9 +173,19 @@ export default function EventsPage() {
                     <Card className="cursor-pointer hover:shadow-lg transition-shadow">
                       <div className="grid md:grid-cols-[300px,1fr] gap-6">
                         <div
-                          className="h-48 md:h-full bg-cover bg-center"
-                          style={{ backgroundImage: `url(${event.imageUrl || event.image})` }}
-                        />
+                          className="h-48 md:h-full bg-cover bg-center relative"
+                          style={{ 
+                            backgroundImage: event.imageUrl 
+                              ? `url(${event.imageUrl})` 
+                              : `url(${event.image})`
+                          }}
+                        >
+                          {event.imageUrl && (
+                            <div className="absolute bottom-2 right-2 bg-black bg-opacity-50 rounded-full p-1">
+                              <ImageIcon className="h-4 w-4 text-white" />
+                            </div>
+                          )}
+                        </div>
                         <div className="p-6">
                           <h3 className="text-2xl font-semibold mb-2">{event.title}</h3>
                           <div className="space-y-2 text-muted-foreground">
@@ -196,7 +216,11 @@ export default function EventsPage() {
                     <div className="grid gap-6">
                       <div
                         className="h-64 w-full bg-cover bg-center rounded-lg"
-                        style={{ backgroundImage: `url(${event.image})` }}
+                        style={{ 
+                          backgroundImage: event.imageUrl 
+                            ? `url(${event.imageUrl})` 
+                            : `url(${event.image})`
+                        }}
                       />
                       <div className="space-y-4">
                         <p className="text-muted-foreground">{event.description}</p>

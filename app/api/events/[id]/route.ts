@@ -38,6 +38,94 @@ export async function GET(
   }
 }
 
+// Update an event
+export async function PUT(
+  request: Request,
+  context: { params: { id: string } }
+) {
+  try {
+    const idParam = context.params.id;
+    const id = parseInt(idParam);
+    
+    if (isNaN(id)) {
+      return NextResponse.json(
+        { error: 'Invalid event ID' },
+        { status: 400 }
+      );
+    }
+
+    // Check if the event exists
+    const existingEvent = await prisma.event.findUnique({
+      where: { id },
+    });
+    
+    if (!existingEvent) {
+      return NextResponse.json(
+        { error: 'Event not found' },
+        { status: 404 }
+      );
+    }
+    
+    // Parse FormData
+    const formData = await request.formData();
+    
+    // Extract basic event info from form data
+    const title = formData.get('title') as string;
+    const date = formData.get('date') as string;
+    const time = formData.get('time') as string;
+    const venue = formData.get('venue') as string;
+    const price = parseFloat(formData.get('price') as string);
+    const availableSeats = parseInt(formData.get('availableSeats') as string);
+    const description = formData.get('description') as string;
+    const imageRemoved = formData.get('imageRemoved') === 'true';
+    
+    // Extract image file if it exists
+    const imageFile = formData.get('image') as File | null;
+    
+    // Combine date and time into a single DateTime
+    const eventDateTime = new Date(`${date}T${time || '00:00'}`);
+    
+    // Prepare the event data for database update
+    const eventData: any = {
+      title,
+      date: eventDateTime,
+      venue,
+      price,
+      availableSeats,
+      description,
+    };
+    
+    // Process image update
+    if (imageFile && imageFile instanceof File) {
+      // Add a new image
+      const imageBuffer = Buffer.from(await imageFile.arrayBuffer());
+      eventData.imageName = imageFile.name;
+      eventData.imageData = imageBuffer;
+      eventData.imageMimeType = imageFile.type;
+    } else if (imageRemoved) {
+      // Remove existing image
+      eventData.imageName = null;
+      eventData.imageData = null;
+      eventData.imageMimeType = null;
+    }
+    // If neither condition is met, keep the existing image
+    
+    // Update the event
+    const updatedEvent = await prisma.event.update({
+      where: { id },
+      data: eventData,
+    });
+    
+    return NextResponse.json(updatedEvent);
+  } catch (error) {
+    console.error('Error updating event:', error);
+    return NextResponse.json(
+      { error: 'Failed to update event' },
+      { status: 500 }
+    );
+  }
+}
+
 // Delete an event
 export async function DELETE(
   request: Request,

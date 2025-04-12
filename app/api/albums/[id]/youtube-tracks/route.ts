@@ -6,7 +6,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const albumId = parseInt(params.id);
+    const albumId = parseInt((await params).id);
 
     if (isNaN(albumId)) {
       return NextResponse.json(

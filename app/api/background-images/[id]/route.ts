@@ -7,7 +7,7 @@ export async function GET(
   context: { params: { id: string } }
 ) {
   try {
-    const id = parseInt(context.params.id);
+    const id = parseInt((await context.params).id);
     
     if (isNaN(id)) {
       return NextResponse.json(
@@ -95,7 +95,7 @@ export async function DELETE(
   context: { params: { id: string } }
 ) {
   try {
-    const id = parseInt(context.params.id);
+    const id = parseInt((await context.params).id);
     
     if (isNaN(id)) {
       return NextResponse.json(
