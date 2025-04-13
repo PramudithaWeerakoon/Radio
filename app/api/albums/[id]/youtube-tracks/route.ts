@@ -15,7 +15,7 @@ export async function GET(
       );
     }
 
-    // Fetch tracks with their YouTube IDs
+    // Fetch tracks with their YouTube IDs, lyrics, and credits
     const tracks = await prisma.track.findMany({
       where: {
         album_id: albumId,
@@ -25,6 +25,14 @@ export async function GET(
         title: true,
         track_number: true,
         youtube_id: true,
+        lyrics: true,
+        credits: {
+          select: {
+            id: true,
+            role: true,
+            name: true,
+          }
+        },
       },
       orderBy: {
         track_number: 'asc',
@@ -35,6 +43,17 @@ export async function GET(
     console.log(`[YouTube Tracks API] Album ${albumId}: Found ${tracks.length} tracks`);
     tracks.forEach(track => {
       console.log(`[YouTube Tracks API] Track #${track.track_number} (ID:${track.id}) "${track.title}": YouTube ID = ${track.youtube_id || 'none'}`);
+      console.log(`[YouTube Tracks API] Track has lyrics: ${track.lyrics ? 'Yes' : 'No'}, Credits: ${track.credits.length}`);
+      
+      // Print full lyrics for debugging
+      console.log(`[YouTube Tracks API] FULL LYRICS for track ${track.id}:`);
+      console.log(track.lyrics);
+      
+      // Print full credits for debugging
+      console.log(`[YouTube Tracks API] FULL CREDITS for track ${track.id}:`);
+      track.credits.forEach(credit => {
+        console.log(`- ${credit.role}: ${credit.name} (ID: ${credit.id})`);
+      });
     });
     
     return NextResponse.json({
