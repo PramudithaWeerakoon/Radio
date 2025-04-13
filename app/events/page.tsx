@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Calendar as CalendarIcon, MapPin, DollarSign, Clock, Loader2, Image as ImageIcon } from "lucide-react";
 import { format } from "date-fns";
+import Link from "next/link";
 
 const venues = ["All Venues", "Madison Square Garden", "Blue Note Jazz Club", "Central Park"];
 const priceRanges = ["All Prices", "Under $50", "$50-$100", "Over $100"];
@@ -250,7 +251,9 @@ export default function EventsPage() {
                           <p className="text-sm text-muted-foreground">
                             {event.availableSeats} seats available
                           </p>
-                          <Button>Book Tickets</Button>
+                          <Button asChild>
+                            <Link href={`/booking/${event.id}`}>Book Tickets</Link>
+                          </Button>
                         </div>
                       </div>
                     </div>

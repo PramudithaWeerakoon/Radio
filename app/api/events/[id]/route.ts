@@ -1,38 +1,40 @@
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
 // Get event by ID
 export async function GET(
   request: Request,
-  context: { params: { id: string } }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const idParam = context.params.id;
-    const id = parseInt(idParam);
-    
+    const id = parseInt(params.id);
+
     if (isNaN(id)) {
       return NextResponse.json(
-        { error: 'Invalid event ID' },
+        { success: false, message: "Invalid event ID" },
         { status: 400 }
       );
     }
-    
+
     const event = await prisma.event.findUnique({
       where: { id },
     });
-    
+
     if (!event) {
       return NextResponse.json(
-        { error: 'Event not found' },
+        { success: false, message: "Event not found" },
         { status: 404 }
       );
     }
-    
-    return NextResponse.json(event);
-  } catch (error) {
-    console.error('Error fetching event:', error);
+
+    return NextResponse.json({
+      success: true,
+      event,
+    });
+  } catch (error: any) {
+    console.error("Error fetching event:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch event' },
+      { success: false, message: "Failed to fetch event details" },
       { status: 500 }
     );
   }
