@@ -4,8 +4,51 @@ import { Facebook, Twitter, Instagram, Youtube, Mail, Phone, MapPin } from "luci
 import { Button } from "./ui/button";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+
+interface BlogPost {
+  id: number;
+  title: string;
+  createdAt: string;
+}
 
 export function Footer() {
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [isLoadingPosts, setIsLoadingPosts] = useState(true);
+
+  useEffect(() => {
+    async function fetchLatestPosts() {
+      try {
+        const response = await fetch('/api/blog?published=true');
+        
+        if (response.ok) {
+          const data = await response.json();
+          // Get the 2 most recent posts
+          const recentPosts = (data.posts || []).slice(0, 2);
+          setPosts(recentPosts);
+        }
+      } catch (error) {
+        console.error('Error fetching blog posts for footer:', error);
+      } finally {
+        setIsLoadingPosts(false);
+      }
+    }
+
+    fetchLatestPosts();
+  }, []);
+
+  function formatDate(dateString: string): string {
+    try {
+      return new Date(dateString).toLocaleDateString('en-US', {
+        month: 'long', 
+        day: 'numeric', 
+        year: 'numeric'
+      });
+    } catch {
+      return 'Unknown date';
+    }
+  }
+
   return (
     <footer className="bg-black text-white py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -16,7 +59,7 @@ export function Footer() {
             viewport={{ once: true }}
             className="space-y-4"
           >
-            <h3 className="text-xl font-bold">About Midnight Echo</h3>
+            <h3 className="text-xl font-bold">About Radioo Music</h3>
             <p className="text-gray-400">
               Experience the fusion of classical rock and modern elements in a journey through sound and emotion.
             </p>
@@ -90,22 +133,24 @@ export function Footer() {
           >
             <h3 className="text-xl font-bold">Latest Posts</h3>
             <ul className="space-y-4">
-              <li>
-                <Link href="/blog/post-1" className="group">
-                  <p className="text-sm text-gray-400 group-hover:text-white transition">
-                    Behind the Scenes: Making of Our New Album
-                  </p>
-                  <p className="text-xs text-gray-500">March 15, 2024</p>
-                </Link>
-              </li>
-              <li>
-                <Link href="/blog/post-2" className="group">
-                  <p className="text-sm text-gray-400 group-hover:text-white transition">
-                    Summer Tour Announcement
-                  </p>
-                  <p className="text-xs text-gray-500">March 10, 2024</p>
-                </Link>
-              </li>
+              {isLoadingPosts ? (
+                <li className="text-sm text-gray-400">Loading posts...</li>
+              ) : posts.length > 0 ? (
+                posts.map(post => (
+                  <li key={post.id}>
+                    <Link href={`/blog/${post.id}`} className="group">
+                      <p className="text-sm text-gray-400 group-hover:text-white transition">
+                        {post.title}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {formatDate(post.createdAt)}
+                      </p>
+                    </Link>
+                  </li>
+                ))
+              ) : (
+                <li className="text-sm text-gray-400">No posts available</li>
+              )}
             </ul>
           </motion.div>
 
@@ -137,7 +182,7 @@ export function Footer() {
         <div className="mt-12 pt-8 border-t border-gray-800">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-400 text-sm">
-              © 2024 Midnight Echo. All rights reserved.
+              © 2024 Radioo Music. All rights reserved.
             </p>
             <div className="flex space-x-4 mt-4 md:mt-0">
               <Link href="/privacy" className="text-gray-400 hover:text-white text-sm transition">

@@ -37,7 +37,7 @@ export default function AboutPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
-            From humble beginnings to stadium tours, discover the journey of Midnight Echo
+            From humble beginnings to stadium tours, discover the journey of Radioo Music
           </motion.p>
         </div>
       </section>
@@ -80,7 +80,7 @@ export default function AboutPage() {
           >
             <h2 className="text-3xl font-bold mb-4">The Journey</h2>
             <p className="text-muted-foreground">
-              Formed in 2018, Midnight Echo has grown from local venues to international stages,
+              Formed in 2018, Radioo Music has grown from local venues to international stages,
               crafting a unique sound that bridges classical rock with modern elements.
             </p>
           </motion.div>
@@ -112,7 +112,7 @@ export default function AboutPage() {
             >
               <h3 className="text-2xl font-bold">Where We Are Now</h3>
               <p className="text-muted-foreground">
-                Today, Midnight Echo stands as a testament to perseverance and musical innovation.
+                Today, Radioo Music stands as a testament to perseverance and musical innovation.
                 Our sound has evolved, but our core mission remains the same: creating music that
                 moves people.
               </p>

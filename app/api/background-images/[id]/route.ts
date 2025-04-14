@@ -1,0 +1,122 @@
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/db';
+
+// Get a specific background image
+export async function GET(
+  request: Request,
+  context: { params: { id: string } }
+) {
+  try {
+    const id = parseInt((await context.params).id);
+    
+    if (isNaN(id)) {
+      return NextResponse.json(
+        { error: 'Invalid image ID' },
+        { status: 400 }
+      );
+    }
+    
+    const backgroundImage = await prisma.backgroundImage.findUnique({
+      where: { id }
+    });
+    
+    if (!backgroundImage) {
+      return NextResponse.json(
+        { error: 'Image not found' },
+        { status: 404 }
+      );
+    }
+    
+    return NextResponse.json({
+      id: backgroundImage.id,
+      title: backgroundImage.title,
+      imageUrl: `data:${backgroundImage.imageMimeType};base64,${backgroundImage.imageData.toString('base64')}`,
+      order: backgroundImage.order,
+      isActive: backgroundImage.isActive,
+      createdAt: backgroundImage.createdAt
+    });
+  } catch (error) {
+    console.error('Failed to fetch background image:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch background image' },
+      { status: 500 }
+    );
+  }
+}
+
+// Update background image status or order
+export async function PUT(
+  request: Request,
+  context: { params: { id: string } }
+) {
+  try {
+    const id = parseInt(context.params.id);
+    
+    if (isNaN(id)) {
+      return NextResponse.json(
+        { error: 'Invalid image ID' },
+        { status: 400 }
+      );
+    }
+    
+    const data = await request.json();
+    
+    const updatedImage = await prisma.backgroundImage.update({
+      where: { id },
+      data: {
+        isActive: data.isActive !== undefined ? data.isActive : undefined,
+        order: data.order !== undefined ? data.order : undefined,
+        title: data.title || undefined
+      }
+    });
+    
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Background image updated successfully',
+      image: {
+        id: updatedImage.id,
+        title: updatedImage.title,
+        order: updatedImage.order,
+        isActive: updatedImage.isActive
+      }
+    });
+  } catch (error) {
+    console.error('Failed to update background image:', error);
+    return NextResponse.json(
+      { success: false, error: 'Failed to update background image' },
+      { status: 500 }
+    );
+  }
+}
+
+// Delete a background image
+export async function DELETE(
+  request: Request,
+  context: { params: { id: string } }
+) {
+  try {
+    const id = parseInt((await context.params).id);
+    
+    if (isNaN(id)) {
+      return NextResponse.json(
+        { error: 'Invalid image ID' },
+        { status: 400 }
+      );
+    }
+    
+    await prisma.backgroundImage.delete({
+      where: { id }
+    });
+    
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Background image deleted successfully' 
+    });
+  } catch (error) {
+    console.error('Failed to delete background image:', error);
+    return NextResponse.json(
+      { success: false, error: 'Failed to delete background image' },
+      { status: 500 }
+    );
+  }
+}
