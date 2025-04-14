@@ -31,7 +31,17 @@ export default function Home() {
         }
         
         const data = await response.json();
-        setEvents(data.events || []);
+        
+        // Process events to add proper image URLs with cache busting
+        const processedEvents = data.events.map(event => ({
+          ...event,
+          // Add cache busting to image URLs
+          imageUrl: event.imageName ? `/api/events/${event.id}/image?t=${Date.now()}` : null,
+          // Ensure image property exists as a fallback
+          image: event.image || "https://placehold.co/600x400?text=No+Image"
+        }));
+        
+        setEvents(processedEvents || []);
         setEventsError(null);
       } catch (error) {
         console.error('Error fetching events:', error);
