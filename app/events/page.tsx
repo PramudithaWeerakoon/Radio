@@ -37,8 +37,8 @@ export default function EventsPage() {
         // Process events to include image URLs for database images
         const processedEvents = data.events.map((event: any) => ({
           ...event,
-          // If the event has image data stored in DB, create a URL to fetch it
-          imageUrl: event.imageName ? `/api/events/${event.id}/image` : null,
+          // If the event has image data stored in DB, create a URL to fetch it with cache busting
+          imageUrl: event.imageName ? `/api/events/${event.id}/image?t=${Date.now()}` : null,
           // Keep any existing image URL or use a placeholder
           image: event.image || "https://placehold.co/600x400?text=No+Image"
         }));

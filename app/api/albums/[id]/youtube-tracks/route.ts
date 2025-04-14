@@ -40,19 +40,19 @@ export async function GET(
     });
 
     // Log detailed information for each track to help with debugging
-    console.log(`[YouTube Tracks API] Album ${albumId}: Found ${tracks.length} tracks`);
+    //console.log(`[YouTube Tracks API] Album ${albumId}: Found ${tracks.length} tracks`);
     tracks.forEach(track => {
-      console.log(`[YouTube Tracks API] Track #${track.track_number} (ID:${track.id}) "${track.title}": YouTube ID = ${track.youtube_id || 'none'}`);
-      console.log(`[YouTube Tracks API] Track has lyrics: ${track.lyrics ? 'Yes' : 'No'}, Credits: ${track.credits.length}`);
+      //console.log(`[YouTube Tracks API] Track #${track.track_number} (ID:${track.id}) "${track.title}": YouTube ID = ${track.youtube_id || 'none'}`);
+      //console.log(`[YouTube Tracks API] Track has lyrics: ${track.lyrics ? 'Yes' : 'No'}, Credits: ${track.credits.length}`);
       
       // Print full lyrics for debugging
-      console.log(`[YouTube Tracks API] FULL LYRICS for track ${track.id}:`);
-      console.log(track.lyrics);
+      //console.log(`[YouTube Tracks API] FULL LYRICS for track ${track.id}:`);
+      //console.log(track.lyrics);
       
       // Print full credits for debugging
-      console.log(`[YouTube Tracks API] FULL CREDITS for track ${track.id}:`);
+      //console.log(`[YouTube Tracks API] FULL CREDITS for track ${track.id}:`);
       track.credits.forEach(credit => {
-        console.log(`- ${credit.role}: ${credit.name} (ID: ${credit.id})`);
+        //console.log(`- ${credit.role}: ${credit.name} (ID: ${credit.id})`);
       });
     });
     
@@ -61,7 +61,7 @@ export async function GET(
       tracks: tracks,
     });
   } catch (error: any) {
-    console.error("[YouTube Tracks API] Failed to fetch track YouTube IDs:", error);
+    //console.error("[YouTube Tracks API] Failed to fetch track YouTube IDs:", error);
     return NextResponse.json(
       {
         success: false,
