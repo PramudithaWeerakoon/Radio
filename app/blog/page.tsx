@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import Loading from "../loading";
 import Link from "next/link";
 import { useToast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
@@ -41,14 +41,7 @@ export default function BlogPage() {
   }, [toast]);
 
   if (isLoading) {
-    return (
-      <div className="container mx-auto py-12 px-4">
-        <div className="flex justify-center items-center py-20">
-          <Loader2 className="h-12 w-12 animate-spin text-primary" />
-          <span className="ml-2 text-lg">Loading blog posts...</span>
-        </div>
-      </div>
-    );
+    return <Loading />;
   }
 
   if (posts.length === 0) {

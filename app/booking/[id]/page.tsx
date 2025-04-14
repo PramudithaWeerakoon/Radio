@@ -13,6 +13,7 @@ import { useToast } from "@/components/ui/use-toast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { use } from 'react';
+import Loading from "../../loading";
 
 export default function BookingPage({ params }: { params: { id: string } }) {
   // Use React.use to unwrap params promise
@@ -176,14 +177,7 @@ export default function BookingPage({ params }: { params: { id: string } }) {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
-          <p className="text-muted-foreground">Loading event details...</p>
-        </div>
-      </div>
-    );
+    return <Loading />;
   }
 
   if (error || !event) {

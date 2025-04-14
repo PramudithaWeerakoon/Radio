@@ -11,6 +11,7 @@ import { ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
+import Loading from "../../../../../loading";
 
 export default function EditTrackPage({ params }) {
   const router = useRouter();
@@ -209,14 +210,7 @@ export default function EditTrackPage({ params }) {
   };
   
   if (isFetching) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="flex flex-col items-center space-y-4">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p>Loading track data...</p>
-        </div>
-      </div>
-    );
+    return <Loading />;
   }
   
   return (
