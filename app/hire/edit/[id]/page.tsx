@@ -176,7 +176,7 @@ const EditHireForm = () => {
 
             // Append each file to the FormData
             for (let i = 0; i < e.target.files.length; i++) {
-                formData.append('images', e.target.files[i]);
+                formData.append('file', e.target.files[i]);
             }
 
             const response = await fetch(`/api/hire/${id}/upload`, {
@@ -245,48 +245,12 @@ const EditHireForm = () => {
                             </svg>
                         </button>
                     </div>
-
-                    {/* Upload section */}
-                    <div className="mb-6 p-4 border border-dashed border-gray-300 rounded-lg">
-                        <div className="mb-2 text-sm font-medium text-gray-700">Upload New Images</div>
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            multiple
-                            accept="image/*"
-                            onChange={handleFileUpload}
-                            className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                            disabled={uploadingImages}
-                        />
-                        {uploadingImages && <div className="mt-2 text-sm text-blue-600">Uploading...</div>}
-                    </div>
-
                     {images.length === 0 ? (
                         <p className="text-center py-8 text-gray-500">No images available.</p>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {images.map((image, index) => (
                                 <div key={index} className="border rounded-lg overflow-hidden">
-                                    <div className="bg-gray-100 p-2 flex justify-between items-center">
-                                        <span className="text-sm font-medium truncate max-w-xs">
-                                            {image.name || `Image ${index + 1}`}
-                                        </span>
-                                        <button
-                                            onClick={() => handleDeleteImage(index)}
-                                            disabled={deletingImageIndex === index}
-                                            className="text-red-600 hover:text-red-800 disabled:text-red-300"
-                                        >
-                                            {deletingImageIndex === index ? (
-                                                <span className="text-xs">Deleting...</span>
-                                            ) : (
-                                                <svg className="w-4 h-4" fill="none" stroke="currentColor"
-                                                     viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                                                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                                </svg>
-                                            )}
-                                        </button>
-                                    </div>
                                     <img
                                         src={image.url}
                                         alt={image.name || `Image ${index + 1}`}
