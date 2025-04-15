@@ -138,7 +138,9 @@ export default function AlbumsPage() {
                   <div className="grid md:grid-cols-[200px,1fr] gap-6">
                     <div
                       className="h-40 bg-cover bg-center rounded-lg"
-                      style={{ backgroundImage: `url(${album.cover_art || "/placeholder-album.jpg"})` }}
+                      style={{ 
+                        backgroundImage: `url(/api/albums/${album.id}/cover?t=${Date.now()})` 
+                      }}
                     />
                     <div className="space-y-4">
                       <div className="flex justify-between items-start">
