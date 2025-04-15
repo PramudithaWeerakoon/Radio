@@ -8,6 +8,7 @@ import { MusicPlayer } from "@/components/music-player";
 import { EventScroller } from "@/components/event-scroller";
 import { HeroSection } from "@/components/hero-section";
 import { BookingSection } from "@/components/booking-section";
+import { ChatBot } from "@/components/chat-bot";
 import Link from "next/link";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -313,6 +314,9 @@ export default function Home() {
       </section>
 
       <BookingSection />
+      
+      {/* Gemini-powered Chat Bot */}
+      <ChatBot />
     </main>
   );
 }
