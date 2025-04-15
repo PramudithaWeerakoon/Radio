@@ -28,7 +28,7 @@ export default async function AlbumPage({ params }: { params: { id: string } }) 
       id: album.id,
       title: album.title,
       releaseDate: album.release_date ? new Date(album.release_date).getFullYear().toString() : 'Unknown',
-      coverArt: album.coverImageData ? `/api/albums/${album.id}/cover?t=${Date.now()}` : '/placeholder-album.jpg',
+      coverArt: album.coverImageData ? `/api/albums/${album.id}/cover` : '/placeholder-album.jpg',
       description: album.description || '',
       tracks: album.tracks.map(track => ({
         title: track.title,
