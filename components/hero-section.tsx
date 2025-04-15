@@ -59,60 +59,58 @@ export function HeroSection() {
     : defaultBackgroundImage;
 
   return (
-    <div className="relative h-screen flex items-center justify-center overflow-hidden">
-      {/* Background Image */}
+    <section className="relative h-[90vh] w-full flex items-center justify-center overflow-hidden">
+      {/* Background image container with improved responsive handling */}
       <motion.div 
         key={currentImageIndex}
-        className="absolute inset-0 z-0"
+        className="absolute inset-0 w-full h-full"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 1.5 }}
         style={{
           backgroundImage: `url('${currentBackground}')`,
-          backgroundPosition: "center",
           backgroundSize: "cover",
+          backgroundPosition: "50% 50%", 
+          backgroundRepeat: "no-repeat",
+          objectFit: "cover",
+          width: "100%",
+          height: "100%",
+          // Force the background to maintain aspect ratio while covering the full area
+          // This helps prevent cropping on mobile
         }}
       >
+        {/* Dark overlay */}
         <div className="absolute inset-0 bg-black/50" />
       </motion.div>
 
-      {/* Content */}
-      <div className="relative z-10 text-center px-4 sm:px-6 lg:px-8">
-        <motion.h1 
-          className="text-4xl sm:text-6xl lg:text-7xl font-bold text-white mb-6"
+      {/* Content wrapper with proper z-index */}
+      <div className="relative z-10 text-center px-4 sm:px-6 max-w-4xl mx-auto">
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          The Radioo Music
-        </motion.h1>
-        <motion.p 
-          className="text-xl sm:text-2xl text-gray-200 mb-8 max-w-3xl mx-auto"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-        >
-          Experience the fusion of classical rock and modern elements in a journey through sound and emotion
-        </motion.p>
-        <motion.div
-          className="flex flex-col sm:flex-row gap-4 justify-center"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-        >
-          <Link href="/events">
-            <Button size="lg" className="bg-primary hover:bg-primary/90">
-              Book Tickets
-            </Button>
-          </Link>
-          <Link href="/events">
-            <Button size="lg" variant="outline" className="text-white border-white hover:bg-white/20">
-              View Schedule
-            </Button>
-          </Link>
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6">
+            Experience the Sound of Tomorrow
+          </h1>
+          <p className="text-xl text-gray-200 mb-8 max-w-2xl mx-auto">
+            Join us on a musical journey that transcends boundaries and connects souls.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/events">
+              <Button size="lg" className="bg-white text-black hover:bg-white/90 w-full sm:w-auto">
+                Upcoming Events
+              </Button>
+            </Link>
+            <Link href="/music">
+              <Button size="lg" variant="outline" className="text-white border-white hover:bg-white/20 w-full sm:w-auto">
+                Explore Our Music
+              </Button>
+            </Link>
+          </div>
         </motion.div>
       </div>
-    </div>
+    </section>
   );
 }

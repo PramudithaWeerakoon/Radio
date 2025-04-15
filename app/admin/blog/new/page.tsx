@@ -19,6 +19,7 @@ export default function NewBlogPostPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const fileInputRef = useRef(null);
   
   const [formData, setFormData] = useState({
@@ -113,6 +114,8 @@ export default function NewBlogPostPage() {
           : "Blog post saved as draft",
       });
       
+      setIsSubmitted(true); // Mark as submitted after successful publish
+      
       // Redirect to blog list
       router.push("/admin/blog");
     } catch (error) {
@@ -122,6 +125,7 @@ export default function NewBlogPostPage() {
         description: error.message || "Failed to create blog post",
         variant: "destructive",
       });
+      setIsSubmitted(false); // Reset submission state if there's an error
     } finally {
       setIsLoading(false);
     }
@@ -239,18 +243,10 @@ export default function NewBlogPostPage() {
 
             <div className="flex justify-end space-x-4">
               <Button 
-                type="button"
-                variant="outline"
-                onClick={() => handleSubmit(false)}
-                disabled={isLoading}
-              >
-                Save as Draft
-              </Button>
-              <Button 
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || isSubmitted}
               >
-                {isLoading ? "Saving..." : "Publish Post"}
+                {isLoading ? "Saving..." : isSubmitted ? "Published" : "Publish Post"}
               </Button>
             </div>
           </form>
