@@ -1,10 +1,14 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-export async function POST(request) {
+export async function POST(request: Request) {
     try {
         const body = await request.json();
         const { hireId } = body; // Get amount from request
+
+        if (!process.env.STRIPE_SECRET_KEY) {
+            throw new Error('Stripe secret key is not defined');
+        }
 
         const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -32,7 +36,7 @@ export async function POST(request) {
         });
 
         return NextResponse.json({ id: session.id });
-    } catch (err) {
+    } catch (err: any) {
         console.error('Stripe error:', err);
         return NextResponse.json({ error: err.message }, { status: 500 });
     }
