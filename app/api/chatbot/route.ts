@@ -2,9 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-// Initialize the Gemini API with the API key WITHOUT specifying version
-// The JS/TS SDK will handle the correct API version automatically
-const genAI = new GoogleGenerativeAI('AIzaSyDz6xQM99_8aCcmx7qmbawRIU7uvzB1op4');
+// Initialize the Gemini API with the API key from environment variables
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || '');
 
 // Function to get database information that matches the actual schema
 async function getWebsiteData() {
@@ -132,7 +131,7 @@ export async function POST(request: NextRequest) {
         
         // Define the prompt with database context
         const prompt = `
-        You are a helpful assistant for a radio website. Answer only questions related to:
+        You are a helpful assistant for a radioo website. Answer only questions related to:
         - Music and albums
         - Events and bookings
         - Blog posts and reviews
@@ -140,7 +139,7 @@ export async function POST(request: NextRequest) {
         - Merchandise
         - Contact information
         
-        If asked about other topics, politely explain you can only help with radio website information.
+        If asked about other topics, politely explain you can only help with radioo website information.
         
         Website database information:
         ${JSON.stringify(websiteData, null, 2)}
@@ -163,7 +162,7 @@ export async function POST(request: NextRequest) {
             const fallbackModel = genAI.getGenerativeModel({ model: "gemini-pro" });
             
             const prompt = `
-            You are a helpful assistant for a radio website. Answer only questions related to:
+            You are a helpful assistant for a radioo website. Answer only questions related to:
             - Music and albums
             - Events and bookings
             - Blog posts and reviews
@@ -171,7 +170,7 @@ export async function POST(request: NextRequest) {
             - Merchandise
             - Contact information
             
-            If asked about other topics, politely explain you can only help with radio website information.
+            If asked about other topics, politely explain you can only help with radioo website information.
             
             Website database information:
             ${JSON.stringify(websiteData, null, 2)}

@@ -228,10 +228,10 @@ export default function Home() {
                 link: "/blog"
               },
               {
-                title: "Official Merchandise",
-                description: "Show your support with our latest merchandise collection",
-                image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-                link: "/merchandise"
+                title: "Hire Our Band",
+                description: "Book us for your next event and experience live music that will elevate any occasion",
+                image: "https://i.postimg.cc/25mVyPwq/Whats-App-Image-2025-04-15-at-21-31-10-2c838c59.jpg",
+                link: "/hire"
               }
             ].map((item, index) => (
               <motion.div

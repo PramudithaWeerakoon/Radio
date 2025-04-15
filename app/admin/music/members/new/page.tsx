@@ -6,22 +6,11 @@ import { Button } from "@/components/ui/button"; // Verify this export
 import { Input } from "@/components/ui/input"; // Verify this export
 import { Label } from "@/components/ui/label"; // Verify this export
 import { Textarea } from "@/components/ui/textarea"; // Verify this export
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; // Verify these exports
 import { ArrowLeft } from "lucide-react"; // Ensure this is correctly imported
 import Link from "next/link"; // This should be correct
 import { useRouter } from "next/navigation"; // Add this import
 import { useToast } from "@/components/ui/use-toast"; // Add this import for consistent notifications
 import Image from "next/image"; // Add this for image preview
-
-const roles = [
-  "Lead Vocals",
-  "Lead Guitar",
-  "Rhythm Guitar",
-  "Bass",
-  "Drums",
-  "Keyboard",
-  "Other",
-];
 
 export default function NewMemberPage() {
   const router = useRouter(); // Initialize the router
@@ -71,13 +60,6 @@ export default function NewMemberPage() {
         ...prev.socialLinks,
         [name]: value,
       },
-    }));
-  };
-
-  const handleRoleChange = (role: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      role,
     }));
   };
 
@@ -168,18 +150,12 @@ export default function NewMemberPage() {
 
             <div className="space-y-2">
               <Label>Role</Label>
-              <Select onValueChange={handleRoleChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select role" />
-                </SelectTrigger>
-                <SelectContent>
-                  {roles.map((role) => (
-                    <SelectItem key={role} value={role}>
-                      {role}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Input
+                name="role"
+                placeholder="Enter band member role (e.g. Lead Vocals, Drummer)"
+                value={formData.role}
+                onChange={handleChange}
+              />
             </div>
 
             <div className="space-y-2">

@@ -12,7 +12,6 @@ import { format } from "date-fns";
 import Link from "next/link";
 import Loading from "../loading";
 
-const venues = ["All Venues", "Madison Square Garden", "Blue Note Jazz Club", "Central Park"];
 const priceRanges = ["All Prices", "Under $50", "$50-$100", "Over $100"];
 
 export default function EventsPage() {
@@ -20,40 +19,63 @@ export default function EventsPage() {
   const [selectedVenue, setSelectedVenue] = useState("All Venues");
   const [selectedPrice, setSelectedPrice] = useState("All Prices");
   const [events, setEvents] = useState<any[]>([]);
+  const [venues, setVenues] = useState<string[]>(["All Venues"]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Fetch events and venues from the database
   useEffect(() => {
-    async function fetchEvents() {
+    async function fetchData() {
       try {
         setIsLoading(true);
-        const response = await fetch('/api/events');
         
-        if (!response.ok) {
+        // Fetch events
+        const eventsResponse = await fetch('/api/events');
+        if (!eventsResponse.ok) {
           throw new Error('Failed to load events');
         }
+        const eventsData = await eventsResponse.json();
         
-        const data = await response.json();
-        
-        // Process events to include image URLs for database images
-        const processedEvents = data.events.map((event: any) => ({
+        // Process events to include image URLs
+        const processedEvents = eventsData.events.map((event: any) => ({
           ...event,
-          // If the event has image data stored in DB, create a URL to fetch it with cache busting
           imageUrl: event.imageName ? `/api/events/${event.id}/image?t=${Date.now()}` : null,
-          // Keep any existing image URL or use a placeholder
           image: event.image || "https://placehold.co/600x400?text=No+Image"
         }));
-        
         setEvents(processedEvents || []);
+        
+        // Try to fetch venues, but don't fail if this doesn't work
+        try {
+          const venuesResponse = await fetch('/api/venues');
+          if (venuesResponse.ok) {
+            const venuesData = await venuesResponse.json();
+            
+            // Add "All Venues" option to the beginning of the venues array
+            const allVenues = ["All Venues", ...venuesData.venues.map((venue: any) => venue.name)];
+            setVenues(allVenues);
+          } else {
+            // If venues API fails, extract unique venues from events data
+            const uniqueVenues = [...new Set(processedEvents.map(event => event.venue))].filter(Boolean);
+            const allVenues = ["All Venues", ...uniqueVenues.sort()];
+            setVenues(allVenues);
+          }
+        } catch (venueError) {
+          console.error('Error fetching venues:', venueError);
+          // Extract venue information from events as fallback
+          const uniqueVenues = [...new Set(processedEvents.map(event => event.venue))].filter(Boolean);
+          const allVenues = ["All Venues", ...uniqueVenues.sort()];
+          setVenues(allVenues);
+        }
+        
       } catch (err) {
-        console.error('Error fetching events:', err);
-        setError('Failed to load events. Please try again later.');
+        console.error('Error fetching data:', err);
+        setError('Failed to load data. Please try again later.');
       } finally {
         setIsLoading(false);
       }
     }
     
-    fetchEvents();
+    fetchData();
   }, []);
 
   const filteredEvents = events.filter(event => {

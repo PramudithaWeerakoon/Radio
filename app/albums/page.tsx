@@ -20,7 +20,7 @@ interface Album {
   id: number;
   title: string;
   releaseDate: string;
-  cover_art: string;  // This will be the API URL to the cover image
+  coverImageUrl?: string;  // Changed to match database image URL pattern
   description: string;
   tracks: Track[];
   youtubeId: string;
@@ -50,7 +50,7 @@ export default function AlbumsPage() {
           id: album.id,
           title: album.title,
           releaseDate: album.release_date ? new Date(album.release_date).getFullYear().toString() : 'Unknown',
-          cover_art: album.cover_art,
+          coverImageUrl: `/api/albums/${album.id}/cover?t=${Date.now()}`,
           description: album.description || '',
           tracks: album.tracks.map(track => ({
             title: track.title,
@@ -104,7 +104,7 @@ export default function AlbumsPage() {
                 <Card className="overflow-hidden hover:shadow-lg transition-shadow">
                   <div className="h-64 w-full relative">
                     <Image
-                      src={album.cover_art}
+                      src={album.coverImageUrl}
                       alt={album.title}
                       fill
                       className="object-cover"

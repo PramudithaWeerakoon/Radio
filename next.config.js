@@ -14,4 +14,15 @@ module.exports = {
 
     return config;
   },
+  // Add this to explicitly allow all hosts
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          { key: 'Access-Control-Allow-Origin', value: '*' }
+        ],
+      },
+    ];
+  }
 };

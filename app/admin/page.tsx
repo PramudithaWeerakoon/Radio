@@ -95,6 +95,7 @@ const quickActions = [
       { label: "Hero Backgrounds", href: "/admin/background-images", icon: ImageIcon },
       { label: "Manage Reviews", href: "/admin/reviews", icon: MessageSquare },
       { label: "Newsletter", href: "/admin/newsletter", icon: Mail },
+      { label: "Hire", href: "/admin/hire", icon: MessageSquare },
     ],
   },
 ];

@@ -31,7 +31,9 @@ export async function GET(
     return new NextResponse(member.imageData, {
       headers: {
         "Content-Type": member.imageMimeType || "image/jpeg",
-        "Cache-Control": "public, max-age=31536000, immutable"
+        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+        "Pragma": "no-cache",
+        "Expires": "0"
       }
     });
   } catch (error) {
