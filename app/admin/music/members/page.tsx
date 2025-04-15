@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Search, Plus, Edit, Trash, Users, ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { useToast } from "@/components/ui/use-toast";
+import Loading from "@/app/loading";
 
 // This will only be used as fallback
 const fallbackMembers = [
@@ -41,6 +43,7 @@ export default function MembersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState<number | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     async function fetchMembers() {
@@ -59,7 +62,10 @@ export default function MembersPage() {
           id: member.id,
           name: `${member.firstName} ${member.lastName}`,
           role: member.role,
-          imageUrl: member.imageData ? `/api/members/${member.id}/image` : '/images/default-profile.jpg',
+          // Add timestamp as cache-busting parameter
+          imageUrl: member.imageData ? 
+            `/api/members/${member.id}/image?t=${new Date().getTime()}` : 
+            '/images/default-profile.jpg',
           joinDate: new Date(member.joinDate).getFullYear().toString(),
         }));
         
@@ -81,15 +87,16 @@ export default function MembersPage() {
     fetchMembers();
   }, []);
 
-  // Add delete member function
+  // Fix the deleteMember function to use the correct API endpoint structure
   async function deleteMember(id: number) {
-    if (!confirm("Are you sure you want to delete this member?")) {
+    if (!confirm("Are you sure you want to delete this member? This action cannot be undone.")) {
       return;
     }
     
     setIsDeleting(id);
     
     try {
+      // Change from path parameter to query parameter structure
       const response = await fetch(`/api/members?id=${id}`, {
         method: 'DELETE',
       });
@@ -100,9 +107,20 @@ export default function MembersPage() {
       
       // Remove the deleted member from the state
       setMembers(members.filter(member => member.id !== id));
+      
+      // Show success toast
+      toast({
+        title: "Success",
+        description: "Band member deleted successfully",
+      });
     } catch (err) {
       console.error('Error deleting member:', err);
-      alert('Failed to delete member');
+      // Show error toast
+      toast({
+        title: "Error",
+        description: "Failed to delete band member",
+        variant: "destructive",
+      });
     } finally {
       setIsDeleting(null);
     }
@@ -145,10 +163,7 @@ export default function MembersPage() {
       </div>
 
       {loading ? (
-        <div className="flex justify-center items-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <span className="ml-3">Loading members...</span>
-        </div>
+        <Loading />
       ) : error ? (
         <div className="bg-destructive/10 text-destructive p-4 rounded-md">
           {error}. Using fallback data.
@@ -175,7 +190,8 @@ export default function MembersPage() {
                         alt={member.name}
                         fill
                         style={{ objectFit: 'cover' }}
-                        unoptimized // For external or dynamic image sources
+                        unoptimized={true} // Ensure images are not optimized by Next.js to avoid caching issues
+                        priority={index < 3} // Load first few images with priority
                       />
                     </div>
                     <div className="space-y-4">
@@ -190,9 +206,11 @@ export default function MembersPage() {
                           </div>
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="icon">
-                            <Edit className="h-4 w-4" />
-                          </Button>
+                          <Link href={`/admin/music/members/edit/${member.id}`}>
+                            <Button variant="outline" size="icon">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </Link>
                           <Button 
                             variant="outline" 
                             size="icon" 
@@ -209,7 +227,9 @@ export default function MembersPage() {
                         </div>
                       </div>
                       <div className="flex justify-end pt-4 border-t">
-                        <Button variant="outline">View Details</Button>
+                        <Link href={`/admin/music/members/edit/${member.id}`}>
+                          <Button variant="outline">View Details</Button>
+                        </Link>
                       </div>
                     </div>
                   </div>
