@@ -4,7 +4,7 @@ let stripePromise: Promise<any> | null = null;
 
 export const getStripe = () => {
     if (!stripePromise) {
-        const key = "pk_test_51RE3Nx4N6RvwXaQvIENsXT20l2KUmuB14AUdZtj5if3hQqERHo92j11kD98odwdquCTSeMYzdIxSwan32yRLD4WC0091IciD00";
+        const key = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
         if (!key) {
             console.error('Missing Stripe publishable key');
             return null;

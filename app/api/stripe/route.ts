@@ -6,7 +6,7 @@ export async function POST(request) {
         const body = await request.json();
         const { hireId } = body; // Get amount from request
 
-        const stripe = new Stripe("sk_test_51RE3Nx4N6RvwXaQv1LVr0xwDYNrRK7tOPqO5yK615TRb3RsII4xjG119QbZOq8epjZbHeo4LMHuZmaD1HZoqnOQa00gcyOTivt");
+        const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
         const product = await stripe.products.create({
             name: 'Hire Ticket',
