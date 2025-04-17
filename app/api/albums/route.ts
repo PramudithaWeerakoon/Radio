@@ -1,6 +1,19 @@
 import { NextResponse } from 'next/server';
 import prisma from '../../../lib/prisma';
 
+// Helper function to handle BigInt serialization
+const serializeData = (data) => {
+  return JSON.parse(
+    JSON.stringify(data, (key, value) => {
+      // Convert BigInt to String to avoid serialization errors
+      if (typeof value === 'bigint') {
+        return value.toString();
+      }
+      return value;
+    })
+  );
+};
+
 export async function POST(request) {
   try {
     const data = await request.json();
@@ -35,9 +48,12 @@ export async function POST(request) {
       }
     });
 
+    // Serialize the album data to handle BigInt
+    const serializedAlbum = serializeData(album);
+
     return NextResponse.json({
       message: "Album created successfully",
-      album
+      album: serializedAlbum
     }, { status: 201 });
   } catch (error) {
     console.error("Failed to create album:", error);
@@ -60,7 +76,10 @@ export async function GET() {
       }
     });
     
-    const formattedAlbums = albums.map(album => ({
+    // Serialize to handle BigInt values before formatting
+    const serializedAlbums = serializeData(albums);
+    
+    const formattedAlbums = serializedAlbums.map(album => ({
       id: album.id,
       title: album.title,
       release_date: album.release_date,
