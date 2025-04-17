@@ -1,6 +1,19 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
+// Helper function to handle BigInt serialization
+const serializeData = (data) => {
+  return JSON.parse(
+    JSON.stringify(data, (key, value) => {
+      // Convert BigInt to String to avoid serialization errors
+      if (typeof value === 'bigint') {
+        return value.toString();
+      }
+      return value;
+    })
+  );
+};
+
 // GET a single album by ID
 export async function GET(request, { params }) {
   try {
@@ -28,9 +41,12 @@ export async function GET(request, { params }) {
       }, { status: 404 });
     }
     
+    // Serialize album data to handle BigInt values
+    const serializedAlbum = serializeData(album);
+    
     // Add coverImageUrl for frontend display
     const albumWithImageUrl = {
-      ...album,
+      ...serializedAlbum,
       coverImageUrl: album.coverImageData ? `/api/albums/${id}/cover` : null
     };
     
@@ -175,9 +191,12 @@ export async function PUT(request, { params }) {
       });
     });
     
+    // Serialize album data to handle BigInt values
+    const serializedAlbum = serializeData(updatedAlbum);
+    
     // Add image URL for frontend display
     const albumWithImageUrl = {
-      ...updatedAlbum,
+      ...serializedAlbum,
       coverImageUrl: updatedAlbum.coverImageData ? `/api/albums/${id}/cover` : null
     };
     
