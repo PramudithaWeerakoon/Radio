@@ -9,6 +9,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
 import { useParams } from "next/navigation";
+import Loading from "../../loading";
 
 export default function BlogPostPage() {
   const { toast } = useToast();
@@ -48,14 +49,7 @@ export default function BlogPostPage() {
   }, [params.id, toast]);
 
   if (isLoading) {
-    return (
-      <div className="container max-w-4xl mx-auto py-12 px-4">
-        <div className="flex justify-center items-center py-20">
-          <Loader2 className="h-12 w-12 animate-spin text-primary" />
-          <span className="ml-2 text-lg">Loading post...</span>
-        </div>
-      </div>
-    );
+    return <Loading />;
   }
 
   if (!post) {

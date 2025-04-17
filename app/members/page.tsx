@@ -87,7 +87,8 @@ export default function MembersPage() {
           name: `${member.firstName} ${member.lastName}`,
           role: member.role,
           bio: member.bio || "Band member of Radioo Music",
-          image: `/api/members/${member.id}/image`,
+          // Add timestamp to prevent caching
+          image: `/api/members/${member.id}/image?t=${Date.now()}`,
           social: {
             facebook: member.facebook || "https://facebook.com",
             twitter: member.twitter || "https://twitter.com",
@@ -106,7 +107,6 @@ export default function MembersPage() {
         setLoading(false);
       }
     }
-
     fetchMembers();
   }, []);
 
@@ -141,14 +141,13 @@ export default function MembersPage() {
             </div>
           )}
         </motion.div>
-
         <motion.div
           variants={container}
           initial="hidden"
           animate="show"
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
         >
-          {members.map((member) => (
+          {members.map((member, index) => (
             <motion.div key={member.id} variants={item}>
               <Dialog>
                 <DialogTrigger asChild>
@@ -160,7 +159,8 @@ export default function MembersPage() {
                         fill
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         style={{ objectFit: "cover" }}
-                        unoptimized
+                        unoptimized={true}
+                        priority={index < 3} // Add priority loading for first few images
                       />
                     </div>
                     <CardHeader>
@@ -180,7 +180,7 @@ export default function MembersPage() {
                         alt={member.name}
                         fill
                         style={{ objectFit: "cover" }}
-                        unoptimized
+                        unoptimized={true}
                       />
                     </div>
                     <div>

@@ -45,9 +45,6 @@ export function YouTubeDialog({ videoId, isOpen, onClose }: YouTubeDialogProps) 
           <DialogTitle>
             {hasError ? "Error Loading Video" : "YouTube Video"}
           </DialogTitle>
-          <Button variant="ghost" size="icon" onClick={onClose}>
-            <X className="h-4 w-4" />
-          </Button>
         </DialogHeader>
         <div className="aspect-video bg-black">
           {isOpen && embeddedVideoId && (

@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Search, Plus, Edit, Trash, Music, Clock, ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/components/ui/use-toast";
+import Loading from "../../../loading";
 
 export default function TracksPage() {
   const { toast } = useToast(); // Properly initialize the toast function from the hook
@@ -128,10 +129,7 @@ export default function TracksPage() {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center items-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <span className="ml-2">Loading tracks...</span>
-        </div>
+        <Loading />
       ) : filteredTracks.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-muted-foreground">No tracks found.</p>

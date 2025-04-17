@@ -7,7 +7,9 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const id = parseInt(params.id);
+    // Correctly await the params object before accessing its properties
+    const { id: paramId } = await params;
+    const id = parseInt(paramId);
 
     if (isNaN(id)) {
       return NextResponse.json(
@@ -46,7 +48,8 @@ export async function PUT(
   context: { params: { id: string } }
 ) {
   try {
-    const idParam = context.params.id;
+    // Correctly await the params object before accessing its properties
+    const { id: idParam } = await context.params;
     const id = parseInt(idParam);
     
     if (isNaN(id)) {
@@ -134,7 +137,8 @@ export async function DELETE(
   context: { params: { id: string } }
 ) {
   try {
-    const idParam = context.params.id;
+    // Correctly await the params object before accessing its properties
+    const { id: idParam } = await context.params;
     const id = parseInt(idParam);
     
     if (isNaN(id)) {

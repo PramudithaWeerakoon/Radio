@@ -9,6 +9,7 @@ import { Search, Plus, Edit, Trash, ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
+import Loading from "../../loading";
 
 export default function AdminBlogPage() {
   const { toast } = useToast();
@@ -125,10 +126,7 @@ export default function AdminBlogPage() {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center items-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <span className="ml-2">Loading blog posts...</span>
-        </div>
+        <Loading />
       ) : filteredPosts.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-muted-foreground">No blog posts found.</p>

@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { YouTubeDialog } from "@/components/youtube-dialog";
 import Image from "next/image";
+import { useToast } from "@/components/ui/use-toast"; // Import the toast hook
 
 interface TrackCredit {
   id?: number;
@@ -57,6 +58,10 @@ export function AlbumDetails({ album }: AlbumDetailsProps) {
     credits?: TrackCredit[]
   }>>(new Map());
   const [trackTitleMap, setTrackTitleMap] = useState<Map<string, any>>(new Map());
+  const { toast } = useToast(); // Initialize the toast hook
+  
+  // Add cache busting parameter to cover art URL
+  const coverArtUrl = album.coverArt ? `${album.coverArt}?t=${Date.now()}` : '/placeholder-album.jpg';
 
   // Fetch track-specific YouTube IDs, lyrics, and credits
   useEffect(() => {
@@ -350,6 +355,35 @@ export function AlbumDetails({ album }: AlbumDetailsProps) {
     }
   };
 
+  const handleShareAlbum = () => {
+    if (navigator.share) {
+      // For devices that support Web Share API
+      navigator.share({
+        title: `${album.title} - Radioo Music`,
+        text: `Check out "${album.title}" album by Radioo Music!`,
+        url: window.location.href,
+      })
+      .catch((error) => console.error('Error sharing:', error));
+    } else {
+      // Fallback for devices that don't support Web Share API
+      const shareUrl = window.location.href;
+      
+      // Copy to clipboard
+      navigator.clipboard.writeText(shareUrl)
+        .then(() => {
+          toast({
+            title: "Link copied to clipboard",
+            description: "Share the link with your friends!",
+            duration: 3000,
+          });
+        })
+        .catch(() => {
+          // If clipboard API fails, prompt user to copy manually
+          window.prompt("Copy this link to share:", shareUrl);
+        });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -376,7 +410,7 @@ export function AlbumDetails({ album }: AlbumDetailsProps) {
               <Card className="overflow-hidden">
                 <div className="aspect-square relative">
                   <Image
-                    src={album.coverArt}
+                    src={coverArtUrl}
                     alt={album.title}
                     fill
                     className="object-cover"
@@ -401,7 +435,7 @@ export function AlbumDetails({ album }: AlbumDetailsProps) {
                       <Button variant="outline" size="icon">
                         <Heart className="h-4 w-4" />
                       </Button>
-                      <Button variant="outline" size="icon">
+                      <Button variant="outline" size="icon" onClick={handleShareAlbum}>
                         <Share2 className="h-4 w-4" />
                       </Button>
                     </div>

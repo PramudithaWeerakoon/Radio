@@ -25,11 +25,19 @@ export async function GET(
       return new NextResponse('Image not found', { status: 404 });
     }
 
+    // Get query params to check for cache busting
+    const url = new URL(request.url);
+    const timestamp = url.searchParams.get('t');
+
     // Return the image with the appropriate content type
     const response = new NextResponse(event.imageData);
     response.headers.set('Content-Type', event.imageMimeType || 'image/jpeg');
     response.headers.set('Content-Disposition', `inline; filename="${event.imageName || 'event-image'}"`);
-    response.headers.set('Cache-Control', 'public, max-age=31536000'); // Cache for a year
+    
+    // Set no-cache headers to prevent browsers from caching images
+    response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
     
     return response;
   } catch (error) {

@@ -11,11 +11,15 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
 import Link from "next/link";
-import { useState, FormEvent, useEffect, useRef } from "react";
+import { useState, FormEvent, useEffect, useRef, use } from "react";
 import { useRouter } from "next/navigation";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 export default function EditEventPage({ params }: { params: { id: string } }) {
+  // Properly unwrap params using React.use()
+  const unwrappedParams = use(params);
+  const eventId = unwrappedParams.id;
+  
   const router = useRouter();
   const { toast } = useToast();
   const [date, setDate] = useState<Date | undefined>();
@@ -39,19 +43,19 @@ export default function EditEventPage({ params }: { params: { id: string } }) {
     const fetchEvent = async () => {
       try {
         setIsFetching(true);
-        const response = await fetch(`/api/events/${params.id}`);
+        const response = await fetch(`/api/events/${eventId}`);
         
         if (!response.ok) {
           throw new Error('Failed to fetch event');
         }
         
-        const eventData = await response.json();
+        const eventData = await response.json().then(data => data.event);
         
         // Format the date and time
         const eventDate = new Date(eventData.date);
         setDate(eventDate);
 
-        // Extract hours and minutes for the time input
+        // Extract hours and minutes for the time input, ensuring it works correctly with timezones
         const hours = eventDate.getHours().toString().padStart(2, '0');
         const minutes = eventDate.getMinutes().toString().padStart(2, '0');
         const timeString = `${hours}:${minutes}`;
@@ -68,9 +72,11 @@ export default function EditEventPage({ params }: { params: { id: string } }) {
         
         // Check if there's an existing image
         if (eventData.imageName) {
+          // Add timestamp to prevent image caching issues
+          const timestamp = Date.now();
           // Set the current image URL to display the existing image
-          setCurrentImageUrl(`/api/events/${params.id}/image`);
-          setImagePreview(`/api/events/${params.id}/image`);
+          setCurrentImageUrl(`/api/events/${eventId}/image?t=${timestamp}`);
+          setImagePreview(`/api/events/${eventId}/image?t=${timestamp}`);
         }
       } catch (error) {
         console.error('Error fetching event:', error);
@@ -85,7 +91,7 @@ export default function EditEventPage({ params }: { params: { id: string } }) {
     };
     
     fetchEvent();
-  }, [params.id, toast]);
+  }, [eventId, toast]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -140,7 +146,7 @@ export default function EditEventPage({ params }: { params: { id: string } }) {
       
       // Add all text fields to FormData
       Object.keys(formData).forEach(key => {
-        submitData.append(key, formData[key]);
+        submitData.append(key, formData[key as keyof typeof formData]);
       });
       
       // Add date in the required format
@@ -154,7 +160,7 @@ export default function EditEventPage({ params }: { params: { id: string } }) {
       // Flag to indicate if image was removed
       submitData.append("imageRemoved", (!imageFile && !currentImageUrl).toString());
       
-      const response = await fetch(`/api/events/${params.id}`, {
+      const response = await fetch(`/api/events/${eventId}`, {
         method: 'PUT',
         body: submitData, // Send as FormData, not JSON
       });
@@ -226,7 +232,9 @@ export default function EditEventPage({ params }: { params: { id: string } }) {
                       className="w-full justify-start text-left font-normal"
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {date ? format(date, "PPP") : <span>Pick a date</span>}
+                      {date && date instanceof Date && !isNaN(date.getTime()) 
+                        ? format(date, "PPP") 
+                        : <span>Pick a date</span>}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">

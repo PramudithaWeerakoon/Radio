@@ -8,6 +8,7 @@ import { MusicPlayer } from "@/components/music-player";
 import { EventScroller } from "@/components/event-scroller";
 import { HeroSection } from "@/components/hero-section";
 import { BookingSection } from "@/components/booking-section";
+import { ChatBot } from "@/components/chat-bot";
 import Link from "next/link";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -31,7 +32,17 @@ export default function Home() {
         }
         
         const data = await response.json();
-        setEvents(data.events || []);
+        
+        // Process events to add proper image URLs with cache busting
+        const processedEvents = data.events.map(event => ({
+          ...event,
+          // Add cache busting to image URLs
+          imageUrl: event.imageName ? `/api/events/${event.id}/image?t=${Date.now()}` : null,
+          // Ensure image property exists as a fallback
+          image: event.image || "https://placehold.co/600x400?text=No+Image"
+        }));
+        
+        setEvents(processedEvents || []);
         setEventsError(null);
       } catch (error) {
         console.error('Error fetching events:', error);
@@ -217,10 +228,10 @@ export default function Home() {
                 link: "/blog"
               },
               {
-                title: "Official Merchandise",
-                description: "Show your support with our latest merchandise collection",
-                image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-                link: "/merchandise"
+                title: "Hire Our Band",
+                description: "Book us for your next event and experience live music that will elevate any occasion",
+                image: "https://i.postimg.cc/25mVyPwq/Whats-App-Image-2025-04-15-at-21-31-10-2c838c59.jpg",
+                link: "/hire"
               }
             ].map((item, index) => (
               <motion.div
@@ -303,6 +314,9 @@ export default function Home() {
       </section>
 
       <BookingSection />
+      
+      {/* Gemini-powered Chat Bot */}
+      <ChatBot />
     </main>
   );
 }

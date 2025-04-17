@@ -35,7 +35,8 @@ export default function AdminEventsPage() {
           ...event,
           // If the event has image data, use the API endpoint to fetch it
           hasImage: !!event.imageName || !!event.imageData,
-          imageUrl: event.imageUrl || (event.imageName ? `/api/events/${event.id}/image` : null)
+          // Add a timestamp to prevent caching issues
+          imageUrl: event.imageName ? `/api/events/${event.id}/image?t=${Date.now()}` : null
         }));
         
         setEvents(eventsWithImages || []);
