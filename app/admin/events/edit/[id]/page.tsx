@@ -18,13 +18,14 @@ import { use } from "react";
 
 // Use the correct typing for Next.js 15 in deployed environments
 interface EditEventPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
   searchParams?: { [key: string]: string | string[] | undefined };
 }
 
 export default function EditEventPage({ params }: EditEventPageProps) {
-  // Access the id directly from params
-  const eventId = params.id;
+  // Unwrap params using the use hook
+  const unwrappedParams = use(params);
+  const eventId = unwrappedParams.id;
   
   const router = useRouter();
   const { toast } = useToast();
