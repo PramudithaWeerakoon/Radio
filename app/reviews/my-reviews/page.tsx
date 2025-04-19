@@ -118,7 +118,7 @@ export default function MyReviewsPage() {
         <div className="text-center py-16 bg-muted/30 rounded-lg">
           <Star className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
           <h2 className="text-xl font-semibold mb-2">No Reviews Yet</h2>
-          <p className="text-muted-foreground mb-6">You haven't written any reviews yet.</p>
+          <p className="text-muted-foreground mb-6">You haven&apos;t written any reviews yet.</p>
           <Button asChild>
             <Link href="/reviews/write">Write Your First Review</Link>
           </Button>

@@ -432,7 +432,7 @@ export default function AlbumTracksPage({ params }: { params: { id: string } }) 
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <FileText className="mr-2 h-5 w-5" />
-                  Lyrics for "{album.tracks[currentTrackIndex].title}"
+                  Lyrics for &quot;{album.tracks[currentTrackIndex].title}&quot;
                 </CardTitle>
               </CardHeader>
               <CardContent>

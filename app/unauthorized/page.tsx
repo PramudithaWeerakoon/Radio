@@ -35,7 +35,7 @@ export default function UnauthorizedPage() {
         transition={{ delay: 0.3 }}
         className="text-muted-foreground mb-8 max-w-md"
       >
-        You don't have permission to access this area. This section is restricted to administrators only.
+        You don&apos;t have permission to access this area. This section is restricted to administrators only.
       </motion.p>
       
       <motion.div

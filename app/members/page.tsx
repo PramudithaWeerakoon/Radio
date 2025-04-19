@@ -133,7 +133,7 @@ export default function MembersPage() {
             Meet the Band
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            The talented musicians behind Radioo Music's unique sound
+            The talented musicians behind Radioo Music&apos;s unique sound
           </p>
           {error && (
             <div className="mt-4 p-3 bg-destructive/10 text-destructive rounded-md inline-block">

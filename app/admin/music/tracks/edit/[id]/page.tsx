@@ -367,7 +367,7 @@ export default function EditTrackPage({ params }) {
                 onChange={handleTrackChange}
               />
               <p className="text-xs text-muted-foreground">
-                Enter only the ID portion from a YouTube URL (e.g., from "https://youtube.com/watch?v=ea3Ue-LN5B9U" enter "ea3Ue-LN5B9U")
+                Enter only the ID portion from a YouTube URL (e.g., from &quot;https://youtube.com/watch?v=ea3Ue-LN5B9U&quot; enter &quot;ea3Ue-LN5B9U&quot;)
               </p>
             </div>
 

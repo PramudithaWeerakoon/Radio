@@ -427,7 +427,7 @@ export default function HirePage() {
                                 {hires.length === 0 ? (
                                     <div className="text-center py-8">
                                         <ClipboardList className="h-8 w-8 mx-auto text-muted-foreground mb-2"/>
-                                        <p className="text-muted-foreground">You don't have any hire requests yet.</p>
+                                        <p className="text-muted-foreground">You don&apos;t have any hire requests yet.</p>
                                         <Button className="mt-4" onClick={() => setFormOpen(true)}>
                                             Create a Hire Request
                                         </Button>

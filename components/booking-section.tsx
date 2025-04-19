@@ -96,7 +96,7 @@ export function BookingSection() {
         >
           <h2 className="text-3xl font-bold mb-4">Book Us for Your Event</h2>
           <p className="text-gray-400 max-w-2xl mx-auto">
-            From intimate acoustic sessions to full stadium performances, we'll make your event unforgettable
+            From intimate acoustic sessions to full stadium performances, we&apos;ll make your event unforgettable
           </p>
         </motion.div>
 
@@ -114,7 +114,7 @@ export function BookingSection() {
                     <CheckCircle className="h-16 w-16 text-green-500" />
                   </div>
                   <h3 className="text-xl font-bold">Booking Request Sent!</h3>
-                  <p className="text-gray-400">Thanks for your interest! We'll respond to you shortly to confirm your booking.</p>
+                  <p className="text-gray-400">Thanks for your interest! We&apos;ll respond to you shortly to confirm your booking.</p>
                   <Button 
                     onClick={() => setIsSubmitted(false)} 
                     className="mt-4 bg-white text-black hover:bg-white/90"

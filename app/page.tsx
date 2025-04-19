@@ -133,7 +133,7 @@ export default function Home() {
             <motion.div variants={fadeInUp} className="space-y-6">
               <h2 className="text-4xl font-bold">Latest Release</h2>
               <p className="text-xl text-gray-400">
-                "Echoes of Tomorrow" - Our most ambitious album yet, featuring a unique blend of classical rock and electronic elements.
+                &quot;Echoes of Tomorrow&quot; - Our most ambitious album yet, featuring a unique blend of classical rock and electronic elements.
               </p>
               <div className="flex gap-4">
                 <Link href="/albums/1">

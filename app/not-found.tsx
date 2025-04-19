@@ -32,7 +32,7 @@ export default function NotFound() {
           transition={{ delay: 0.4 }}
           className="text-xl text-muted-foreground mb-8 max-w-md mx-auto"
         >
-          Looks like this track doesn't exist. Let's get you back to the main stage.
+          Looks like this track doesn&apos;t exist. Let&apos;s get you back to the main stage.
         </motion.p>
         
         <motion.div
