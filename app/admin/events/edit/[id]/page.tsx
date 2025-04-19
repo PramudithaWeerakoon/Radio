@@ -11,14 +11,13 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
 import Link from "next/link";
-import { useState, FormEvent, useEffect, useRef, use } from "react";
+import { useState, FormEvent, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 
 export default function EditEventPage({ params }: { params: { id: string } }) {
-  // Properly unwrap params using React.use()
-  const unwrappedParams = use(params);
-  const eventId = unwrappedParams.id;
+  // Remove the React.use() unwrapping since we don't need it for client components
+  const eventId = params.id;
   
   const router = useRouter();
   const { toast } = useToast();
