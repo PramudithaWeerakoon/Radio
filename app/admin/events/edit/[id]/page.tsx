@@ -16,15 +16,14 @@ import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { use } from "react";
 
-// In Next.js 15, params are passed as a Promise
+// Correct interface for page props in Next.js 15
 interface EditEventPageProps {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }
 
 export default function EditEventPage({ params }: EditEventPageProps) {
-  // Use React.use to unwrap the params Promise
-  const unwrappedParams = use(params);
-  const eventId = unwrappedParams.id;
+  // Get the event ID directly from params
+  const eventId = params.id;
   
   const router = useRouter();
   const { toast } = useToast();
