@@ -16,19 +16,15 @@ import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { use } from "react";
 
-// For client components in Next.js 15, we need to handle both Promise-based and direct params
-// This helps ensure compatibility across different environments (local dev vs Vercel)
-type PageParams = { id: string } | Promise<{ id: string }>;
-
+// Make the params interface compatible with Next.js PageProps
 interface EditEventPageProps {
-  params: PageParams;
+  params: Promise<{ id: string }>;
 }
 
 export default function EditEventPage({ params }: EditEventPageProps) {
-  // Handle params whether it's a Promise or direct object
-  const eventId = 'then' in params 
-    ? use(params as Promise<{ id: string }>).id
-    : (params as { id: string }).id;
+  // Always use 'use' to unwrap the params promise
+  const unwrappedParams = use(params);
+  const eventId = unwrappedParams.id;
   
   const router = useRouter();
   const { toast } = useToast();
