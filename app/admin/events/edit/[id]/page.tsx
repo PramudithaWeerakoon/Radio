@@ -15,8 +15,14 @@ import { useState, FormEvent, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 
-export default function EditEventPage({ params }: { params: { id: string } }) {
-  // Remove the React.use() unwrapping since we don't need it for client components
+// Define the correct props interface for the component
+interface EditEventPageProps {
+  params: {
+    id: string;
+  };
+}
+
+export default function EditEventPage({ params }: EditEventPageProps) {
   const eventId = params.id;
   
   const router = useRouter();
