@@ -5,7 +5,8 @@ import { prisma } from "@/lib/prisma";
 export async function GET(request, { params }) {
   try {
     // Extract the track ID from the URL params
-    const id = parseInt(params.id);
+    // Await params before accessing its properties
+    const id = parseInt((await params).id);
     
     if (isNaN(id)) {
       return NextResponse.json(
@@ -57,7 +58,8 @@ export async function GET(request, { params }) {
 export async function PUT(request, { params }) {
   try {
     // Extract the track ID from the URL params
-    const id = parseInt(params.id);
+    // Await params before accessing its properties
+    const id = parseInt((await params).id);
     
     if (isNaN(id)) {
       return NextResponse.json(

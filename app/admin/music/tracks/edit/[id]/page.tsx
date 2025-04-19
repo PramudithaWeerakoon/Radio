@@ -12,6 +12,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
 import Loading from "../../../../../loading";
+import { use } from "react";
 
 export default function EditTrackPage({ params }) {
   const router = useRouter();
@@ -35,8 +36,9 @@ export default function EditTrackPage({ params }) {
   // Credits state
   const [credits, setCredits] = useState([]);
   
-  // Get track ID from params
-  const trackId = params.id;
+  // Get track ID from params - unwrap the Promise using the use hook
+  const unwrappedParams = use(params);
+  const trackId = unwrappedParams.id;
 
   // Fetch track data when component mounts
   useEffect(() => {
