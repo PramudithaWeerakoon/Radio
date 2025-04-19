@@ -211,7 +211,7 @@ export default function PlayerManagerPage() {
   
   // Handle delete track
   const deleteTrack = async (trackId) => {
-    if (!confirm(&apos;Are you sure you want to remove this track from the player?&apos;)) return;
+    if (!confirm('Are you sure you want to remove this track from the player?')) return;
     
     try {
       const response = await fetch(`/api/admin/player-tracks/${trackId}`, {
