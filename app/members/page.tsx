@@ -8,6 +8,20 @@ import { Facebook, Twitter, Instagram, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 
+// Define interface for Member type
+interface Member {
+  id: number;
+  name: string;
+  role: string;
+  bio: string;
+  image: string;
+  social: {
+    facebook?: string;
+    twitter?: string;
+    instagram?: string;
+  };
+}
+
 // Animation variants
 const container = {
   hidden: { opacity: 0 },
@@ -25,7 +39,7 @@ const item = {
 };
 
 // Fallback data in case API fails
-const fallbackMembers = [
+const fallbackMembers: Member[] = [
   {
     id: 1,
     name: "Alex Rivers",
@@ -65,9 +79,9 @@ const fallbackMembers = [
 ];
 
 export default function MembersPage() {
-  const [members, setMembers] = useState([]);
+  const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchMembers() {
@@ -82,7 +96,7 @@ export default function MembersPage() {
         const data = await response.json();
         
         // Transform API data to match our component format
-        const formattedMembers = data.map((member) => ({
+        const formattedMembers = data.map((member: any) => ({
           id: member.id,
           name: `${member.firstName} ${member.lastName}`,
           role: member.role,

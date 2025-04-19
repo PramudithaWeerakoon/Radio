@@ -13,11 +13,10 @@ import { format } from "date-fns";
 import Link from "next/link";
 import { useState, FormEvent, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "@/components/ui/use-toast";
 
 export default function NewEventPage() {
   const router = useRouter();
-  const { toast } = useToast();
   const [date, setDate] = useState<Date | undefined>();
   const [formData, setFormData] = useState({
     title: "",
@@ -80,7 +79,7 @@ export default function NewEventPage() {
       const submitData = new FormData();
       
       // Add all text fields to FormData
-      Object.keys(formData).forEach(key => {
+      (Object.keys(formData) as Array<keyof typeof formData>).forEach(key => {
         submitData.append(key, formData[key]);
       });
       

@@ -10,16 +10,30 @@ import { HeroSection } from "@/components/hero-section";
 import { BookingSection } from "@/components/booking-section";
 import { ChatBot } from "@/components/chat-bot";
 import Link from "next/link";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "@/components/ui/use-toast";
+
+// Define the Event interface
+interface Event {
+  id: number;
+  title: string;
+  date: string;
+  venue: string;
+  price: number;
+  availableSeats: number;
+  imageName?: string;
+  image?: string;
+  imageUrl?: string;
+  description?: string;
+  time?: string;
+}
 
 export default function Home() {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [events, setEvents] = useState([]);
+  const [events, setEvents] = useState<Event[]>([]);
   const [eventsLoading, setEventsLoading] = useState(true);
-  const [eventsError, setEventsError] = useState(null);
+  const [eventsError, setEventsError] = useState<string | null>(null);
   const [email, setEmail] = useState('');
   const [isSubscribing, setIsSubscribing] = useState(false);
-  const { toast } = useToast();
 
   useEffect(() => {
     async function fetchLatestEvents() {
@@ -34,7 +48,7 @@ export default function Home() {
         const data = await response.json();
         
         // Process events to add proper image URLs with cache busting
-        const processedEvents = data.events.map(event => ({
+        const processedEvents = data.events.map((event: any) => ({
           ...event,
           // Add cache busting to image URLs
           imageUrl: event.imageName ? `/api/events/${event.id}/image?t=${Date.now()}` : null,

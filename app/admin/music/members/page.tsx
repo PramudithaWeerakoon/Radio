@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Search, Plus, Edit, Trash, Users, ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import Loading from "@/app/loading";
 
 // This will only be used as fallback
@@ -43,7 +43,7 @@ export default function MembersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState<number | null>(null);
-  const { toast } = useToast();
+ 
 
   useEffect(() => {
     async function fetchMembers() {

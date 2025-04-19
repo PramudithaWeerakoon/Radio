@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, Upload, X, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import { useParams } from "next/navigation";
 import Loading from "../../../../loading";
 
@@ -18,7 +18,7 @@ const categories = ["Studio Updates", "Tour News", "Interviews", "Behind the Sce
 
 export default function EditBlogPostPage() {
   const router = useRouter();
-  const { toast } = useToast();
+  // Removed unused showToast variable
   const { id } = useParams();
   const fileInputRef = useRef<HTMLInputElement>(null);
   

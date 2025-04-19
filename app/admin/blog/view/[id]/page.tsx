@@ -6,13 +6,23 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Edit, Clock, Calendar, Tag, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
 
 export default function ViewBlogPost() {
   const { id } = useParams();
-  const { toast } = useToast();
-  const [post, setPost] = useState(null);
+  interface BlogPost {
+    id: string;
+    title: string;
+    content: string;
+    excerpt?: string;
+    createdAt: string;
+    category: string;
+    published: boolean;
+    imageData?: string;
+  }
+  
+  const [post, setPost] = useState<BlogPost | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -43,7 +53,7 @@ export default function ViewBlogPost() {
   }, [id, toast]);
 
   // Format the date from ISO to readable format
-  const formatPostDate = (dateString) => {
+  const formatPostDate = (dateString: string) => {
     try {
       return format(new Date(dateString), "MMMM d, yyyy");
     } catch {

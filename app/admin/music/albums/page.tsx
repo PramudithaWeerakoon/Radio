@@ -9,8 +9,20 @@ import { Search, Plus, Edit, Trash, Album as AlbumIcon, ArrowLeft, Loader2 } fro
 import Link from "next/link";
 import { toast } from "@/components/ui/use-toast";
 
+// Define album interface
+interface Album {
+  id: string;
+  title: string;
+  release_date: string;
+  tracks?: {
+    id: string;
+    title: string;
+    duration?: string;
+  }[];
+}
+
 export default function AlbumsPage() {
-  const [albums, setAlbums] = useState([]);
+  const [albums, setAlbums] = useState<Album[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   
@@ -35,11 +47,11 @@ export default function AlbumsPage() {
         }
         
         setAlbums(data.albums);
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Error fetching albums:', error);
         toast({
           title: "Error",
-          description: error.message || "Failed to load albums",
+          description: error instanceof Error ? error.message : "Failed to load albums",
           variant: "destructive"
         });
       } finally {
@@ -55,7 +67,7 @@ export default function AlbumsPage() {
   );
   
   // Handle album deletion
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this album?")) {
       try {
         const response = await fetch(`/api/albums/${id}`, {
@@ -73,7 +85,7 @@ export default function AlbumsPage() {
           title: "Success",
           description: "Album deleted successfully"
         });
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Error deleting album:', error);
         toast({
           title: "Error",

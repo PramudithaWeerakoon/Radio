@@ -19,7 +19,7 @@ import { use } from "react";
 // Use the correct typing for Next.js 15 in deployed environments
 interface EditEventPageProps {
   params: Promise<{ id: string }>;
-  searchParams?: { [key: string]: string | string[] | undefined };
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 export default function EditEventPage({ params }: EditEventPageProps) {

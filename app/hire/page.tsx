@@ -9,7 +9,7 @@ import {Label} from "@/components/ui/label";
 import {Textarea} from "@/components/ui/textarea";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {Separator} from "@/components/ui/separator";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import {
     Loader2,
     Calendar,
@@ -68,7 +68,6 @@ interface HireData {
 
 export default function HirePage() {
     const router = useRouter();
-    const {toast} = useToast();
     const [isLoading, setIsLoading] = useState(true);
     const [user, setUser] = useState<any>(null);
     const [hires, setHires] = useState<HireData[]>([]);

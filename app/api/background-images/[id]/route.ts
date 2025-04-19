@@ -4,7 +4,7 @@ import { prisma } from '@/lib/db';
 // Get a specific background image
 export async function GET(
   request: Request,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const id = parseInt((await context.params).id);
@@ -30,7 +30,7 @@ export async function GET(
     return NextResponse.json({
       id: backgroundImage.id,
       title: backgroundImage.title,
-      imageUrl: `data:${backgroundImage.imageMimeType};base64,${backgroundImage.imageData.toString('base64')}`,
+      imageUrl: `data:${backgroundImage.imageMimeType};base64,${Buffer.from(backgroundImage.imageData).toString('base64')}`,
       order: backgroundImage.order,
       isActive: backgroundImage.isActive,
       createdAt: backgroundImage.createdAt
@@ -47,10 +47,11 @@ export async function GET(
 // Update background image status or order
 export async function PUT(
   request: Request,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(context.params.id);
+    const unwrappedParams = await context.params;
+    const id = parseInt(unwrappedParams.id);
     
     if (isNaN(id)) {
       return NextResponse.json(
@@ -92,7 +93,7 @@ export async function PUT(
 // Delete a background image
 export async function DELETE(
   request: Request,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const id = parseInt((await context.params).id);

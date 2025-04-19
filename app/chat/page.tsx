@@ -9,7 +9,24 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Star, Send } from "lucide-react";
 
-const reviews = [
+// Define interfaces for proper type checking
+interface Review {
+  id: number;
+  user: string;
+  avatar: string;
+  review: string;
+  rating: number;
+  timestamp: string;
+}
+
+interface StarRatingProps {
+  value: number;
+  onSelect: (rating: number) => void;
+  onHover: (rating: number) => void;
+  size?: number;
+}
+
+const reviews: Review[] = [
   {
     id: 1,
     user: "Alex Thompson",
@@ -50,7 +67,7 @@ export default function ReviewsPage() {
     }
   };
 
-  const StarRating = ({ value, onSelect, onHover, size = 5 }) => {
+  const StarRating = ({ value, onSelect, onHover, size = 5 }: StarRatingProps) => {
     return (
       <div className="flex space-x-1">
         {[...Array(size)].map((_, index) => (

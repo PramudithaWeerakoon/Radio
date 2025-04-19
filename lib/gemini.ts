@@ -2,9 +2,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { prisma } from '@/lib/db';
 
 // Initialize the Gemini API with your API key
-const genAI = new GoogleGenerativeAI('AIzaSyDz6xQM99_8aCcmx7qmbawRIU7uvzB1op4', {
-  apiVersion: "v1" // Explicitly specify the API version (v1 is stable)
-});
+const genAI = new GoogleGenerativeAI('AIzaSyDz6xQM99_8aCcmx7qmbawRIU7uvzB1op4');
 
 // Function to get database information
 async function getWebsiteData() {
@@ -48,7 +46,7 @@ async function getWebsiteData() {
         take: 10,
         select: {
           id: true,
-          name: true,
+          firstName: true, // or possibly 'username', 'displayName', etc.
           role: true
         }
       }),
@@ -60,7 +58,7 @@ async function getWebsiteData() {
         select: {
           id: true,
           title: true,
-          summary: true
+          content: true
         }
       }),
       

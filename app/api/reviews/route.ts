@@ -11,7 +11,7 @@ export async function GET(request: Request) {
     const showAll = searchParams.get('showAll') === 'true';
     
     // Check if user is admin for showAll functionality
-    const user = getCurrentUser();
+    const user = await getCurrentUser();
     const isAdmin = user?.role === 'admin';
     
     // Calculate pagination

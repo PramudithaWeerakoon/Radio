@@ -23,6 +23,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Slider } from "@/components/ui/slider";
 import { YouTubeDialog } from "@/components/youtube-dialog";
+import { use } from "react";
 
 interface TrackCredit {
   role: string;
@@ -53,8 +54,12 @@ interface Album {
   credits: { role: string; name: string }[];
 }
 
-export default function AlbumTracksPage({ params }: { params: { id: string } }) {
+export default function AlbumTracksPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
+  // Unwrap params using the use hook
+  const unwrappedParams = use(params);
+  const albumId = unwrappedParams.id;
+  
   const [album, setAlbum] = useState<Album | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -73,7 +78,7 @@ export default function AlbumTracksPage({ params }: { params: { id: string } }) 
     async function fetchAlbumTracks() {
       try {
         setLoading(true);
-        const response = await fetch(`/api/albums/${params.id}/tracks`);
+        const response = await fetch(`/api/albums/${albumId}/tracks`);
         
         if (!response.ok) {
           throw new Error('Failed to fetch album tracks');
@@ -91,7 +96,7 @@ export default function AlbumTracksPage({ params }: { params: { id: string } }) 
     }
     
     fetchAlbumTracks();
-  }, [params.id]);
+  }, [albumId]);
   
   // Handle audio player
   useEffect(() => {
@@ -100,40 +105,43 @@ export default function AlbumTracksPage({ params }: { params: { id: string } }) 
         audioRef.current = new Audio();
       }
       
-      audioRef.current.src = album.tracks[currentTrackIndex].audio_url;
-      audioRef.current.volume = volume;
-      
-      const handleLoadedMetadata = () => {
-        if (audioRef.current) {
-          setDuration(audioRef.current.duration);
+      const audioUrl = album.tracks[currentTrackIndex].audio_url;
+      if (audioUrl) {
+        audioRef.current.src = audioUrl;
+        audioRef.current.volume = volume;
+        
+        const handleLoadedMetadata = () => {
+          if (audioRef.current) {
+            setDuration(audioRef.current.duration);
+          }
+        };
+        
+        const handleTimeUpdate = () => {
+          if (audioRef.current) {
+            setCurrentTime(audioRef.current.currentTime);
+          }
+        };
+        
+        const handleEnded = () => {
+          playNextTrack();
+        };
+        
+        audioRef.current.addEventListener('loadedmetadata', handleLoadedMetadata);
+        audioRef.current.addEventListener('timeupdate', handleTimeUpdate);
+        audioRef.current.addEventListener('ended', handleEnded);
+        
+        if (isPlaying) {
+          audioRef.current.play();
         }
-      };
-      
-      const handleTimeUpdate = () => {
-        if (audioRef.current) {
-          setCurrentTime(audioRef.current.currentTime);
-        }
-      };
-      
-      const handleEnded = () => {
-        playNextTrack();
-      };
-      
-      audioRef.current.addEventListener('loadedmetadata', handleLoadedMetadata);
-      audioRef.current.addEventListener('timeupdate', handleTimeUpdate);
-      audioRef.current.addEventListener('ended', handleEnded);
-      
-      if (isPlaying) {
-        audioRef.current.play();
+        
+        return () => {
+          if (audioRef.current) {
+            audioRef.current.removeEventListener('loadedmetadata', handleLoadedMetadata);
+            audioRef.current.removeEventListener('timeupdate', handleTimeUpdate);
+            audioRef.current.removeEventListener('ended', handleEnded);
+          }
+        };
       }
-      
-      return () => {
-        if (audioRef.current) {
-          audioRef.current.removeEventListener('loadedmetadata', handleLoadedMetadata);
-          audioRef.current.removeEventListener('timeupdate', handleTimeUpdate);
-          audioRef.current.removeEventListener('ended', handleEnded);
-        }
-      };
     }
   }, [currentTrackIndex, album, isPlaying, volume]);
   
@@ -266,7 +274,7 @@ export default function AlbumTracksPage({ params }: { params: { id: string } }) 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <Link href={`/albums/${params.id}`}>
+          <Link href={`/albums/${albumId}`}>
             <Button variant="ghost" className="mb-8">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Album

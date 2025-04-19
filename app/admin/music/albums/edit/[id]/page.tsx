@@ -10,19 +10,37 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Upload, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import Image from "next/image";
 
-export default function EditAlbumPage({ params }) {
-  // Proper way to handle params in client components with Next.js 15+
-  const id = React.use(params).id;
+// Define types for our data structures
+interface AlbumData {
+  title: string;
+  releaseDate: string;
+  description: string;
+  youtubeId: string;
+}
+
+interface TrackData {
+  id?: string;
+  title: string;
+  duration: string;
+}
+
+interface CreditData {
+  id?: string;
+  role: string;
+  name: string;
+}
+
+export default function EditAlbumPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
-  const { toast } = useToast();
+  const [albumId, setAlbumId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   
   // Album state
-  const [album, setAlbum] = useState({
+  const [album, setAlbum] = useState<AlbumData>({
     title: "",
     releaseDate: "",
     description: "",
@@ -30,21 +48,38 @@ export default function EditAlbumPage({ params }) {
   });
   
   // Cover image state
-  const [coverImage, setCoverImage] = useState(null);
-  const [coverImagePreview, setCoverImagePreview] = useState("");
+  const [coverImage, setCoverImage] = useState<File | null>(null);
+  const [coverImagePreview, setCoverImagePreview] = useState<string>("");
   
   // Tracks state
-  const [tracks, setTracks] = useState([]);
+  const [tracks, setTracks] = useState<TrackData[]>([]);
   
   // Credits state
-  const [credits, setCredits] = useState([]);
+  const [credits, setCredits] = useState<CreditData[]>([]);
 
-  // Fetch album data when component mounts
+  // Resolve the params promise to get the id
   useEffect(() => {
+    async function resolveParams() {
+      try {
+        const resolvedParams = await params;
+        setAlbumId(resolvedParams.id);
+      } catch (error) {
+        console.error("Error resolving params:", error);
+        router.push("/admin/music/albums");
+      }
+    }
+    
+    resolveParams();
+  }, [params, router]);
+
+  // Fetch album data when albumId is available
+  useEffect(() => {
+    if (!albumId) return;
+    
     async function fetchAlbumData() {
       try {
         setIsFetching(true);
-        const response = await fetch(`/api/albums/${id}`);
+        const response = await fetch(`/api/albums/${albumId}`);
         
         if (!response.ok) {
           throw new Error("Failed to fetch album data");
@@ -70,7 +105,7 @@ export default function EditAlbumPage({ params }) {
         }
         
         // Format tracks
-        const formattedTracks = albumData.album.tracks.map(track => ({
+        const formattedTracks = albumData.album.tracks.map((track: { id: string; title: string; duration?: string }) => ({
           id: track.id,
           title: track.title,
           duration: track.duration || ""
@@ -78,7 +113,7 @@ export default function EditAlbumPage({ params }) {
         setTracks(formattedTracks.length > 0 ? formattedTracks : [{ title: "", duration: "" }]);
         
         // Format credits
-        const formattedCredits = albumData.album.album_credits.map(credit => ({
+        const formattedCredits = albumData.album.album_credits.map((credit: { id: string; role: string; name: string }) => ({
           id: credit.id,
           role: credit.role,
           name: credit.name
@@ -99,10 +134,10 @@ export default function EditAlbumPage({ params }) {
     }
     
     fetchAlbumData();
-  }, [id, toast, router]);
+  }, [albumId, toast, router]);
   
-  // Handle album input changes
-  const handleAlbumChange = (e) => {
+  // Handle album input changes for both input and textarea
+  const handleAlbumChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setAlbum(prev => ({
       ...prev,
@@ -111,22 +146,22 @@ export default function EditAlbumPage({ params }) {
   };
   
   // Handle cover image selection
-  const handleCoverImageChange = (e) => {
-    const file = e.target.files[0];
+  const handleCoverImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (file) {
       setCoverImage(file);
       
       // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
-        setCoverImagePreview(reader.result);
+        setCoverImagePreview(reader.result as string);
       };
       reader.readAsDataURL(file);
     }
   };
   
   // Handle track input changes
-  const handleTrackChange = (index, field, value) => {
+  const handleTrackChange = (index: number, field: keyof TrackData, value: string) => {
     setTracks(prev => 
       prev.map((track, i) => 
         i === index ? { ...track, [field]: value } : track
@@ -135,7 +170,7 @@ export default function EditAlbumPage({ params }) {
   };
   
   // Handle credit input changes
-  const handleCreditChange = (index, field, value) => {
+  const handleCreditChange = (index: number, field: keyof CreditData, value: string) => {
     setCredits(prev => 
       prev.map((credit, i) => 
         i === index ? { ...credit, [field]: value } : credit
@@ -149,7 +184,7 @@ export default function EditAlbumPage({ params }) {
   };
   
   // Remove track
-  const removeTrack = (index) => {
+  const removeTrack = (index: number) => {
     setTracks(prev => prev.filter((_, i) => i !== index));
   };
   
@@ -159,13 +194,15 @@ export default function EditAlbumPage({ params }) {
   };
   
   // Remove credit
-  const removeCredit = (index) => {
+  const removeCredit = (index: number) => {
     setCredits(prev => prev.filter((_, i) => i !== index));
   };
   
   // Handle form submission
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!albumId) return;
+    
     setIsLoading(true);
     
     try {
@@ -191,7 +228,7 @@ export default function EditAlbumPage({ params }) {
       formData.append('tracks', JSON.stringify(validTracks));
       formData.append('credits', JSON.stringify(validCredits));
       
-      const response = await fetch(`/api/albums/${id}`, {
+      const response = await fetch(`/api/albums/${albumId}`, {
         method: "PUT",
         body: formData,
       });
@@ -207,10 +244,10 @@ export default function EditAlbumPage({ params }) {
       });
       
       router.push("/admin/music/albums");
-    } catch (error) {
+    } catch (error: unknown) {
       toast({
         title: "Error",
-        description: error.message || "Failed to update album",
+        description: error instanceof Error ? error.message : "Failed to update album",
         variant: "destructive",
       });
     } finally {

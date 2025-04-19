@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export async function POST(request) {
+export async function POST(request: NextRequest) {
   try {
     const data = await request.json();
 
@@ -29,7 +29,7 @@ export async function POST(request) {
     // If there are credits, create them
     if (data.credits && Array.isArray(data.credits) && data.credits.length > 0) {
       await Promise.all(
-        data.credits.map(credit => 
+        data.credits.map((credit: { role: string; name: string }) => 
           prisma.trackCredit.create({
             data: {
               role: credit.role,
@@ -49,13 +49,13 @@ export async function POST(request) {
       },
       { status: 201 }
     );
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Failed to create track:", error);
     return NextResponse.json(
       {
         success: false,
         message: "Failed to create track",
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
       },
       { status: 500 }
     );
@@ -80,13 +80,13 @@ export async function GET() {
       },
       { status: 200 }
     );
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Failed to fetch tracks:", error);
     return NextResponse.json(
       {
         success: false,
         message: "Failed to fetch tracks",
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
       },
       { status: 500 }
     );
@@ -94,7 +94,7 @@ export async function GET() {
 }
 
 // Add DELETE endpoint to handle track deletion
-export async function DELETE(request) {
+export async function DELETE(request: NextRequest) {
   try {
     // Get the ID from the URL
     const url = new URL(request.url);
@@ -121,13 +121,13 @@ export async function DELETE(request) {
       },
       { status: 200 }
     );
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Failed to delete track:", error);
     return NextResponse.json(
       {
         success: false,
         message: "Failed to delete track",
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
       },
       { status: 500 }
     );

@@ -36,9 +36,11 @@ export function YouTubeIdDebugger({ albumId }: YouTubeIdDebuggerProps) {
         } else {
           throw new Error("Invalid data format");
         }
-      } catch (err) {
+      } catch (err: unknown) {
         console.error("Error:", err);
-        setError(err.message || "An error occurred");
+        setError(
+          err instanceof Error ? err.message : "An unknown error occurred"
+        );
       } finally {
         setIsLoading(false);
       }

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import { Loader2, Star, ArrowLeft, PenSquare, AlertCircle, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 
@@ -20,7 +20,6 @@ interface Review {
 
 export default function MyReviewsPage() {
   const router = useRouter();
-  const { toast } = useToast();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 

@@ -5,7 +5,7 @@ import { getCurrentUser } from '@/lib/auth';
 // Update a specific subscriber
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Check if user is admin
@@ -18,7 +18,8 @@ export async function PUT(
       );
     }
     
-    const id = parseInt(params.id);
+    const unwrappedParams = await params;
+    const id = parseInt(unwrappedParams.id);
     
     if (isNaN(id)) {
       return NextResponse.json(
@@ -61,7 +62,7 @@ export async function PUT(
 // Delete a specific subscriber
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Check if user is admin
@@ -74,7 +75,8 @@ export async function DELETE(
       );
     }
     
-    const id = parseInt(params.id);
+    const unwrappedParams = await params;
+    const id = parseInt(unwrappedParams.id);
     
     if (isNaN(id)) {
       return NextResponse.json(

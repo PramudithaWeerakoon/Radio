@@ -26,7 +26,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import { motion } from "framer-motion";
 
 interface UserData {
@@ -67,7 +67,6 @@ const routes = [
 export function MainNav() {
   const pathname = usePathname();
   const router = useRouter();
-  const { toast } = useToast();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [user, setUser] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState(true);

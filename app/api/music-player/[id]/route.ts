@@ -1,55 +1,53 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest) {
   try {
-    // Convert id to number after directly accessing it from the destructured params
-    const id = parseInt(params?.id || '');
-    
+    const idParam = request.nextUrl.pathname.split('/').pop();
+    const id = parseInt(idParam ?? '', 10);
+
     if (isNaN(id)) {
       return NextResponse.json(
-        { success: false, error: 'Invalid track ID' }, 
+        { success: false, error: 'Invalid track ID' },
         { status: 400 }
       );
     }
-    
+
     const track = await prisma.track.findUnique({
       where: { id },
       select: {
         audioData: true,
         audioMimeType: true,
-        audioFileName: true
-      }
+        audioFileName: true,
+      },
     });
-    
+
     if (!track || !track.audioData) {
       return NextResponse.json(
-        { success: false, error: 'Track not found or has no audio data' }, 
+        { success: false, error: 'Track not found or has no audio data' },
         { status: 404 }
       );
     }
-    
-    // Create response with appropriate headers for audio streaming
+
+    // Stream the binary audio data with headers
     const response = new NextResponse(track.audioData);
-    
-    // Set correct content type for the audio file
     response.headers.set('Content-Type', track.audioMimeType || 'audio/mpeg');
-    response.headers.set('Content-Disposition', `inline; filename="${track.audioFileName}"`);
-    
+    response.headers.set(
+      'Content-Disposition',
+      `inline; filename="${track.audioFileName}"`
+    );
+
     return response;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching track audio:', error);
     return NextResponse.json(
-      { 
-        success: false, 
+      {
+        success: false,
         error: 'Failed to fetch track audio',
-        details: error instanceof Error ? error.message : String(error)
-      }, 
+        details: error.message
+      },
       { status: 500 }
     );
   } finally {

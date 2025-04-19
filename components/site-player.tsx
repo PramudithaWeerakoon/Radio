@@ -13,10 +13,24 @@ import {
   VolumeX 
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { formatTime } from "@/lib/utils";
+
+// Define a formatTime function since it's not exported from @/lib/utils
+const formatTime = (seconds: number): string => {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = Math.floor(seconds % 60);
+  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+};
+
+// Define track interface
+interface Track {
+  id: number | string;
+  title: string;
+  artist?: string;
+  duration?: string;
+}
 
 export function SitePlayer() {
-  const [tracks, setTracks] = useState([]);
+  const [tracks, setTracks] = useState<Track[]>([]);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -26,8 +40,8 @@ export function SitePlayer() {
   const [isLoading, setIsLoading] = useState(true);
   const [amplitude, setAmplitude] = useState(Array(20).fill(0));
   
-  const audioRef = useRef(null);
-  const intervalRef = useRef(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
   
   // Fetch player tracks
   useEffect(() => {
@@ -73,18 +87,22 @@ export function SitePlayer() {
     if (!audioRef.current) return;
     
     const handleTimeUpdate = () => {
-      setCurrentTime(audioRef.current.currentTime);
+      if (audioRef.current) {
+        setCurrentTime(audioRef.current.currentTime);
       
-      // Simulate visualization
-      if (isPlaying) {
-        setAmplitude(prev => 
-          prev.map(() => Math.random() * 40 + (isPlaying ? 10 : 0))
-        );
+        // Simulate visualization
+        if (isPlaying) {
+          setAmplitude(prev => 
+            prev.map(() => Math.random() * 40 + (isPlaying ? 10 : 0))
+          );
+        }
       }
     };
     
     const handleLoadedMetadata = () => {
-      setDuration(audioRef.current.duration);
+      if (audioRef.current) {
+        setDuration(audioRef.current.duration);
+      }
     };
     
     const handleEnded = () => {
@@ -113,7 +131,7 @@ export function SitePlayer() {
   useEffect(() => {
     if (audioRef.current) {
       if (isPlaying) {
-        audioRef.current.play().catch(error => {
+        audioRef.current.play().catch((error: Error) => {
           console.error("Error playing audio:", error);
           setIsPlaying(false);
         });
@@ -158,7 +176,7 @@ export function SitePlayer() {
   };
   
   // Handle seeking
-  const handleSeek = (value) => {
+  const handleSeek = (value: number[]) => {
     if (audioRef.current) {
       audioRef.current.currentTime = value[0];
       setCurrentTime(value[0]);
@@ -170,7 +188,7 @@ export function SitePlayer() {
     setIsMuted(!isMuted);
   };
   
-  const currentTrack = tracks[currentTrackIndex];
+  const currentTrack = tracks[currentTrackIndex] || { title: "", artist: "" };
   
   if (isLoading) {
     return (

@@ -38,21 +38,37 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 
+// Define interfaces
+interface Track {
+  id: string;
+  title: string;
+  artist: string;
+  duration: string;
+  addedAt: string;
+  playCount: number;
+}
+
+interface UploadTrackData {
+  title: string;
+  artist: string;
+  duration: string;
+}
+
 export default function PlayerManagerPage() {
-  const [tracks, setTracks] = useState([]);
+  const [tracks, setTracks] = useState<Track[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
+  const [currentlyPlaying, setCurrentlyPlaying] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   
   // Track upload state
-  const [uploadTrack, setUploadTrack] = useState({
+  const [uploadTrack, setUploadTrack] = useState<UploadTrackData>({
     title: "",
     artist: "",
     duration: ""
   });
-  const [audioFile, setAudioFile] = useState(null);
+  const [audioFile, setAudioFile] = useState<File | null>(null);
   
   // Fetch player tracks
   useEffect(() => {
@@ -62,7 +78,7 @@ export default function PlayerManagerPage() {
         if (!response.ok) throw new Error('Failed to fetch player tracks');
         const data = await response.json();
         setTracks(data);
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Error fetching tracks:', error);
         toast({
           title: "Error",
@@ -84,7 +100,7 @@ export default function PlayerManagerPage() {
   );
   
   // Handle track input changes for upload
-  const handleTrackChange = (e) => {
+  const handleTrackChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setUploadTrack(prev => ({
       ...prev,
@@ -93,8 +109,8 @@ export default function PlayerManagerPage() {
   };
   
   // Handle audio file selection
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (file) {
       setAudioFile(file);
       
@@ -159,11 +175,11 @@ export default function PlayerManagerPage() {
         title: "Success",
         description: "Track uploaded successfully",
       });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error uploading track:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to upload track",
+        description: error instanceof Error ? error.message : "Failed to upload track",
         variant: "destructive",
       });
     } finally {
@@ -172,7 +188,7 @@ export default function PlayerManagerPage() {
   };
   
   // Handle play/pause
-  const handlePlayPause = (trackId) => {
+  const handlePlayPause = (trackId: string) => {
     if (currentlyPlaying === trackId) {
       setIsPlaying(!isPlaying);
     } else {
@@ -182,7 +198,7 @@ export default function PlayerManagerPage() {
   };
   
   // Handle reordering tracks
-  const moveTrack = async (trackId, direction) => {
+  const moveTrack = async (trackId: string, direction: 'up' | 'down') => {
     try {
       const response = await fetch(`/api/admin/player-tracks/reorder`, {
         method: 'POST',
@@ -199,7 +215,7 @@ export default function PlayerManagerPage() {
       
       const updatedTracks = await response.json();
       setTracks(updatedTracks);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error reordering track:', error);
       toast({
         title: "Error",
@@ -210,7 +226,7 @@ export default function PlayerManagerPage() {
   };
   
   // Handle delete track
-  const deleteTrack = async (trackId) => {
+  const deleteTrack = async (trackId: string) => {
     if (!confirm('Are you sure you want to remove this track from the player?')) return;
     
     try {
@@ -226,7 +242,7 @@ export default function PlayerManagerPage() {
         title: "Success",
         description: "Track removed from player",
       });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error deleting track:', error);
       toast({
         title: "Error",

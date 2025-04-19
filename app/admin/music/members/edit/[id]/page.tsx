@@ -9,14 +9,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Loader2, Upload, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import Loading from "@/app/loading";
 
 export default function EditMemberPage() {
   const router = useRouter();
-  const { toast } = useToast();
   const { id } = useParams();
   const fileInputRef = useRef<HTMLInputElement>(null);
   

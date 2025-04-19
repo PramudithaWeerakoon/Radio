@@ -5,16 +5,30 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Calendar, User } from "lucide-react";
 import Link from "next/link";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
 import { useParams } from "next/navigation";
 import Loading from "../../loading";
 
+// Define interface for Blog post based on the schema
+interface BlogPost {
+  id: number;
+  title: string;
+  category: string;
+  imageName?: string;
+  imageData?: Uint8Array;
+  imageMimeType?: string;
+  excerpt?: string;
+  content: string;
+  published: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export default function BlogPostPage() {
-  const { toast } = useToast();
   const params = useParams();
-  const [post, setPost] = useState(null);
+  const [post, setPost] = useState<BlogPost | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -46,7 +60,7 @@ export default function BlogPostPage() {
     if (params.id) {
       fetchPost();
     }
-  }, [params.id, toast]);
+  }, [params.id]);
 
   if (isLoading) {
     return <Loading />;
@@ -111,7 +125,7 @@ export default function BlogPostPage() {
 
         <div className="prose prose-lg max-w-none">
           {/* Render the content with proper formatting */}
-          {post.content.split("\n").map((paragraph, idx) => (
+          {post.content.split("\n").map((paragraph: string, idx: number) => (
             <p key={idx}>{paragraph}</p>
           ))}
         </div>

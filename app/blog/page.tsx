@@ -5,12 +5,26 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Loading from "../loading";
 import Link from "next/link";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
 
+// Define the interface for Blog posts based on your schema
+interface BlogPost {
+  id: number;
+  title: string;
+  category: string;
+  imageName?: string;
+  imageData?: Uint8Array;
+  imageMimeType?: string;
+  excerpt?: string;
+  content: string;
+  published: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export default function BlogPage() {
-  const { toast } = useToast();
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState<BlogPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -38,7 +52,7 @@ export default function BlogPage() {
     };
 
     fetchPosts();
-  }, [toast]);
+  }, []);
 
   if (isLoading) {
     return <Loading />;

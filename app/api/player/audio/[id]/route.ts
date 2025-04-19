@@ -1,17 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { type RouteParams } from 'next/dist/shared/lib/router/utils/route-matcher';
 
 const prisma = new PrismaClient();
 
 export async function GET(
-  request: NextRequest, 
-  context: { params: RouteParams }
+  request: Request
 ): Promise<NextResponse> {
   try {
-    // Correctly await the params object before destructuring
-    const params = await context.params;
-    const { id } = params;
+    // Extract the id from the URL
+    const url = new URL(request.url);
+    const id = url.pathname.split('/').pop();
     
     if (!id) {
       return NextResponse.json(

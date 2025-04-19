@@ -19,7 +19,7 @@ import {
   ThumbsDown 
 } from "lucide-react";
 import Link from "next/link";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
 
 interface Review {
@@ -36,7 +36,6 @@ interface Review {
 }
 
 export default function AdminReviewsPage() {
-  const { toast } = useToast();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [filteredReviews, setFilteredReviews] = useState<Review[]>([]);
   const [searchQuery, setSearchQuery] = useState("");

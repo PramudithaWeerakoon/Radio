@@ -1,14 +1,15 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { requireAuth, requireAdmin, getCurrentUser } from '@/lib/auth';
+import { getCurrentUser } from '@/lib/auth';
 
 // Get a specific review
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
+    const resolvedParams = await params;
+    const id = parseInt(resolvedParams.id);
     
     if (isNaN(id)) {
       return NextResponse.json(
@@ -37,7 +38,7 @@ export async function GET(
     }
     
     // If review is not approved, only the author and admins can see it
-    const currentUser = getCurrentUser();
+    const currentUser = await getCurrentUser();
     if (!review.approved && (!currentUser || (currentUser.id !== review.userId && currentUser.role !== 'admin'))) {
       return NextResponse.json(
         { success: false, message: 'Review not available' },
@@ -58,10 +59,10 @@ export async function GET(
 // Update a review
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = getCurrentUser();
+    const user = await getCurrentUser();
     
     if (!user) {
       return NextResponse.json(
@@ -70,7 +71,8 @@ export async function PUT(
       );
     }
     
-    const id = parseInt(params.id);
+    const resolvedParams = await params;
+    const id = parseInt(resolvedParams.id);
     
     if (isNaN(id)) {
       return NextResponse.json(
@@ -124,7 +126,7 @@ export async function PUT(
     
     return NextResponse.json({
       success: true,
-      message: user.role === 'admin' ? 'Review updated' : 'Review updated and awaiting approval',
+      message: user?.role === 'admin' ? 'Review updated' : 'Review updated and awaiting approval',
       review
     });
   } catch (error) {
@@ -139,10 +141,10 @@ export async function PUT(
 // Delete a review
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = getCurrentUser();
+    const user = await getCurrentUser();
     
     if (!user) {
       return NextResponse.json(
@@ -151,7 +153,8 @@ export async function DELETE(
       );
     }
     
-    const id = parseInt(params.id);
+    const resolvedParams = await params;
+    const id = parseInt(resolvedParams.id);
     
     if (isNaN(id)) {
       return NextResponse.json(

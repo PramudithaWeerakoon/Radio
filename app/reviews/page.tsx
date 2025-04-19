@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import { Star, Loader2, PenSquare, UserCircle } from "lucide-react";
 import Link from "next/link";
 import { Pagination } from "@/components/ui/pagination";
@@ -21,7 +21,6 @@ interface Review {
 }
 
 export default function ReviewsPage() {
-  const { toast } = useToast();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);

@@ -48,16 +48,16 @@ export async function POST(request: Request) {
       // Generate a booking reference
       const bookingReference = `BK-${randomUUID().substring(0, 8).toUpperCase()}`;
       
-      // Create booking in database
+      // Create booking in database - using fields that match the Booking model in schema
       const booking = await tx.booking.create({
         data: {
-          eventId: parseInt(eventId),
-          numberOfSeats: seats,
-          totalAmount: event.price * seats,
-          customerName: `${customerInfo.firstName} ${customerInfo.lastName}`,
-          customerEmail: customerInfo.email,
-          paymentMethod: paymentMethod,
-          bookingReference: bookingReference,
+          eventType: "Event Booking", // Required field in your schema
+          venueType: event.venue, // Using venue from event as venueType
+          preferredDate: event.date, // Using event date
+          expectedGuests: seats, // Using seats as expectedGuests
+          contactName: `${customerInfo.firstName} ${customerInfo.lastName}`,
+          contactEmail: customerInfo.email,
+          additionalRequirements: `Payment method: ${paymentMethod}, Booking Reference: ${bookingReference}`,
           status: "confirmed"
         }
       });
@@ -87,7 +87,8 @@ export async function POST(request: Request) {
       bookingDetails: {
         event: result.updatedEvent.title,
         seats: seats,
-        totalAmount: result.booking.totalAmount,
+        // The booking model doesn't have price field, so we calculate it here
+        totalAmount: result.updatedEvent.price * seats,
         date: result.updatedEvent.date,
         venue: result.updatedEvent.venue
       }

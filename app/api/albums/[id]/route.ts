@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
 // Helper function to handle BigInt serialization
-const serializeData = (data) => {
+const serializeData = (data: any): any => {
   return JSON.parse(
     JSON.stringify(data, (key, value) => {
       // Convert BigInt to String to avoid serialization errors
@@ -15,7 +15,7 @@ const serializeData = (data) => {
 };
 
 // GET a single album by ID
-export async function GET(request, { params }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     // Await params before accessing its properties
     const { id: paramId } = await params;
@@ -68,7 +68,7 @@ export async function GET(request, { params }) {
 }
 
 // UPDATE an album by ID
-export async function PUT(request, { params }) {
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     // Await params before accessing its properties
     const { id: paramId } = await params;
@@ -95,18 +95,18 @@ export async function PUT(request, { params }) {
     
     // Get form data
     const formData = await request.formData();
-    const title = formData.get('title');
-    const releaseDate = formData.get('releaseDate');
-    const description = formData.get('description');
-    const youtubeId = formData.get('youtubeId');
+    const title = formData.get('title')?.toString() || null;
+    const releaseDate = formData.get('releaseDate')?.toString() || null;
+    const description = formData.get('description')?.toString() || null;
+    const youtubeId = formData.get('youtubeId')?.toString() || null;
     
     // Handle cover image upload if present
     const coverImage = formData.get('coverImage');
-    let coverImageData = undefined;
-    let coverImageName = undefined;
-    let coverImageMimeType = undefined;
+    let coverImageData: Buffer | undefined = undefined;
+    let coverImageName: string | undefined = undefined;
+    let coverImageMimeType: string | undefined = undefined;
     
-    if (coverImage && coverImage.size > 0) {
+    if (coverImage && coverImage instanceof File && coverImage.size > 0) {
       // Process the image data
       coverImageData = Buffer.from(await coverImage.arrayBuffer());
       coverImageName = coverImage.name;
@@ -114,11 +114,11 @@ export async function PUT(request, { params }) {
     }
     
     // Parse tracks and credits from form data
-    const tracksJson = formData.get('tracks');
-    const creditsJson = formData.get('credits');
+    const tracksJson = formData.get('tracks')?.toString();
+    const creditsJson = formData.get('credits')?.toString();
     
-    let tracks = [];
-    let credits = [];
+    let tracks: any[] = [];
+    let credits: any[] = [];
     
     try {
       if (tracksJson) tracks = JSON.parse(tracksJson);
@@ -133,9 +133,9 @@ export async function PUT(request, { params }) {
     // Update the album in a transaction
     const updatedAlbum = await prisma.$transaction(async (prisma) => {
       // 1. Update album basic information
-      const albumUpdate = {
+      const albumUpdate: any = {
         title,
-        release_date: new Date(releaseDate),
+        release_date: releaseDate ? new Date(releaseDate) : undefined,
         description,
         youtube_id: youtubeId,
       };
@@ -160,7 +160,7 @@ export async function PUT(request, { params }) {
       // 3. Create new tracks
       if (tracks.length > 0) {
         await prisma.track.createMany({
-          data: tracks.map((track, index) => ({
+          data: tracks.map((track: any, index: number) => ({
             title: track.title,
             duration: track.duration || null,
             track_number: index + 1,
@@ -177,7 +177,7 @@ export async function PUT(request, { params }) {
       // 5. Create new credits
       if (credits.length > 0) {
         await prisma.albumCredit.createMany({
-          data: credits.map(credit => ({
+          data: credits.map((credit: any) => ({
             role: credit.role,
             name: credit.name,
             album_id: id
@@ -198,11 +198,11 @@ export async function PUT(request, { params }) {
     // Serialize album data to handle BigInt values
     const serializedAlbum = serializeData(updatedAlbum);
     
-    // Add image URL for frontend display
-    const albumWithImageUrl = {
+    // Add image URL for frontend display and handle potentially null updatedAlbum
+    const albumWithImageUrl = updatedAlbum ? {
       ...serializedAlbum,
       coverImageUrl: updatedAlbum.coverImageData ? `/api/albums/${id}/cover` : null
-    };
+    } : null;
     
     return NextResponse.json({
       success: true,
@@ -221,7 +221,7 @@ export async function PUT(request, { params }) {
 }
 
 // DELETE an album by ID
-export async function DELETE(request, { params }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     // Await params before accessing its properties
     const { id: paramId } = await params;

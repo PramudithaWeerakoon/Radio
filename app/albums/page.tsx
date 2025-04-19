@@ -20,10 +20,25 @@ interface Album {
   id: number;
   title: string;
   releaseDate: string;
-  coverImageUrl?: string;  // Changed to match database image URL pattern
+  coverImageUrl: string; // Changed to match database image URL pattern
   description: string;
   tracks: Track[];
   youtubeId: string;
+}
+
+// Add interface for API response data
+interface ApiAlbum {
+  id: number;
+  title: string;
+  release_date?: string;
+  description?: string;
+  youtube_id?: string;
+  tracks: ApiTrack[];
+}
+
+interface ApiTrack {
+  title: string;
+  duration?: string;
 }
 
 export default function AlbumsPage() {
@@ -38,27 +53,27 @@ export default function AlbumsPage() {
       try {
         setLoading(true);
         const response = await fetch('/api/albums');
-        
+
         if (!response.ok) {
           throw new Error('Failed to fetch albums');
         }
-        
+
         const data = await response.json();
-        
+
         // Format the albums data for the frontend
-        const formattedAlbums = data.albums.map(album => ({
+        const formattedAlbums = data.albums.map((album: ApiAlbum) => ({
           id: album.id,
           title: album.title,
           releaseDate: album.release_date ? new Date(album.release_date).getFullYear().toString() : 'Unknown',
           coverImageUrl: `/api/albums/${album.id}/cover?t=${Date.now()}`,
           description: album.description || '',
-          tracks: album.tracks.map(track => ({
+          tracks: album.tracks.map((track: ApiTrack) => ({
             title: track.title,
             duration: track.duration || ''
           })),
           youtubeId: album.youtube_id || ''
         }));
-        
+
         setAlbums(formattedAlbums);
       } catch (err) {
         console.error('Error fetching albums:', err);
@@ -67,7 +82,7 @@ export default function AlbumsPage() {
         setLoading(false);
       }
     }
-    
+
     fetchAlbums();
   }, []);
 
@@ -104,7 +119,7 @@ export default function AlbumsPage() {
                 <Card className="overflow-hidden hover:shadow-lg transition-shadow">
                   <div className="h-64 w-full relative">
                     <Image
-                      src={album.coverImageUrl}
+                      src={album.coverImageUrl || '/placeholder-album.jpg'} // Add fallback for undefined
                       alt={album.title}
                       fill
                       className="object-cover"
@@ -140,7 +155,7 @@ export default function AlbumsPage() {
                         )}
                       </div>
                       <div className="flex gap-2">
-                        <Button 
+                        <Button
                           className="flex-1"
                           onClick={() => setSelectedVideo(album.youtubeId)}
                           disabled={!album.youtubeId}

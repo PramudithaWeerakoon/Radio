@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export async function POST(request) {
+export async function POST(request: Request) {
   try {
     const data = await request.json();
 
@@ -39,7 +39,7 @@ export async function POST(request) {
       {
         success: false,
         message: "Failed to create track",
-        error: error.message,
+        error: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 }
     );
@@ -61,11 +61,11 @@ export async function GET() {
   } catch (error) {
     console.error("Failed to fetch tracks:", error);
     return NextResponse.json(
-      {
-        message: "Failed to fetch tracks",
-        error: error.message,
-      },
-      { status: 500 }
+        {
+            message: "Failed to fetch tracks",
+            error: (error instanceof Error ? error.message : "Unknown error"),
+        },
+        { status: 500 }
     );
   }
 }

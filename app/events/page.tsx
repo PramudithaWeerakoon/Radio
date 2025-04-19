@@ -12,13 +12,28 @@ import { format } from "date-fns";
 import Link from "next/link";
 import Loading from "../loading";
 
+// Define an interface for the Event type
+interface Event {
+  id: number;
+  title: string;
+  date: string;
+  venue: string;
+  price: number;
+  availableSeats: number;
+  imageUrl?: string;
+  image?: string;
+  imageName?: string;
+  description?: string;
+  time?: string;
+}
+
 const priceRanges = ["All Prices", "Under $50", "$50-$100", "Over $100"];
 
 export default function EventsPage() {
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [selectedVenue, setSelectedVenue] = useState("All Venues");
   const [selectedPrice, setSelectedPrice] = useState("All Prices");
-  const [events, setEvents] = useState<any[]>([]);
+  const [events, setEvents] = useState<Event[]>([]);
   const [venues, setVenues] = useState<string[]>(["All Venues"]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -55,15 +70,23 @@ export default function EventsPage() {
             setVenues(allVenues);
           } else {
             // If venues API fails, extract unique venues from events data
-            const uniqueVenues = [...new Set(processedEvents.map(event => event.venue))].filter(Boolean);
-            const allVenues = ["All Venues", ...uniqueVenues.sort()];
+            const uniqueVenueSet = new Set<string>();
+            processedEvents.forEach((event: Event) => {
+              if (event.venue) uniqueVenueSet.add(event.venue);
+            });
+            const uniqueVenues = Array.from(uniqueVenueSet).sort();
+            const allVenues = ["All Venues", ...uniqueVenues];
             setVenues(allVenues);
           }
         } catch (venueError) {
           console.error('Error fetching venues:', venueError);
           // Extract venue information from events as fallback
-          const uniqueVenues = [...new Set(processedEvents.map(event => event.venue))].filter(Boolean);
-          const allVenues = ["All Venues", ...uniqueVenues.sort()];
+          const uniqueVenueSet = new Set<string>();
+          processedEvents.forEach((event: Event) => {
+            if (event.venue) uniqueVenueSet.add(event.venue);
+          });
+          const uniqueVenues = Array.from(uniqueVenueSet).sort();
+          const allVenues = ["All Venues", ...uniqueVenues];
           setVenues(allVenues);
         }
         
@@ -224,7 +247,7 @@ export default function EventsPage() {
                               </div>
                               <div className="flex items-center gap-2">
                                 <DollarSign className="h-4 w-4" />
-                                <span>${parseFloat(event.price).toFixed(2)}</span>
+                                <span>${event.price.toString()}</span>
                               </div>
                             </div>
                           </div>
@@ -264,7 +287,7 @@ export default function EventsPage() {
                               </div>
                               <div className="flex items-center gap-2 text-muted-foreground">
                                 <DollarSign className="h-4 w-4" />
-                                <span>${event.price.toFixed(2)}</span>
+                                <span>${event.price.toString()}</span>
                               </div>
                             </div>
                           </div>

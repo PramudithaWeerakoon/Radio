@@ -12,7 +12,6 @@ export async function POST(request: Request) {
         firstName: data.firstName,
         lastName: data.lastName,
         role: data.role,
-        profileImageUrl: data.profileImageUrl,
         bio: data.bio,
         joinDate: new Date(data.joinDate),
         facebook: data.socialLinks.facebook,

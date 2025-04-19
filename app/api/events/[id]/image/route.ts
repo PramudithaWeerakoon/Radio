@@ -3,7 +3,7 @@ import { prisma } from '@/lib/db';
 
 export async function GET(
   request: Request,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     // Await context.params before accessing the id property

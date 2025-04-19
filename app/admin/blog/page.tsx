@@ -7,16 +7,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Plus, Edit, Trash, ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
 import Loading from "../../loading";
 
 export default function AdminBlogPage() {
-  const { toast } = useToast();
+  // Initialize toast
   const [searchQuery, setSearchQuery] = useState("");
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState<{ id: string; title: string; category: string; createdAt: string; published: boolean; excerpt?: string; imageData?: string }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [deleteInProgress, setDeleteInProgress] = useState(null);
+  const [deleteInProgress, setDeleteInProgress] = useState<string | null>(null);
 
   // Fetch blog posts from the API
   useEffect(() => {
@@ -45,7 +45,7 @@ export default function AdminBlogPage() {
   }, [toast]);
 
   // Delete blog post
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: string) => {
     // Confirm before deletion
     if (!confirm("Are you sure you want to delete this post? This cannot be undone.")) {
       return;
@@ -85,7 +85,7 @@ export default function AdminBlogPage() {
   );
 
   // Format the date from ISO to readable format
-  const formatPostDate = (dateString) => {
+  const formatPostDate = (dateString: string) => {
     try {
       return format(new Date(dateString), "MMMM d, yyyy");
     } catch {

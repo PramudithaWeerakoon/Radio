@@ -11,17 +11,46 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "@/components/ui/use-toast";
+
+// Define interfaces for our data types
+interface TrackData {
+  title: string;
+  album_id: string;
+  duration: string;
+  track_number: string;
+  lyrics: string;
+  youtube_id: string;
+}
+
+interface Credit {
+  role: string;
+  name: string;
+}
+
+interface Album {
+  id: string;
+  title: string;
+}
+
+interface AlbumTrack {
+  track_number: number;
+}
+
+interface AlbumResponse {
+  album?: {
+    tracks?: AlbumTrack[];
+  };
+}
 
 export default function NewTrackPage() {
   const router = useRouter();
-  const { toast } = useToast(); // Properly initialize the toast function from the hook
   const [isLoading, setIsLoading] = useState(false);
   const [fetchingAlbums, setFetchingAlbums] = useState(true);
-  const [albums, setAlbums] = useState([]);
+  const [albums, setAlbums] = useState<Album[]>([]);
   
   // Track state
-  const [track, setTrack] = useState({
+  const [track, setTrack] = useState<TrackData>({
     title: "",
     album_id: "",
     duration: "",
@@ -31,7 +60,7 @@ export default function NewTrackPage() {
   });
   
   // Credits state
-  const [credits, setCredits] = useState([
+  const [credits, setCredits] = useState<Credit[]>([
     { role: "", name: "" },
     { role: "", name: "" }
   ]);
@@ -40,14 +69,14 @@ export default function NewTrackPage() {
   useEffect(() => {
     async function fetchAlbums() {
       try {
-        const response = await fetch("/api/albums"); // Ensure this endpoint exists and returns albums
+        const response = await fetch("/api/albums");
 
         if (!response.ok) {
           throw new Error("Failed to fetch albums");
         }
 
         const data = await response.json();
-        setAlbums(data.albums || []); // Adjust based on the API response structure
+        setAlbums(data.albums || []);
       } catch (error) {
         console.error("Error fetching albums:", error);
         toast({
@@ -64,7 +93,7 @@ export default function NewTrackPage() {
   }, [toast]);
   
   // Handle track input changes
-  const handleTrackChange = (e) => {
+  const handleTrackChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setTrack(prev => ({
       ...prev,
@@ -73,7 +102,7 @@ export default function NewTrackPage() {
   };
   
   // Handle album selection
-  const handleAlbumChange = async (value) => {
+  const handleAlbumChange = async (value: string) => {
     setTrack(prev => ({
       ...prev,
       album_id: value
@@ -81,19 +110,17 @@ export default function NewTrackPage() {
     
     if (value) {
       try {
-        // Fetch tracks for this album
         const response = await fetch(`/api/albums/${value}/tracks`);
         
         if (!response.ok) {
           throw new Error("Failed to fetch album tracks");
         }
         
-        const data = await response.json();
+        const data = await response.json() as AlbumResponse;
         
-        // Find the highest track number and add 1
         let nextTrackNumber = 1;
         if (data.album && data.album.tracks && data.album.tracks.length > 0) {
-          const highestTrackNumber = Math.max(...data.album.tracks.map(t => t.track_number));
+          const highestTrackNumber = Math.max(...data.album.tracks.map((t: AlbumTrack) => t.track_number));
           nextTrackNumber = highestTrackNumber + 1;
         }
         
@@ -103,7 +130,6 @@ export default function NewTrackPage() {
         }));
       } catch (error) {
         console.error("Error updating track number:", error);
-        // Set default track number if fetching fails
         setTrack(prev => ({
           ...prev,
           track_number: "1"
@@ -113,7 +139,7 @@ export default function NewTrackPage() {
   };
   
   // Handle credit input changes
-  const handleCreditChange = (index, field, value) => {
+  const handleCreditChange = (index: number, field: keyof Credit, value: string) => {
     setCredits(prev => 
       prev.map((credit, i) => 
         i === index ? { ...credit, [field]: value } : credit
@@ -127,36 +153,31 @@ export default function NewTrackPage() {
   };
   
   // Remove credit
-  const removeCredit = (index) => {
+  const removeCredit = (index: number) => {
     setCredits(prev => prev.filter((_, i) => i !== index));
   };
   
   // Handle form submission
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
     try {
-      // Validate required fields
       if (!track.title || !track.album_id || !track.track_number) {
         throw new Error("Please fill in all required fields");
       }
       
-      // Filter out empty credits
       const validCredits = credits.filter(credit => credit.role.trim() !== "" && credit.name.trim() !== "");
-      
-      // Clean YouTube ID from any extra spaces
       const cleanedYoutubeId = track.youtube_id ? track.youtube_id.trim() : "";
       
       const requestData = {
         ...track,
         album_id: parseInt(track.album_id),
         track_number: parseInt(track.track_number),
-        youtube_id: cleanedYoutubeId, // Explicitly set the YouTube ID
+        youtube_id: cleanedYoutubeId,
         credits: validCredits,
       };
       
-      // Log the data being sent for debugging
       console.log("Sending track data:", requestData);
       
       const response = await fetch("/api/tracks", {
@@ -178,11 +199,11 @@ export default function NewTrackPage() {
         description: "Track saved successfully"
       });
       router.push("/admin/music/tracks");
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Submission Error:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to save track",
+        description: error instanceof Error ? error.message : "Failed to save track",
         variant: "destructive"
       });
     } finally {

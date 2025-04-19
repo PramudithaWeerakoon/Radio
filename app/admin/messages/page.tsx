@@ -17,7 +17,7 @@ import {
 import Link from "next/link";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import Loading from "@/app/loading";
 
 type ContactMessage = {
@@ -35,7 +35,7 @@ export default function AdminMessagesPage() {
   const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const { toast } = useToast();
+
   
   useEffect(() => {
     fetchMessages();

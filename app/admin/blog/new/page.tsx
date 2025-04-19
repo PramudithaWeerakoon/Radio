@@ -11,18 +11,26 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, Upload, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "@/components/ui/use-toast";
 
 const categories = ["Studio Updates", "Tour News", "Interviews", "Behind the Scenes"];
 
+interface BlogFormData {
+  title: string;
+  category: string;
+  excerpt: string;
+  content: string;
+  published: boolean;
+}
+
 export default function NewBlogPostPage() {
   const router = useRouter();
-  const { toast } = useToast();
+  // Use toast directly without destructuring
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const fileInputRef = useRef(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<BlogFormData>({
     title: "",
     category: "",
     excerpt: "",
@@ -30,10 +38,10 @@ export default function NewBlogPostPage() {
     published: false,
   });
   
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -41,22 +49,22 @@ export default function NewBlogPostPage() {
     }));
   };
 
-  const handleCategoryChange = (category) => {
+  const handleCategoryChange = (category: string) => {
     setFormData((prev) => ({
       ...prev,
       category,
     }));
   };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (file) {
       setImageFile(file);
       
       // Create preview URL for the selected image
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImagePreview(reader.result);
+        setImagePreview(reader.result as string);
       };
       reader.readAsDataURL(file);
     }
@@ -87,11 +95,11 @@ export default function NewBlogPostPage() {
       
       // Add all form fields
       Object.keys(formData).forEach(key => {
-        submitData.append(key, formData[key]);
+        submitData.append(key, formData[key as keyof BlogFormData] as string);
       });
       
       // Add published status
-      submitData.append("published", published);
+      submitData.append("published", published.toString());
       
       // Add image file if selected
       if (imageFile) {
@@ -122,7 +130,7 @@ export default function NewBlogPostPage() {
       console.error("Error creating blog post:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to create blog post",
+        description: error instanceof Error ? error.message : "Failed to create blog post",
         variant: "destructive",
       });
       setIsSubmitted(false); // Reset submission state if there's an error
@@ -199,7 +207,7 @@ export default function NewBlogPostPage() {
                 ) : (
                   <div 
                     className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:bg-gray-50"
-                    onClick={() => fileInputRef.current.click()}
+                    onClick={() => fileInputRef.current?.click()}
                   >
                     <Upload className="h-8 w-8 text-gray-400" />
                     <p className="mt-2 text-sm text-gray-500">Click to upload an image</p>

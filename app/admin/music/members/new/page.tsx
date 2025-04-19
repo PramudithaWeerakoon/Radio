@@ -9,12 +9,11 @@ import { Textarea } from "@/components/ui/textarea"; // Verify this export
 import { ArrowLeft } from "lucide-react"; // Ensure this is correctly imported
 import Link from "next/link"; // This should be correct
 import { useRouter } from "next/navigation"; // Add this import
-import { useToast } from "@/components/ui/use-toast"; // Add this import for consistent notifications
+import { toast } from "@/components/ui/use-toast"; // Add this import for consistent notifications
 import Image from "next/image"; // Add this for image preview
 
 export default function NewMemberPage() {
   const router = useRouter(); // Initialize the router
-  const { toast } = useToast(); // Initialize toast
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [formData, setFormData] = useState({
