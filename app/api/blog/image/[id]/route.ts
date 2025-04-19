@@ -6,7 +6,8 @@ export async function GET(
   context: { params: { id: string } }
 ) {
   try {
-    const idParam = context.params.id;
+    // Await context.params before accessing its properties
+    const { id: idParam } = await context.params;
     const id = parseInt(idParam);
     
     if (isNaN(id)) {

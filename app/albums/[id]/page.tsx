@@ -3,9 +3,10 @@ import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 
 export default async function AlbumPage({ params }: { params: { id: string } }) {
-  // Get album data from database
-  const id = parseInt(params.id);
-  
+  // In server components with Next.js 14+, we need to await params
+  const { id: albumId } = await params;
+  const id = parseInt(albumId);
+
   if (isNaN(id)) {
     return notFound();
   }

@@ -6,7 +6,8 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const id = params.id;
+    // Await params before accessing its properties
+    const { id } = await params;
     
     if (!id) {
       return NextResponse.json({ error: "Member ID is required" }, { status: 400 });

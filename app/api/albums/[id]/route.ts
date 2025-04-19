@@ -17,7 +17,9 @@ const serializeData = (data) => {
 // GET a single album by ID
 export async function GET(request, { params }) {
   try {
-    const id = parseInt(params.id);
+    // Await params before accessing its properties
+    const { id: paramId } = await params;
+    const id = parseInt(paramId);
     
     if (isNaN(id)) {
       return NextResponse.json({
@@ -68,7 +70,9 @@ export async function GET(request, { params }) {
 // UPDATE an album by ID
 export async function PUT(request, { params }) {
   try {
-    const id = parseInt(params.id);
+    // Await params before accessing its properties
+    const { id: paramId } = await params;
+    const id = parseInt(paramId);
     
     if (isNaN(id)) {
       return NextResponse.json({
@@ -216,10 +220,12 @@ export async function PUT(request, { params }) {
   }
 }
 
-// DELETE an album by ID (keep existing code)
+// DELETE an album by ID
 export async function DELETE(request, { params }) {
   try {
-    const id = parseInt(params.id);
+    // Await params before accessing its properties
+    const { id: paramId } = await params;
+    const id = parseInt(paramId);
     
     if (isNaN(id)) {
       return NextResponse.json({
