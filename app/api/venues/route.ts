@@ -9,11 +9,6 @@ export async function GET() {
         venue: true,
       },
       distinct: ['venue'],
-      where: {
-        venue: {
-          not: null,
-        },
-      },
       orderBy: {
         venue: 'asc',
       },

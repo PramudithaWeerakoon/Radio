@@ -6,7 +6,9 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const id = parseInt(params.id);
+    // Await params before accessing the id property
+    const { id: paramId } = await params;
+    const id = parseInt(paramId);
     
     if (isNaN(id)) {
       return new Response('Invalid album ID', { status: 400 });

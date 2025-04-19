@@ -6,7 +6,9 @@ export async function GET(
   context: { params: { id: string } }
 ) {
   try {
-    const eventId = parseInt(context.params.id);
+    // Await context.params before accessing the id property
+    const { id } = await context.params;
+    const eventId = parseInt(id);
     
     if (isNaN(eventId)) {
       return new NextResponse('Invalid event ID', { status: 400 });
