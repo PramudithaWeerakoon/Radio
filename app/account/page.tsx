@@ -141,7 +141,7 @@ export default function AccountPage() {
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
       toast({
         title: "Error",
-        description: "New passwords don't match",
+        description: "New passwords don&apos;t match",
         variant: "destructive"
       });
       return;
@@ -354,7 +354,7 @@ export default function AccountPage() {
               ) : reviews.length === 0 ? (
                 <div className="text-center py-8">
                   <Star className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                  <p className="text-muted-foreground">You haven't written any reviews yet.</p>
+                  <p className="text-muted-foreground">You haven&apos;t written any reviews yet.</p>
                   <Button className="mt-4" asChild>
                     <Link href="/reviews/write">Write a Review</Link>
                   </Button>

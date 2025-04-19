@@ -104,7 +104,7 @@ export default function ContactPage() {
                       <CheckCircle className="h-16 w-16 text-green-500" />
                     </div>
                     <h3 className="text-xl font-bold">Message Sent!</h3>
-                    <p className="text-muted-foreground">Thank you for reaching out. We'll respond to you shortly.</p>
+                    <p className="text-muted-foreground">Thank you for reaching out. We&apos;ll respond to you shortly.</p>
                     <Button onClick={() => setIsSubmitted(false)} className="mt-4">Send Another Message</Button>
                   </div>
                 ) : (

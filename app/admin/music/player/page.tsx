@@ -348,7 +348,7 @@ export default function PlayerManagerPage() {
             <div className="text-center p-6">
               <Music className="mx-auto h-12 w-12 text-muted-foreground mb-3" />
               <p className="text-muted-foreground">No tracks in the player yet.</p>
-              <p className="text-sm text-muted-foreground">Click "Add Track to Player" to upload your first track.</p>
+              <p className="text-sm text-muted-foreground">Click &quot;Add Track to Player&quot; to upload your first track.</p>
             </div>
           ) : (
             <Table>

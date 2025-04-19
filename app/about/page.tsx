@@ -117,7 +117,7 @@ export default function AboutPage() {
                 moves people.
               </p>
               <p className="text-muted-foreground">
-                With five studio albums and multiple world tours under our belt, we're just
+                With five studio albums and multiple world tours under our belt, we&apos;re just
                 getting started.
               </p>
             </motion.div>
