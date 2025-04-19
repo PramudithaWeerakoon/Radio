@@ -16,15 +16,15 @@ import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { use } from "react";
 
-// Make the params interface compatible with Next.js PageProps
+// Use the correct typing for Next.js 15 in deployed environments
 interface EditEventPageProps {
-  params: Promise<{ id: string }>;
+  params: { id: string };
+  searchParams?: { [key: string]: string | string[] | undefined };
 }
 
 export default function EditEventPage({ params }: EditEventPageProps) {
-  // Always use 'use' to unwrap the params promise
-  const unwrappedParams = use(params);
-  const eventId = unwrappedParams.id;
+  // Access the id directly from params
+  const eventId = params.id;
   
   const router = useRouter();
   const { toast } = useToast();
