@@ -9,18 +9,18 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CalendarIcon, CreditCard, ArrowLeft, Loader2, CheckCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { use } from 'react';
 import Loading from "../../loading";
 
-export default function BookingPage({ params }: { params: { id: string } }) {
+export default function BookingPage({ params }: { params: Promise<{ id: string }> }) {
   // Use React.use to unwrap params promise
   const unwrappedParams = use(params);
   const eventId = unwrappedParams.id;
   const router = useRouter();
-  const { toast } = useToast();
+  // Use toast directly without destructuring
 
   const [event, setEvent] = useState<any>(null);
   const [loading, setLoading] = useState(true);

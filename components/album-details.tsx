@@ -8,7 +8,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { YouTubeDialog } from "@/components/youtube-dialog";
 import Image from "next/image";
-import { useToast } from "@/components/ui/use-toast"; // Import the toast hook
+import { toast } from "@/components/ui/use-toast"; // Import the toast hook
 
 interface TrackCredit {
   id?: number;
@@ -58,7 +58,7 @@ export function AlbumDetails({ album }: AlbumDetailsProps) {
     credits?: TrackCredit[]
   }>>(new Map());
   const [trackTitleMap, setTrackTitleMap] = useState<Map<string, any>>(new Map());
-  const { toast } = useToast(); // Initialize the toast hook
+  
   
   // Add cache busting parameter to cover art URL
   const coverArtUrl = album.coverArt ? `${album.coverArt}?t=${Date.now()}` : '/placeholder-album.jpg';

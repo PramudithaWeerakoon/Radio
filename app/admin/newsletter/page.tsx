@@ -13,7 +13,7 @@ import {
   Table, TableBody, TableCaption, TableCell, 
   TableHead, TableHeader, TableRow 
 } from "@/components/ui/table";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import { 
   ArrowLeft, 
   Search, 
@@ -40,7 +40,6 @@ interface Subscriber {
 
 export default function NewsletterAdminPage() {
   const router = useRouter();
-  const { toast } = useToast();
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [filteredSubscribers, setFilteredSubscribers] = useState<Subscriber[]>([]);
   const [isLoading, setIsLoading] = useState(true);

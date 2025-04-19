@@ -4,7 +4,7 @@ import { prisma } from '@/lib/db';
 // Get a specific blog post by ID
 export async function GET(
   request: Request,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     // Await context.params before accessing its properties
@@ -42,7 +42,7 @@ export async function GET(
 // Delete a blog post
 export async function DELETE(
   request: Request,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     // Await context.params before accessing its properties
@@ -88,7 +88,7 @@ export async function DELETE(
 // Update a blog post
 export async function PUT(
   request: Request,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     // Await context.params before accessing its properties

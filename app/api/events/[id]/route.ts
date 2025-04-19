@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 // Get event by ID
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Correctly await the params object before accessing its properties
@@ -45,7 +45,7 @@ export async function GET(
 // Update an event
 export async function PUT(
   request: Request,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     // Correctly await the params object before accessing its properties
@@ -134,7 +134,7 @@ export async function PUT(
 // Delete an event
 export async function DELETE(
   request: Request,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     // Correctly await the params object before accessing its properties

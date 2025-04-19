@@ -1,5 +1,12 @@
 "use client";
 
+// Extend the Window interface to include refreshNavAuth
+declare global {
+  interface Window {
+    refreshNavAuth?: () => void;
+  }
+}
+
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import { Loader2, Save, User, Mail, KeyRound, Star } from "lucide-react";
 import Link from "next/link";
 
@@ -21,7 +28,7 @@ interface UserData {
 
 export default function AccountPage() {
   const router = useRouter();
-  const { toast } = useToast();
+  // Use toast directly without destructuring
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<UserData | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);

@@ -4,12 +4,11 @@ import { prisma } from "@/lib/prisma";
 // Handle updating a specific hire by ID
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const routeParams = await params;
     const id = parseInt(routeParams.id);
-
 
     if (isNaN(id)) {
       return NextResponse.json(
@@ -34,7 +33,6 @@ export async function PATCH(
         { status: 400 }
       );
     }
-
 
     const updatedHire = await prisma.hire.update({
       where: { id },
@@ -62,7 +60,7 @@ export async function PATCH(
 // Handle fetching a specific hire by ID
 export async function GET(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Await the params object before accessing its properties
@@ -110,10 +108,10 @@ export async function GET(
 // Handle deleting a specific hire by ID (or marking as cancelled)
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
+    const id = parseInt((await params).id);
     
     if (isNaN(id)) {
       return NextResponse.json(

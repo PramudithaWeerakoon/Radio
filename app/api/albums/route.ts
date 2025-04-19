@@ -2,9 +2,9 @@ import { NextResponse } from 'next/server';
 import prisma from '../../../lib/prisma';
 
 // Helper function to handle BigInt serialization
-const serializeData = (data) => {
+const serializeData = (data: any): any => {
   return JSON.parse(
-    JSON.stringify(data, (key, value) => {
+    JSON.stringify(data, (key: string, value: any) => {
       // Convert BigInt to String to avoid serialization errors
       if (typeof value === 'bigint') {
         return value.toString();
@@ -14,7 +14,7 @@ const serializeData = (data) => {
   );
 };
 
-export async function POST(request) {
+export async function POST(request: Request) {
   try {
     const data = await request.json();
     
@@ -23,12 +23,13 @@ export async function POST(request) {
       data: {
         title: data.title,
         release_date: new Date(data.releaseDate),
-        cover_art: data.coverArtUrl || null,
-        description: data.description,
-        youtube_id: data.youtubeId,
+        // Using the correct property names from the Prisma schema
+        // Removed cover_art which doesn't exist in the schema
+        description: data.description || null,
+        youtube_id: data.youtubeId || null,
         // Create tracks related to this album
         tracks: {
-          create: data.tracks.map((track, index) => ({
+          create: data.tracks.map((track: any, index: number) => ({
             title: track.title,
             duration: track.duration,
             track_number: index + 1
@@ -36,7 +37,7 @@ export async function POST(request) {
         },
         // Create credits related to this album
         album_credits: {
-          create: data.credits.map(credit => ({
+          create: data.credits.map((credit: any) => ({
             role: credit.role,
             name: credit.name
           }))
@@ -55,7 +56,7 @@ export async function POST(request) {
       message: "Album created successfully",
       album: serializedAlbum
     }, { status: 201 });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Failed to create album:", error);
     return NextResponse.json({
       message: "Failed to create album",
@@ -79,7 +80,7 @@ export async function GET() {
     // Serialize to handle BigInt values before formatting
     const serializedAlbums = serializeData(albums);
     
-    const formattedAlbums = serializedAlbums.map(album => ({
+    const formattedAlbums = serializedAlbums.map((album: any) => ({
       id: album.id,
       title: album.title,
       release_date: album.release_date,
@@ -95,7 +96,7 @@ export async function GET() {
       success: true, 
       albums: formattedAlbums 
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching albums:', error);
     return NextResponse.json({ 
       success: false, 

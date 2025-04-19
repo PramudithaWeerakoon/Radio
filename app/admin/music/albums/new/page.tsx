@@ -12,12 +12,30 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "@/components/ui/use-toast";
 
+// Define interfaces for our data types
+interface AlbumData {
+  title: string;
+  releaseDate: string;
+  description: string;
+  youtubeId: string;
+}
+
+interface TrackData {
+  title: string;
+  duration: string;
+}
+
+interface CreditData {
+  role: string;
+  name: string;
+}
+
 export default function NewAlbumPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   
   // Album state
-  const [album, setAlbum] = useState({
+  const [album, setAlbum] = useState<AlbumData>({
     title: "",
     releaseDate: "",
     description: "",
@@ -25,24 +43,24 @@ export default function NewAlbumPage() {
   });
   
   // Cover image state
-  const [coverImage, setCoverImage] = useState(null);
-  const [coverImagePreview, setCoverImagePreview] = useState("");
+  const [coverImage, setCoverImage] = useState<File | null>(null);
+  const [coverImagePreview, setCoverImagePreview] = useState<string>("");
   
   // Tracks state
-  const [tracks, setTracks] = useState([
+  const [tracks, setTracks] = useState<TrackData[]>([
     { title: "", duration: "" },
     { title: "", duration: "" },
     { title: "", duration: "" }
   ]);
   
   // Credits state
-  const [credits, setCredits] = useState([
+  const [credits, setCredits] = useState<CreditData[]>([
     { role: "", name: "" },
     { role: "", name: "" }
   ]);
   
   // Handle album input changes
-  const handleAlbumChange = (e) => {
+  const handleAlbumChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setAlbum(prev => ({
       ...prev,
@@ -51,22 +69,22 @@ export default function NewAlbumPage() {
   };
   
   // Handle cover image selection
-  const handleCoverImageChange = (e) => {
-    const file = e.target.files[0];
+  const handleCoverImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (file) {
       setCoverImage(file);
       
       // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
-        setCoverImagePreview(reader.result);
+        setCoverImagePreview(reader.result as string);
       };
       reader.readAsDataURL(file);
     }
   };
   
   // Handle track input changes
-  const handleTrackChange = (index, field, value) => {
+  const handleTrackChange = (index: number, field: keyof TrackData, value: string) => {
     setTracks(prev => 
       prev.map((track, i) => 
         i === index ? { ...track, [field]: value } : track
@@ -75,7 +93,7 @@ export default function NewAlbumPage() {
   };
   
   // Handle credit input changes
-  const handleCreditChange = (index, field, value) => {
+  const handleCreditChange = (index: number, field: keyof CreditData, value: string) => {
     setCredits(prev => 
       prev.map((credit, i) => 
         i === index ? { ...credit, [field]: value } : credit
@@ -89,7 +107,7 @@ export default function NewAlbumPage() {
   };
   
   // Remove track
-  const removeTrack = (index) => {
+  const removeTrack = (index: number) => {
     setTracks(prev => prev.filter((_, i) => i !== index));
   };
   
@@ -99,12 +117,12 @@ export default function NewAlbumPage() {
   };
   
   // Remove credit
-  const removeCredit = (index) => {
+  const removeCredit = (index: number) => {
     setCredits(prev => prev.filter((_, i) => i !== index));
   };
   
   // Handle form submission
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
@@ -148,10 +166,10 @@ export default function NewAlbumPage() {
       });
       
       router.push("/admin/music/albums");
-    } catch (error) {
+    } catch (error: unknown) {
       toast({
         title: "Error",
-        description: error.message || "Failed to create album",
+        description: error instanceof Error ? error.message : "Failed to create album",
         variant: "destructive",
       });
     } finally {

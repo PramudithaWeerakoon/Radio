@@ -1,23 +1,25 @@
+// File: app/api/members/[id]/image/route.ts
+
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+// Make sure the params type matches Next.js 13+ App Router conventions
 export async function GET(
-    request: Request,
-    { params }: { params: { id: string } }
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const routeParams = await params;
-    const id = parseInt(routeParams.id);
-
+    // Await the params value before using it
+    const id = parseInt((await params).id);
 
     if (isNaN(id)) {
       return NextResponse.json(
-          { success: false, message: "Invalid ID" },
-          { status: 400 }
+        { success: false, error: "Invalid ID" },
+        { status: 400 }
       );
     }
 
-    // Fetch the hire record with its images
+    // Fetch the hire (or member) record with its images
     const hire = await prisma.hire.findUnique({
       where: { id },
       select: {
@@ -28,19 +30,16 @@ export async function GET(
 
     if (!hire) {
       return NextResponse.json(
-          { success: false, message: "Hire record not found" },
-          { status: 404 }
+        { success: false, message: "Record not found" },
+        { status: 404 }
       );
     }
 
-    // Convert binary image data to Base64 strings for client-side display
-    const images = hire.imageData.map(data => {
-      if (!data) return '';
-      // Convert Buffer to Base64 string with proper MIME type prefix
-      // Assuming most uploads are images like JPEG or PNG
-      const base64 = Buffer.from(data).toString('base64');
-      // We'll use a generic image MIME type here, but in a real app
-      // you should store and use the actual MIME type for each image
+    // Convert binary data to Base64 strings for the client
+    const images = hire.imageData.map((data) => {
+      if (!data) return "";
+      const base64 = Buffer.from(data).toString("base64");
+      // You should store the actual MIME type per image in a real app
       return `data:image/jpeg;base64,${base64}`;
     });
 
@@ -49,16 +48,30 @@ export async function GET(
       imageNames: hire.imageName,
       images
     });
-
   } catch (error: any) {
-    console.error("Error fetching hire images:", error);
+    console.error("Error fetching images:", error);
     return NextResponse.json(
-        {
-          success: false,
-          message: "Failed to fetch images",
-          error: error.message
-        },
-        { status: 500 }
+      {
+        success: false,
+        message: "Failed to fetch images",
+        error: error.message
+      },
+      { status: 500 }
     );
   }
+}
+
+// Ensure other methods also use the correct params type
+export async function POST(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  // ...existing code...
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  // ...existing code...
 }

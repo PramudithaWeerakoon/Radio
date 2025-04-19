@@ -10,20 +10,46 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import Loading from "../../../../../loading";
 import { use } from "react";
 
-export default function EditTrackPage({ params }) {
+// Define interfaces for our data types
+interface TrackData {
+  title: string;
+  album_id: string;
+  duration: string;
+  track_number: string;
+  lyrics: string;
+  youtube_id: string;
+  artist: string;
+}
+
+interface Credit {
+  id?: string;
+  role: string;
+  name: string;
+}
+
+interface Album {
+  id: string;
+  title: string;
+}
+
+interface PageParams {
+  id: string;
+}
+
+export default function EditTrackPage({ params }: { params: Promise<PageParams> }) {
   const router = useRouter();
-  const { toast } = useToast();
+
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   const [fetchingAlbums, setFetchingAlbums] = useState(true);
-  const [albums, setAlbums] = useState([]);
+  const [albums, setAlbums] = useState<Album[]>([]);
   
   // Track state
-  const [track, setTrack] = useState({
+  const [track, setTrack] = useState<TrackData>({
     title: "",
     album_id: "",
     duration: "",
@@ -34,10 +60,10 @@ export default function EditTrackPage({ params }) {
   });
   
   // Credits state
-  const [credits, setCredits] = useState([]);
+  const [credits, setCredits] = useState<Credit[]>([]);
   
   // Get track ID from params - unwrap the Promise using the use hook
-  const unwrappedParams = use(params);
+  const unwrappedParams = use(params) as PageParams;
   const trackId = unwrappedParams.id;
 
   // Fetch track data when component mounts
@@ -70,7 +96,7 @@ export default function EditTrackPage({ params }) {
         
         // Set credits if any
         if (data.track.credits && data.track.credits.length > 0) {
-          setCredits(data.track.credits.map(credit => ({
+          setCredits(data.track.credits.map((credit: Credit) => ({
             id: credit.id,
             role: credit.role,
             name: credit.name
@@ -121,7 +147,7 @@ export default function EditTrackPage({ params }) {
   };
   
   // Handle track input changes
-  const handleTrackChange = (e) => {
+  const handleTrackChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setTrack(prev => ({
       ...prev,
@@ -130,7 +156,7 @@ export default function EditTrackPage({ params }) {
   };
   
   // Handle album selection
-  const handleAlbumChange = async (value) => {
+  const handleAlbumChange = async (value: string) => {
     setTrack(prev => ({
       ...prev,
       album_id: value
@@ -138,7 +164,7 @@ export default function EditTrackPage({ params }) {
   };
   
   // Handle credit input changes
-  const handleCreditChange = (index, field, value) => {
+  const handleCreditChange = (index: number, field: keyof Credit, value: string) => {
     setCredits(prev => 
       prev.map((credit, i) => 
         i === index ? { ...credit, [field]: value } : credit
@@ -152,12 +178,12 @@ export default function EditTrackPage({ params }) {
   };
   
   // Remove credit
-  const removeCredit = (index) => {
+  const removeCredit = (index: number) => {
     setCredits(prev => prev.filter((_, i) => i !== index));
   };
   
   // Handle form submission
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
@@ -199,11 +225,11 @@ export default function EditTrackPage({ params }) {
         description: "Track updated successfully"
       });
       router.push("/admin/music/tracks");
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Submission Error:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to update track",
+        description: error instanceof Error ? error.message : "Failed to update track",
         variant: "destructive"
       });
     } finally {

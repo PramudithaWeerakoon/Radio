@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
       
       // Read file as ArrayBuffer and convert to Buffer for storage
       const imageArrayBuffer = await profileImage.arrayBuffer();
-      imageData = Buffer.from(imageArrayBuffer);
+      imageData = new Uint8Array(imageArrayBuffer);
     }
     
     const newMember = await prisma.member.create({
@@ -66,14 +66,17 @@ export async function POST(request: NextRequest) {
       member: memberResponse 
     }, { status: 201 });
     
-  } catch (error) {
-    console.error("Error creating member:", error);
+  } catch (error: unknown) {
+    console.error("Error deleting member:", error);
+  
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+  
     return NextResponse.json({ 
-      success: false, 
-      message: "Failed to create member",
-      error: error.toString() 
+      error: "Failed to delete member", 
+      detail: errorMessage 
     }, { status: 500 });
   }
+  
 }
 
 export async function DELETE(request: Request) {

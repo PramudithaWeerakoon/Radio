@@ -2,7 +2,7 @@ import { AlbumDetails } from "@/components/album-details";
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 
-export default async function AlbumPage({ params }: { params: { id: string } }) {
+export default async function AlbumPage({ params }: { params: Promise<{ id: string }> }) {
   // In server components with Next.js 14+, we need to await params
   const { id: albumId } = await params;
   const id = parseInt(albumId);

@@ -21,7 +21,7 @@ import {
   Mail,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useToast } from "@/components/ui/use-toast"; 
+import { toast } from "@/components/ui/use-toast"; 
 
 // Define the activity type
 type Activity = {
@@ -101,7 +101,6 @@ const quickActions = [
 ];
 
 export default function AdminDashboard() {
-  const { toast } = useToast();
   
   // Add state for statistics
   const [stats, setStats] = useState<Stat[]>(defaultStats);

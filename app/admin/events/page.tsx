@@ -7,15 +7,27 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Calendar, MapPin, DollarSign, Search, Plus, Edit, Trash, ArrowLeft, Loader2, Image as ImageIcon } from "lucide-react";
 import Link from "next/link";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
 
 export default function AdminEventsPage() {
-  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
-  const [events, setEvents] = useState([]);
+  interface Event {
+    id: string;
+    title: string;
+    date: string;
+    venue: string;
+    price: number;
+    availableSeats: number;
+    imageName?: string;
+    imageData?: string;
+    imageUrl?: string | null;
+    hasImage?: boolean;
+  }
+
+  const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [deleteInProgress, setDeleteInProgress] = useState(null);
+  const [deleteInProgress, setDeleteInProgress] = useState<string | null>(null);
 
   // Fetch events from database
   useEffect(() => {
@@ -31,7 +43,7 @@ export default function AdminEventsPage() {
         const data = await response.json();
         
         // Process events to add image URLs for those with database images
-        const eventsWithImages = data.events.map(event => ({
+        const eventsWithImages = data.events.map((event: Event) => ({
           ...event,
           // If the event has image data, use the API endpoint to fetch it
           hasImage: !!event.imageName || !!event.imageData,
@@ -57,7 +69,7 @@ export default function AdminEventsPage() {
   }, [toast]);
 
   // Handle event deletion
-  const handleDelete = async (eventId) => {
+  const handleDelete = async (eventId: string) => {
     if (!confirm("Are you sure you want to delete this event? This cannot be undone.")) {
       return;
     }
@@ -92,7 +104,7 @@ export default function AdminEventsPage() {
   };
 
   // Format date and time
-  const formatEventDate = (dateString) => {
+  const formatEventDate = (dateString: string) => {
     try {
       return format(new Date(dateString), "PPP");
     } catch {
@@ -101,7 +113,7 @@ export default function AdminEventsPage() {
   };
 
   // Extract time from date
-  const extractTimeFromDate = (dateString) => {
+  const extractTimeFromDate = (dateString: string) => {
     try {
       return format(new Date(dateString), "p");
     } catch {

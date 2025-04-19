@@ -7,15 +7,33 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Plus, Edit, Trash, Music, Clock, ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import Loading from "../../../loading";
 
+// Define interfaces for our data types
+interface Track {
+  id: string;
+  title: string;
+  album: string;
+  duration: string;
+  trackNumber: number;
+}
+
+interface ApiTrack {
+  id: string;
+  title: string;
+  album?: {
+    title: string;
+  };
+  duration?: string;
+  track_number: number;
+}
+
 export default function TracksPage() {
-  const { toast } = useToast(); // Properly initialize the toast function from the hook
   const [searchQuery, setSearchQuery] = useState("");
-  const [tracks, setTracks] = useState([]);
+  const [tracks, setTracks] = useState<Track[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [deleteLoading, setDeleteLoading] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
 
   // Fetch tracks function
   const fetchTracks = async () => {
@@ -30,7 +48,7 @@ export default function TracksPage() {
       const data = await response.json();
       if (data.success && data.tracks) {
         // Transform the data to match our component's expected structure
-        const formattedTracks = data.tracks.map(track => ({
+        const formattedTracks = data.tracks.map((track: ApiTrack) => ({
           id: track.id,
           title: track.title,
           album: track.album ? track.album.title : "Unknown Album",
@@ -59,7 +77,7 @@ export default function TracksPage() {
   }, []);
 
   // Handle track deletion
-  const handleDeleteTrack = async (trackId) => {
+  const handleDeleteTrack = async (trackId: string) => {
     if (!confirm("Are you sure you want to delete this track?")) {
       return;
     }

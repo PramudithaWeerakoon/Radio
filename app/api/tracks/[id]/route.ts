@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 // GET a track by ID
-export async function GET(request, { params }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     // Extract the track ID from the URL params
     // Await params before accessing its properties
@@ -47,7 +47,7 @@ export async function GET(request, { params }) {
       {
         success: false,
         message: "Failed to get track",
-        error: error.message,
+        error: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 }
     );
@@ -55,7 +55,7 @@ export async function GET(request, { params }) {
 }
 
 // UPDATE a track by ID
-export async function PUT(request, { params }) {
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     // Extract the track ID from the URL params
     // Await params before accessing its properties
@@ -105,7 +105,7 @@ export async function PUT(request, { params }) {
         // Create new credits if they exist
         if (data.credits.length > 0) {
           await tx.trackCredit.createMany({
-            data: data.credits.map((credit) => ({
+            data: data.credits.map((credit: { role: string; name: string }) => ({
               role: credit.role,
               name: credit.name,
               track_id: id,
@@ -129,7 +129,7 @@ export async function PUT(request, { params }) {
       {
         success: false,
         message: "Failed to update track",
-        error: error.message,
+        error: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 }
     );
