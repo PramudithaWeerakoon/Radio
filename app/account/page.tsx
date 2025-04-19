@@ -342,7 +342,7 @@ export default function AccountPage() {
             <CardHeader>
               <CardTitle>My Reviews</CardTitle>
               <CardDescription>
-                Manage the reviews you've submitted
+                Manage the reviews you&apos;ve submitted
               </CardDescription>
             </CardHeader>
             <CardContent>
