@@ -90,7 +90,7 @@ export function AlbumDetails({ album }: AlbumDetailsProps) {
           const detailsMap = new Map();
           const titleMap = new Map(); // For lookup by title
           
-          data.tracks.forEach(track => {
+          data.tracks.forEach((track: any) => {
             console.log(`[PROCESSING TRACK] ID:${track.id}, Title:${track.title}`);
             
             // Map YouTube IDs
@@ -170,7 +170,7 @@ export function AlbumDetails({ album }: AlbumDetailsProps) {
       if (trackYoutubeIds.has(title)) {
         const youtubeId = trackYoutubeIds.get(title);
         debugLog(`Found YouTube ID by exact title match "${title}": ${youtubeId}`);
-        return youtubeId;
+        return youtubeId || null;
       }
       
       // Try case-insensitive title matching against all tracks
@@ -199,7 +199,7 @@ export function AlbumDetails({ album }: AlbumDetailsProps) {
           if (trackYoutubeIds.has(trackNum)) {
             const youtubeId = trackYoutubeIds.get(trackNum);
             debugLog(`Found YouTube ID by calculated ID ${trackNum}: ${youtubeId}`);
-            return youtubeId;
+            return youtubeId || null;
           }
         }
       }
@@ -232,7 +232,7 @@ export function AlbumDetails({ album }: AlbumDetailsProps) {
     } else {
       // Fall back to album's YouTube ID
       debugLog(`No track-specific YouTube ID found for "${track.title}", falling back to album ID: ${album.youtubeId}`);
-      setActiveVideoId(album.youtubeId);
+      setActiveVideoId(album.youtubeId || '');
     }
     
     setIsVideoOpen(true);
@@ -374,7 +374,6 @@ export function AlbumDetails({ album }: AlbumDetailsProps) {
           toast({
             title: "Link copied to clipboard",
             description: "Share the link with your friends!",
-            duration: 3000,
           });
         })
         .catch(() => {
@@ -552,7 +551,7 @@ export function AlbumDetails({ album }: AlbumDetailsProps) {
                                     <h4 className="font-medium text-sm">Credits</h4>
                                     {details?.credits && details.credits.length > 0 ? (
                                       <div className="grid gap-2">
-                                        {details.credits.map((credit, credIndex) => (
+                                        {details.credits.map((credit: TrackCredit, credIndex: number) => (
                                           <div key={credIndex} className="flex items-center space-x-2">
                                             <Music className="h-3 w-3 text-muted-foreground" />
                                             <div>

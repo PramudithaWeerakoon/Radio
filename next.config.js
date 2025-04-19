@@ -1,8 +1,6 @@
 const path = require("path");
 
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  // ✅ Webpack customization
+module.exports = {
   webpack: (config) => {
     config.module.rules.push({
       test: /\.node$/,
@@ -16,8 +14,7 @@ const nextConfig = {
 
     return config;
   },
-
-  // ✅ CORS Headers
+  // Add this to explicitly allow all hosts
   async headers() {
     return [
       {
@@ -27,17 +24,5 @@ const nextConfig = {
         ],
       },
     ];
-  },
-
-  // ✅ Ignore TypeScript errors during build
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-
-  // ✅ Ignore ESLint errors during build
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+  }
 };
-
-module.exports = nextConfig;

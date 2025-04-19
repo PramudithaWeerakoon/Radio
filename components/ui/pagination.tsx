@@ -29,8 +29,8 @@ export function Pagination({ totalPages, currentPage, onPageChange }: Pagination
       pageNumbers.push(totalPages);
     }
     
-    // Deduplicate and sort
-    return [...new Set(pageNumbers)].sort((a, b) => a - b);
+    // Deduplicate and sort without using spread on Set
+    return Array.from(new Set(pageNumbers)).sort((a, b) => a - b);
   };
   
   const pageNumbers = getPageNumbers();
