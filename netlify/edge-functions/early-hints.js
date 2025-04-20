@@ -1,7 +1,7 @@
 // Early Hints Edge Function for Netlify
 // This helps with preloading critical resources
 
-export default async function onRequest(context) {
+export default async function handler(request, context) {
   try {
     // List of critical resources to preload
     const criticalResources = [
@@ -22,16 +22,20 @@ export default async function onRequest(context) {
     linkHeaders.push('<https://fonts.googleapis.com>; rel=preconnect');
     linkHeaders.push('<https://fonts.gstatic.com>; rel=preconnect; crossorigin');
 
-    // Get the response from the origin
-    const response = await context.next();
+    // Create a new request for the origin
+    const newRequest = new Request(request);
     
-    // Add the Link header to the response
-    response.headers.set('Link', linkHeaders.join(', '));
+    // Add the Link header to response headers
+    const response = await fetch(newRequest);
     
-    // Return the modified response
-    return response;
+    // Create a new response with the Link header
+    const modifiedResponse = new Response(response.body, response);
+    modifiedResponse.headers.set('Link', linkHeaders.join(', '));
+    
+    return modifiedResponse;
   } catch (error) {
     console.error('Edge function error:', error);
-    return context.next();
+    // If there's an error, just pass through the original request
+    return fetch(request);
   }
 }
