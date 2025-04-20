@@ -1,10 +1,7 @@
 {
-  "name": "radio-app",
+  "name": "radioo",
   "compatibility_date": "2025-04-20",
   "assets": {
     "directory": "./.next"
-  },
-  "routes": [
-    { "pattern": "*", "custom_domain": true }
-  ]
+  }
 }
