@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { optimizeImage, generateBlurPlaceholder } from '@/lib/image-utils';
 
 // Get all background images
 export async function GET() {
@@ -13,14 +14,40 @@ export async function GET() {
       }
     });
 
-    // Transform the binary data to base64 for client-side use
-    const formattedImages = backgroundImages.map(image => ({
-      id: image.id,
-      title: image.title,
-      imageUrl: `data:${image.imageMimeType};base64,${Buffer.from(image.imageData).toString('base64')}`,
-      order: image.order,
-      isActive: image.isActive,
-      createdAt: image.createdAt
+    // Transform and optimize images before sending to client
+    const formattedImages = await Promise.all(backgroundImages.map(async (image) => {
+      try {
+        // Optimize image to WebP format
+        const optimizedImageBuffer = await optimizeImage(Buffer.from(image.imageData), {
+          width: 1920,
+          format: 'webp',
+          quality: 80
+        });
+        
+        // Generate blur placeholder for progressive loading
+        const blurPlaceholder = await generateBlurPlaceholder(Buffer.from(image.imageData));
+        
+        return {
+          id: image.id,
+          title: image.title,
+          imageUrl: `data:image/webp;base64,${optimizedImageBuffer.toString('base64')}`,
+          blurDataUrl: blurPlaceholder,
+          order: image.order,
+          isActive: image.isActive,
+          createdAt: image.createdAt
+        };
+      } catch (err) {
+        console.error('Error optimizing image:', err);
+        // Fallback to original image if optimization fails
+        return {
+          id: image.id,
+          title: image.title,
+          imageUrl: `data:${image.imageMimeType};base64,${Buffer.from(image.imageData).toString('base64')}`,
+          order: image.order,
+          isActive: image.isActive,
+          createdAt: image.createdAt
+        };
+      }
     }));
     
     return NextResponse.json({ success: true, images: formattedImages });
@@ -50,13 +77,19 @@ export async function POST(request: Request) {
 
     // Process the uploaded image
     const imageBuffer = Buffer.from(await image.arrayBuffer());
-    const imageMimeType = image.type;
+    
+    // Optimize image before saving to database
+    const optimizedImageBuffer = await optimizeImage(imageBuffer, {
+      width: 1920,
+      format: 'jpeg',
+      quality: 85
+    });
 
     const backgroundImage = await prisma.backgroundImage.create({
       data: {
         title: title || 'Hero Background',
-        imageData: imageBuffer,
-        imageMimeType,
+        imageData: new Uint8Array(optimizedImageBuffer), // Convert Buffer to Uint8Array for Prisma
+        imageMimeType: 'image/jpeg',
         order,
         isActive: true
       }

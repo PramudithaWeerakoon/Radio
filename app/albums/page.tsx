@@ -119,11 +119,15 @@ export default function AlbumsPage() {
                 <Card className="overflow-hidden hover:shadow-lg transition-shadow">
                   <div className="h-64 w-full relative">
                     <Image
-                      src={album.coverImageUrl || '/placeholder-album.jpg'} // Add fallback for undefined
+                      src={album.coverImageUrl || '/placeholder-album.jpg'}
                       alt={album.title}
                       fill
+                      loading={index < 3 ? "eager" : "lazy"} 
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       className="object-cover"
-                      unoptimized
+                      quality={75}
+                      placeholder="blur"
+                      blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+P+/HgAEUQJKXeKhBQAAAABJRU5ErkJggg=="
                     />
                   </div>
                   <CardHeader>

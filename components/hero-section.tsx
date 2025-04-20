@@ -5,11 +5,13 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 interface BackgroundImage {
   id: number;
   title?: string;
   imageUrl: string;
+  blurDataUrl?: string; // New property for blur placeholder
   order: number;
 }
 
@@ -51,38 +53,50 @@ export function HeroSection() {
   }, [backgroundImages.length]);
 
   // Default background image if none from database
-  const defaultBackgroundImage = "https://images.unsplash.com/photo-1501612780327-45045538702b?ixlib=rb-1.2.1&auto=format&fit=crop&w=2850&q=80";
+  const defaultBackgroundImage = "https://images.unsplash.com/photo-1501612780327-45045538702b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=75";
   
   // Current background image
   const currentBackground = backgroundImages.length > 0 
     ? backgroundImages[currentImageIndex].imageUrl
     : defaultBackgroundImage;
 
+  // Current blur placeholder
+  const currentBlurPlaceholder = backgroundImages.length > 0 
+    ? backgroundImages[currentImageIndex].blurDataUrl
+    : undefined;
+
   return (
     <section className="relative h-[90vh] w-full flex items-center justify-center overflow-hidden">
-      {/* Background image container with improved responsive handling */}
-      <motion.div 
-        key={currentImageIndex}
-        className="absolute inset-0 w-full h-full"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 1.5 }}
-        style={{
-          backgroundImage: `url('${currentBackground}')`,
-          backgroundSize: "cover",
-          backgroundPosition: "50% 50%", 
-          backgroundRepeat: "no-repeat",
-          objectFit: "cover",
-          width: "100%",
-          height: "100%",
-          // Force the background to maintain aspect ratio while covering the full area
-          // This helps prevent cropping on mobile
-        }}
-      >
-        {/* Dark overlay */}
-        <div className="absolute inset-0 bg-black/50" />
-      </motion.div>
+      {/* Background image with Next.js Image for optimization */}
+      <div className="absolute inset-0 w-full h-full">
+        <motion.div
+          key={currentImageIndex}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 1.5 }}
+          className="relative w-full h-full"
+        >
+          {currentBackground && (
+            <Image
+              src={currentBackground}
+              alt="Background image"
+              fill
+              priority={true}
+              sizes="100vw"
+              quality={80}
+              placeholder={currentBlurPlaceholder ? "blur" : "empty"}
+              blurDataURL={currentBlurPlaceholder}
+              style={{
+                objectFit: "cover",
+                objectPosition: "center",
+              }}
+            />
+          )}
+          {/* Dark overlay */}
+          <div className="absolute inset-0 bg-black/50" />
+        </motion.div>
+      </div>
 
       {/* Content wrapper with proper z-index */}
       <div className="relative z-10 text-center px-4 sm:px-6 max-w-4xl mx-auto">
