@@ -46,7 +46,7 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# Set prioritization for critical resources
+# Configure the edge function for performance optimization
 [[edge_functions]]
-  function = "early-hints"
   path = "/*"
+  function = "early-hints"
