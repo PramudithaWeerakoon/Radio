@@ -18,7 +18,7 @@ export async function GET() {
       user
     });
   } catch (error) {
-    console.error('Error fetching user:', error);
+    
     return NextResponse.json(
       { success: false, message: 'Authentication error' },
       { status: 500 }
