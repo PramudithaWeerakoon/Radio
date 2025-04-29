@@ -52,7 +52,9 @@ export default function LoginPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Cache-Control": "no-cache, no-store, must-revalidate",
         },
+        credentials: "include", // Critical for cookie handling
         body: JSON.stringify(formData),
       });
 
@@ -72,21 +74,24 @@ export default function LoginPage() {
           : "You have successfully logged in.",
       });
 
-      // Refresh the nav bar authentication state
-      // @ts-ignore - This function is added globally
-      if (window.refreshNavAuth) {
-        window.refreshNavAuth();
-      }
+      // Delay slightly to ensure cookies are saved
+      setTimeout(() => {
+        // Refresh the nav bar authentication state
+        // @ts-ignore - This function is added globally
+        if (window.refreshNavAuth) {
+          window.refreshNavAuth();
+        }
 
-      // Redirect based on user role - admins always go to admin dashboard
-      if (data.user.role === 'admin') {
-        router.push('/admin'); // Always redirect admins to dashboard
-      } else {
-        // For regular users, go to the requested page or home
-        router.push(redirectUrl);
-      }
-      
-      router.refresh();
+        // Redirect based on user role - admins always go to admin dashboard
+        if (data.user.role === 'admin') {
+          router.push('/admin'); // Always redirect admins to dashboard
+        } else {
+          // For regular users, go to the requested page or home
+          router.push(redirectUrl);
+        }
+        
+        router.refresh();
+      }, 500);
     } catch (error: any) {
       toast({
         title: "Error",

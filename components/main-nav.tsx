@@ -82,14 +82,23 @@ export function MainNav() {
     try {
       setIsLoading(true);
       const response = await fetch('/api/auth/me', {
-        // Add cache: 'no-store' to prevent caching
-        cache: 'no-store'
+        method: 'GET',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        },
+        credentials: 'include', // Critical for sending cookies with the request
+        cache: 'no-store',
+        next: { revalidate: 0 }
       });
       
       if (response.ok) {
         const data = await response.json();
         setUser(data.user);
+        console.log("User authenticated:", data.user);
       } else {
+        console.log("Authentication failed:", response.status);
         setUser(null);
       }
     } catch (error) {
@@ -106,6 +115,10 @@ export function MainNav() {
     try {
       const response = await fetch('/api/auth/logout', {
         method: 'POST',
+        credentials: 'include', // Critical for including cookies with the request
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+        }
       });
       
       if (response.ok) {
