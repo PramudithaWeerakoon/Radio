@@ -105,6 +105,19 @@ export async function DELETE(
       );
     }
     
+    // First check if the image exists
+    const existingImage = await prisma.backgroundImage.findUnique({
+      where: { id }
+    });
+    
+    if (!existingImage) {
+      return NextResponse.json(
+        { success: false, error: 'Image not found' },
+        { status: 404 }
+      );
+    }
+    
+    // Then try to delete it
     await prisma.backgroundImage.delete({
       where: { id }
     });
@@ -115,8 +128,14 @@ export async function DELETE(
     });
   } catch (error) {
     console.error('Failed to delete background image:', error);
+    // Include more detailed error information
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { success: false, error: 'Failed to delete background image' },
+      { 
+        success: false, 
+        error: 'Failed to delete background image', 
+        details: errorMessage 
+      },
       { status: 500 }
     );
   }
