@@ -93,10 +93,10 @@ export async function PUT(
 // Delete a background image
 export async function DELETE(
   request: Request,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(context.params.id);
+    const id = parseInt((await context.params).id);
     
     if (isNaN(id)) {
       return NextResponse.json(
