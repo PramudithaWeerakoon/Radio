@@ -1,13 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { Calendar } from "@/components/ui/calendar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Calendar as CalendarIcon, MapPin, DollarSign, Clock, Loader2, Image as ImageIcon } from "lucide-react";
+import { Calendar as CalendarIcon, MapPin, DollarSign, Clock, Image as ImageIcon, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import Link from "next/link";
 import Loading from "../loading";
@@ -25,20 +23,59 @@ interface Event {
   imageName?: string;
   description?: string;
   time?: string;
+  category?: string;
 }
 
-const priceRanges = ["All Prices", "Under $50", "$50-$100", "Over $100"];
-
 export default function EventsPage() {
-  const [date, setDate] = useState<Date | undefined>(undefined);
-  const [selectedVenue, setSelectedVenue] = useState("All Venues");
-  const [selectedPrice, setSelectedPrice] = useState("All Prices");
   const [events, setEvents] = useState<Event[]>([]);
-  const [venues, setVenues] = useState<string[]>(["All Venues"]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  // Fetch events and venues from the database
+  // Create a ref for the top of the page
+  const topRef = useRef<HTMLDivElement>(null);
+
+  // Event categories
+  const eventCategories = [
+    {
+      id: "hotel-lounges",
+      title: "Hotel Lounges & Bars",
+      description: "Live music experiences in elegant hotel settings",
+      image: "https://placehold.co/600x400?text=Hotel+Lounges"
+    },
+    {
+      id: "theme-nights",
+      title: "Weekly Theme Nights",
+      description: "Exciting themed music events every week",
+      image: "https://placehold.co/600x400?text=Theme+Nights"
+    },
+    {
+      id: "private-corporate",
+      title: "Private & Corporate Functions",
+      description: "Exclusive music experiences for your special events",
+      image: "https://placehold.co/600x400?text=Private+Functions"
+    },
+    {
+      id: "weddings",
+      title: "Wedding Receptions",
+      description: "Make your special day unforgettable with live music",
+      image: "https://placehold.co/600x400?text=Weddings"
+    },
+    {
+      id: "seasonal",
+      title: "Seasonal Festivals",
+      description: "Christmas, New Year, and other seasonal celebrations",
+      image: "https://placehold.co/600x400?text=Seasonal+Festivals"
+    },
+    {
+      id: "others",
+      title: "Others",
+      description: "Discover more unique and special music events",
+      image: "https://placehold.co/600x400?text=Other+Events"
+    }
+  ];
+
+  // Fetch events from the database
   useEffect(() => {
     async function fetchData() {
       try {
@@ -55,40 +92,11 @@ export default function EventsPage() {
         const processedEvents = eventsData.events.map((event: any) => ({
           ...event,
           imageUrl: event.imageName ? `/api/events/${event.id}/image?t=${Date.now()}` : null,
-          image: event.image || "https://placehold.co/600x400?text=No+Image"
+          image: event.image || "https://placehold.co/600x400?text=No+Image",
+          // Assign default categories based on title/description if not present
+          category: event.category || assignDefaultCategory(event)
         }));
         setEvents(processedEvents || []);
-        
-        // Try to fetch venues, but don't fail if this doesn't work
-        try {
-          const venuesResponse = await fetch('/api/venues');
-          if (venuesResponse.ok) {
-            const venuesData = await venuesResponse.json();
-            
-            // Add "All Venues" option to the beginning of the venues array
-            const allVenues = ["All Venues", ...venuesData.venues.map((venue: any) => venue.name)];
-            setVenues(allVenues);
-          } else {
-            // If venues API fails, extract unique venues from events data
-            const uniqueVenueSet = new Set<string>();
-            processedEvents.forEach((event: Event) => {
-              if (event.venue) uniqueVenueSet.add(event.venue);
-            });
-            const uniqueVenues = Array.from(uniqueVenueSet).sort();
-            const allVenues = ["All Venues", ...uniqueVenues];
-            setVenues(allVenues);
-          }
-        } catch (venueError) {
-          console.error('Error fetching venues:', venueError);
-          // Extract venue information from events as fallback
-          const uniqueVenueSet = new Set<string>();
-          processedEvents.forEach((event: Event) => {
-            if (event.venue) uniqueVenueSet.add(event.venue);
-          });
-          const uniqueVenues = Array.from(uniqueVenueSet).sort();
-          const allVenues = ["All Venues", ...uniqueVenues];
-          setVenues(allVenues);
-        }
         
       } catch (err) {
         console.error('Error fetching data:', err);
@@ -101,30 +109,49 @@ export default function EventsPage() {
     fetchData();
   }, []);
 
-  const filteredEvents = events.filter(event => {
-    // Fix date comparison by comparing year, month, and day components instead of strings
-    const matchesDate = !date || isSameDay(new Date(event.date), date);
+  // Add effect to scroll to top when a category is selected
+  useEffect(() => {
+    if (selectedCategory && topRef.current) {
+      // Scroll to the top of the page
+      topRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [selectedCategory]);
+
+  // Helper function to assign a default category based on event details
+  const assignDefaultCategory = (event: any): string => {
+    const title = event.title?.toLowerCase() || '';
+    const description = event.description?.toLowerCase() || '';
     
-    const matchesVenue = selectedVenue === "All Venues" || event.venue === selectedVenue;
-    const matchesPrice = selectedPrice === "All Prices" || 
-      (selectedPrice === "Under $50" && event.price < 50) ||
-      (selectedPrice === "$50-$100" && event.price >= 50 && event.price <= 100) ||
-      (selectedPrice === "Over $100" && event.price > 100);
+    if (title.includes('hotel') || title.includes('lounge') || title.includes('bar') || 
+        description.includes('hotel') || description.includes('lounge'))
+      return 'hotel-lounges';
+    
+    if (title.includes('theme') || title.includes('night') || 
+        description.includes('theme night') || description.includes('weekly'))
+      return 'theme-nights';
+    
+    if (title.includes('corporate') || title.includes('private') || 
+        description.includes('corporate') || description.includes('private'))
+      return 'private-corporate';
+    
+    if (title.includes('wedding') || title.includes('reception') || 
+        description.includes('wedding') || description.includes('reception'))
+      return 'weddings';
+    
+    if (title.includes('christmas') || title.includes('new year') || title.includes('festival') || 
+        description.includes('christmas') || description.includes('new year') || description.includes('seasonal'))
+      return 'seasonal';
+    
+    // Default category if no match
+    return 'others';
+  };
 
-    return matchesDate && matchesVenue && matchesPrice;
-  });
-
-  // Helper function to compare if two dates are the same day
-  function isSameDay(date1: Date, date2: Date): boolean {
-    return (
-      date1.getFullYear() === date2.getFullYear() &&
-      date1.getMonth() === date2.getMonth() &&
-      date1.getDate() === date2.getDate()
-    );
-  }
+  const filteredEvents = selectedCategory 
+    ? events.filter(event => event.category === selectedCategory)
+    : [];
 
   return (
-    <div className="min-h-screen bg-background py-12">
+    <div className="min-h-screen bg-background py-12" ref={topRef}>
       {isLoading ? (
         <Loading />
       ) : (
@@ -132,93 +159,79 @@ export default function EventsPage() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-12"
+            className="text-center mb-8 sm:mb-12"
           >
-            <h1 className="text-4xl font-bold tracking-tight text-primary sm:text-5xl mb-4">
-              Upcoming Events
+            <h1 className="text-3xl font-bold tracking-tight text-primary sm:text-4xl md:text-5xl mb-2 sm:mb-4">
+              Our Event Categories
             </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto px-4 sm:px-0">
               Join us at our next performance
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-[300px,1fr] gap-8">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="space-y-6"
-            >
-              <Card>
-                <CardHeader>
-                  <CardTitle>Filters</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Date</label>
-                    <Calendar
-                      mode="single"
-                      selected={date}
-                      onSelect={setDate}
-                      className="rounded-md border"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Venue</label>
-                    <Select value={selectedVenue} onValueChange={setSelectedVenue}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select venue" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {venues.map((venue) => (
-                          <SelectItem key={venue} value={venue}>
-                            {venue}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+          {!selectedCategory ? (
+            // Show category boxes when no category is selected
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              {eventCategories.map((category, index) => (
+                <motion.div
+                  key={category.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="h-full" // Make sure the motion div takes full height
+                >
+                  <Card 
+                    className="cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] h-full flex flex-col"
+                    onClick={() => setSelectedCategory(category.id)}
+                  >
+                    <div className="h-36 sm:h-48 w-full bg-cover bg-center relative rounded-t-lg" style={{ backgroundImage: `url(${category.image})` }}>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent rounded-t-lg"></div>
+                      <div className="absolute bottom-4 left-4 right-4">
+                        <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-white">{category.title}</h3>
+                      </div>
+                    </div>
+                    <CardContent className="p-3 sm:p-4 flex-grow flex flex-col justify-between">
+                      <p className="text-sm sm:text-base text-muted-foreground">{category.description}</p>
+                      <Button variant="ghost" className="mt-3 sm:mt-4 w-full text-sm sm:text-base">
+                        View Events
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            // Show category details and filtered events
+            <div>
+              <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center">
+                <Button 
+                  variant="ghost" 
+                  className="mb-4 sm:mb-0 sm:mr-4 self-start"
+                  onClick={() => setSelectedCategory(null)}
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back to Categories
+                </Button>
+                <h2 className="text-xl sm:text-2xl font-bold">
+                  {eventCategories.find(c => c.id === selectedCategory)?.title}
+                </h2>
+              </div>
 
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Price Range</label>
-                    <Select value={selectedPrice} onValueChange={setSelectedPrice}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select price range" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {priceRanges.map((range) => (
-                          <SelectItem key={range} value={range}>
-                            {range}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                {error ? (
+                  <div className="col-span-full text-center py-8 sm:py-12">
+                    <p className="text-red-500">{error}</p>
                   </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="space-y-6"
-            >
-              {error ? (
-                <div className="text-center py-12">
-                  <p className="text-red-500">{error}</p>
-                </div>
-              ) : filteredEvents.length === 0 ? (
-                <div className="text-center py-12">
-                  <p className="text-muted-foreground">No events found matching your criteria.</p>
-                </div>
-              ) : (
-                filteredEvents.map((event) => (
-                  <Dialog key={event.id}>
-                    <DialogTrigger asChild>
-                      <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-                        <div className="grid md:grid-cols-[300px,1fr] gap-6">
-                          <div
-                            className="h-48 md:h-full bg-cover bg-center relative"
+                ) : filteredEvents.length === 0 ? (
+                  <div className="col-span-full text-center py-8 sm:py-12">
+                    <p className="text-muted-foreground">No events found in this category.</p>
+                  </div>
+                ) : (
+                  filteredEvents.map((event) => (
+                    <Dialog key={event.id}>
+                      <DialogTrigger asChild>
+                        <Card className="cursor-pointer hover:shadow-lg transition-shadow h-full flex flex-col">
+                          <div className="h-36 sm:h-48 w-full bg-cover bg-center relative rounded-t-lg" 
                             style={{ 
                               backgroundImage: event.imageUrl 
                                 ? `url(${event.imageUrl})` 
@@ -230,83 +243,91 @@ export default function EventsPage() {
                                 <ImageIcon className="h-4 w-4 text-white" />
                               </div>
                             )}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent rounded-t-lg"></div>
+                            <div className="absolute bottom-4 left-4 right-4">
+                              <h3 className="text-base sm:text-lg md:text-xl font-bold text-white">{event.title}</h3>
+                            </div>
                           </div>
-                          <div className="p-6">
-                            <h3 className="text-2xl font-semibold mb-2">{event.title}</h3>
-                            <div className="space-y-2 text-muted-foreground">
+                          <CardContent className="p-3 sm:p-4 flex-grow">
+                            <div className="space-y-1 sm:space-y-2 text-muted-foreground text-sm sm:text-base">
                               <div className="flex items-center gap-2">
-                                <CalendarIcon className="h-4 w-4" />
-                                <span>
-                                  {format(new Date(event.date), "MMMM d, yyyy")}
+                                <CalendarIcon className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                                <span className="truncate">
+                                  {format(new Date(event.date), "MMM d, yyyy")}
                                   {event.time && ` at ${event.time}`}
                                 </span>
                               </div>
                               <div className="flex items-center gap-2">
-                                <MapPin className="h-4 w-4" />
-                                <span>{event.venue}</span>
+                                <MapPin className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                                <span className="truncate">{event.venue}</span>
                               </div>
                               <div className="flex items-center gap-2">
-                                <DollarSign className="h-4 w-4" />
+                                <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                                 <span>${event.price.toString()}</span>
                               </div>
                             </div>
-                          </div>
-                        </div>
-                      </Card>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-2xl">
-                      <DialogHeader>
-                        <DialogTitle>{event.title}</DialogTitle>
-                      </DialogHeader>
-                      <div className="grid gap-6">
-                        <div
-                          className="h-64 w-full bg-cover bg-center rounded-lg"
-                          style={{ 
-                            backgroundImage: event.imageUrl 
-                              ? `url(${event.imageUrl})` 
-                              : `url(${event.image})`
-                          }}
-                        />
-                        <div className="space-y-4">
-                          <p className="text-muted-foreground">{event.description}</p>
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <div className="flex items-center gap-2 text-muted-foreground">
-                                <CalendarIcon className="h-4 w-4" />
-                                <span>{format(new Date(event.date), "MMMM d, yyyy")}</span>
+                            <div className="mt-3 sm:mt-4">
+                              <Button variant="ghost" className="w-full text-sm sm:text-base">
+                                View Details
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </DialogTrigger>
+                      <DialogContent className="w-[95vw] max-w-none sm:max-w-2xl mx-auto p-4 sm:p-6">
+                        <DialogHeader>
+                          <DialogTitle className="text-xl sm:text-2xl">{event.title}</DialogTitle>
+                        </DialogHeader>
+                        <div className="grid gap-4 sm:gap-6">
+                          <div
+                            className="h-48 sm:h-64 w-full bg-cover bg-center rounded-lg"
+                            style={{ 
+                              backgroundImage: event.imageUrl 
+                                ? `url(${event.imageUrl})` 
+                                : `url(${event.image})`
+                            }}
+                          />
+                          <div className="space-y-3 sm:space-y-4">
+                            <p className="text-sm sm:text-base text-muted-foreground">{event.description}</p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                              <div className="space-y-2">
+                                <div className="flex items-center gap-2 text-muted-foreground text-sm sm:text-base">
+                                  <CalendarIcon className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                                  <span>{format(new Date(event.date), "MMM d, yyyy")}</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-muted-foreground text-sm sm:text-base">
+                                  <Clock className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                                  <span>{event.time}</span>
+                                </div>
                               </div>
-                              <div className="flex items-center gap-2 text-muted-foreground">
-                                <Clock className="h-4 w-4" />
-                                <span>{event.time}</span>
+                              <div className="space-y-2">
+                                <div className="flex items-center gap-2 text-muted-foreground text-sm sm:text-base">
+                                  <MapPin className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                                  <span>{event.venue}</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-muted-foreground text-sm sm:text-base">
+                                  <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                                  <span>${event.price.toString()}</span>
+                                </div>
                               </div>
                             </div>
-                            <div className="space-y-2">
-                              <div className="flex items-center gap-2 text-muted-foreground">
-                                <MapPin className="h-4 w-4" />
-                                <span>{event.venue}</span>
-                              </div>
-                              <div className="flex items-center gap-2 text-muted-foreground">
-                                <DollarSign className="h-4 w-4" />
-                                <span>${event.price.toString()}</span>
-                              </div>
+                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0 pt-2">
+                              <p className="text-xs sm:text-sm text-muted-foreground order-2 sm:order-1">
+                                {event.availableSeats} seats available
+                              </p>
+                              <Button className="w-full sm:w-auto order-1 sm:order-2" asChild>
+                                <Link href={`/booking/${event.id}`}>Book Tickets</Link>
+                              </Button>
                             </div>
                           </div>
-                          <div className="flex justify-between items-center">
-                            <p className="text-sm text-muted-foreground">
-                              {event.availableSeats} seats available
-                            </p>
-                            <Button asChild>
-                              <Link href={`/booking/${event.id}`}>Book Tickets</Link>
-                            </Button>
-                          </div>
                         </div>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                ))
-              )}
-            </motion.div>
-          </div>
+                      </DialogContent>
+                    </Dialog>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
