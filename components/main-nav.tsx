@@ -49,7 +49,7 @@ const routes = [
   },
   {
     href: "/events",
-    label: "Events",
+    label: "Categories",
     icon: Calendar,
   },
   {

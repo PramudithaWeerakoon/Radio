@@ -103,7 +103,7 @@ export function Footer() {
               </li>
               <li>
                 <Link href="/events" className="text-gray-400 hover:text-white transition">
-                  Events
+                  Categories
                 </Link>
               </li>
               <li>
