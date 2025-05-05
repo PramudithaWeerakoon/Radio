@@ -62,8 +62,8 @@ export async function POST(request: Request) {
         
         // For admin users, add a simple admin token cookie that's easy to check in middleware
         if (user.role === 'admin') {
-          // Add a second cookie specifically for admin access - updated for development compatibility
-          const adminCookie = `admin_token=true; Path=/; HttpOnly; ${process.env.NODE_ENV === 'production' ? 'Secure; SameSite=None;' : 'SameSite=Lax;'} Max-Age=${60 * 60 * 24 * 7}`;
+          // Add a second cookie specifically for admin access - updated for Netlify compatibility
+          const adminCookie = `admin_token=true; Path=/; HttpOnly; SameSite=None; Secure; Max-Age=${60 * 60 * 24 * 7}`;
           
           // Append the admin cookie to existing cookies
           const existingCookies = response.headers.get('Set-Cookie');
@@ -121,8 +121,8 @@ export async function POST(request: Request) {
     
     // For admin users, add a simple admin token cookie that's easy to check in middleware
     if (user.role === 'admin') {
-      // Add a second cookie specifically for admin access - updated for development compatibility
-      const adminCookie = `admin_token=true; Path=/; HttpOnly; ${process.env.NODE_ENV === 'production' ? 'Secure; SameSite=None;' : 'SameSite=Lax;'} Max-Age=${60 * 60 * 24 * 7}`;
+      // Add a second cookie specifically for admin access - updated for Netlify compatibility
+      const adminCookie = `admin_token=true; Path=/; HttpOnly; SameSite=None; Secure; Max-Age=${60 * 60 * 24 * 7}`;
       
       // Append the admin cookie to existing cookies
       const existingCookies = response.headers.get('Set-Cookie');
