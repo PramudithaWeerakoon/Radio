@@ -250,6 +250,9 @@ model Hire {
   status        String   @default("pending") // pending, confirmed, cancelled
   contactName   String
   contactEmail  String
+  contactMobile String?  // Made optional for existing records
+  lineup        String?  // New field for lineup selection
+  musicalOffering String? // New field for musical offering selection
   preferredDate DateTime
   description   String
   imageName     String[] @default([])

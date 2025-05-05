@@ -7,6 +7,9 @@ type HireRequest = {
   userId: string;
   contactName: string;
   contactEmail: string;
+  contactMobile: string;
+  lineup: string;
+  musicalOffering: string;
   preferredDate: string;
   description: string;
   paymentMethod: string;
@@ -18,9 +21,9 @@ export async function POST(request: Request) {
 
     const body: HireRequest = await request.json();
     // Validate required fields
-    const {contactName, contactEmail, preferredDate, description } = body;
+    const {contactName, contactEmail, contactMobile, lineup, musicalOffering, preferredDate, description } = body;
     
-    if (!contactName || !contactEmail || !preferredDate || !description) {
+    if (!contactName || !contactEmail || !contactMobile || !preferredDate || !description) {
       return NextResponse.json(
         { success: false, message: "Missing required fields" },
         { status: 400 }
@@ -57,10 +60,13 @@ export async function POST(request: Request) {
           userId: user_document?.id,
           contactName,
           contactEmail,
+          contactMobile,
+          lineup,
+          musicalOffering,
           preferredDate: new Date(preferredDate),
           description,
-          payment: false, // Assuming payment was successful
-          status: "pending" // Set status to confirmed if payment successful
+          payment: false,
+          status: "pending"
         }
       });
       

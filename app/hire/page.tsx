@@ -24,7 +24,8 @@ import {
     CalendarIcon,
     CreditCard,
     UploadCloud,
-    AlertCircle
+    AlertCircle,
+    Phone
 } from "lucide-react";
 import {
     Dialog,
@@ -60,10 +61,18 @@ interface HireData {
     status: string;
     contactName: string;
     contactEmail: string;
+    contactMobile?: string;
+    lineup?: string;
+    musicalOffering?: string;
     preferredDate: string;
     description: string;
     createdAt: string;
     updatedAt: string;
+    imageName?: string[];
+    user?: {
+        name: string;
+        email: string;
+    };
 }
 
 export default function HirePage() {
@@ -85,6 +94,9 @@ export default function HirePage() {
     const [hireForm, setHireForm] = useState({
         contactName: "",
         contactEmail: "",
+        contactMobile: "",
+        lineup: "",
+        musicalOffering: "",
         description: ""
     });
 
@@ -170,6 +182,9 @@ export default function HirePage() {
                 body: JSON.stringify({
                     contactName: hireForm.contactName,
                     contactEmail: hireForm.contactEmail,
+                    contactMobile: hireForm.contactMobile,
+                    lineup: hireForm.lineup,
+                    musicalOffering: hireForm.musicalOffering,
                     preferredDate: selectedDate.toISOString(),
                     description: hireForm.description
                 })
@@ -339,6 +354,9 @@ export default function HirePage() {
         setHireForm({
             contactName: "",
             contactEmail: "",
+            contactMobile: "",
+            lineup: "",
+            musicalOffering: "",
             description: ""
         });
         setSelectedDate(new Date());
@@ -438,25 +456,57 @@ export default function HirePage() {
                                             .map((hire) => (
                                                 <div
                                                     key={hire.id}
-                                                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-slate-50 cursor-pointer"
+                                                    className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border rounded-lg hover:bg-slate-50 cursor-pointer"
                                                     onClick={() => viewHireDetails(hire)}
                                                 >
-                                                    <div className="flex items-center">
+                                                    <div className="flex items-start sm:items-center w-full sm:w-auto mb-2 sm:mb-0">
                                                         <div className="mr-4">
                                                             {getStatusIcon(hire.status)}
                                                         </div>
-                                                        <div>
-                                                            <h3 className="font-medium">{hire.contactName}</h3>
-                                                            <p className="text-sm text-muted-foreground">
-                                                                {format(new Date(hire.preferredDate), "PPP")}
-                                                            </p>
+                                                        <div className="flex-grow">
+                                                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-1">
+                                                                <h3 className="font-medium">{hire.contactName}</h3>
+                                                                <span className="text-xs text-muted-foreground sm:ml-2">ID: {hire.id}</span>
+                                                            </div>
+                                                            <div className="flex flex-col sm:flex-row text-sm text-muted-foreground gap-2 sm:gap-4">
+                                                                <p className="flex items-center">
+                                                                    <Calendar className="h-3 w-3 mr-1 flex-shrink-0"/>
+                                                                    {format(new Date(hire.preferredDate), "PPP")}
+                                                                </p>
+                                                                {hire.lineup && (
+                                                                    <p className="flex items-center">
+                                                                        {hire.lineup === 'male_female_vocalists' ? 'Vocalists' :
+                                                                         hire.lineup === 'strings' ? 'Strings' :
+                                                                         hire.lineup === 'wind' ? 'Wind' :
+                                                                         hire.lineup === 'keys' ? 'Keys' :
+                                                                         hire.lineup === 'percussion' ? 'Percussion' :
+                                                                         hire.lineup === 'dj' ? 'DJ' :
+                                                                         'Custom'}
+                                                                    </p>
+                                                                )}
+                                                                {hire.contactMobile && (
+                                                                    <p className="flex items-center">
+                                                                        <Phone className="h-3 w-3 mr-1 flex-shrink-0"/>
+                                                                        {hire.contactMobile}
+                                                                    </p>
+                                                                )}
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                    <div className="flex items-center">
-                            <span
-                                className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadgeColor(hire.status)}`}>
-                              {hire.status.charAt(0).toUpperCase() + hire.status.slice(1)}
-                            </span>
+                                                    <div className="flex items-center gap-3 self-end sm:self-center">
+                                                        {hire.payment ? (
+                                                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                                Paid
+                                                            </span>
+                                                        ) : (
+                                                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                                                Unpaid
+                                                            </span>
+                                                        )}
+                                                        <span
+                                                            className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadgeColor(hire.status)}`}>
+                                                          {hire.status.charAt(0).toUpperCase() + hire.status.slice(1)}
+                                                        </span>
                                                         <Button variant="ghost" size="icon" className="ml-2">
                                                             <span className="sr-only">View details</span>
                                                             <svg width="15" height="15" viewBox="0 0 15 15" fill="none"
@@ -517,6 +567,65 @@ export default function HirePage() {
                                         required
                                     />
                                 </div>
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="contactMobile">Contact Mobile Number</Label>
+                                <div className="relative">
+                                    <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground"/>
+                                    <Input
+                                        id="contactMobile"
+                                        type="tel"
+                                        className="pl-10"
+                                        placeholder="Your mobile number"
+                                        value={hireForm.contactMobile}
+                                        onChange={(e) => setHireForm({...hireForm, contactMobile: e.target.value})}
+                                        required
+                                    />
+                                </div>
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="lineup">Our Lineup</Label>
+                                <Select
+                                    value={hireForm.lineup}
+                                    onValueChange={(value) => setHireForm({...hireForm, lineup: value})}
+                                    required
+                                >
+                                    <SelectTrigger id="lineup">
+                                        <SelectValue placeholder="Select lineup options" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="male_female_vocalists">Male & Female Vocalists</SelectItem>
+                                        <SelectItem value="strings">Violinist, Cellist</SelectItem>
+                                        <SelectItem value="wind">Saxophonist, Flutist</SelectItem>
+                                        <SelectItem value="keys">Pianist, Keyboardist</SelectItem>
+                                        <SelectItem value="percussion">Drummer, Live Percussionists</SelectItem>
+                                        <SelectItem value="dj">DJ Music</SelectItem>
+                                        <SelectItem value="custom">Custom Lineup</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="musicalOffering">Our Musical Offering</Label>
+                                <Select
+                                    value={hireForm.musicalOffering}
+                                    onValueChange={(value) => setHireForm({...hireForm, musicalOffering: value})}
+                                    required
+                                >
+                                    <SelectTrigger id="musicalOffering">
+                                        <SelectValue placeholder="Select musical style" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="classical">Classical Music</SelectItem>
+                                        <SelectItem value="pop">Pop</SelectItem>
+                                        <SelectItem value="jazz">Jazz</SelectItem>
+                                        <SelectItem value="sri_lankan">Sri Lankan Classics & Instrumentals</SelectItem>
+                                        <SelectItem value="background">Background Music</SelectItem>
+                                        <SelectItem value="party">High-Energy Party Sets</SelectItem>
+                                        <SelectItem value="themed">Themed Music Nights</SelectItem>
+                                        <SelectItem value="meditation">Meditation Music Therapy</SelectItem>
+                                        <SelectItem value="custom">Custom Style</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="preferredDate">Preferred Date</Label>
@@ -608,8 +717,52 @@ export default function HirePage() {
                                         <Mail className="h-4 w-4 mr-2"/>
                                         {activeHire.contactEmail}
                                     </p>
+                                    {activeHire.contactMobile && (
+                                        <p className="flex items-center text-sm mt-1">
+                                            <Phone className="h-4 w-4 mr-2"/>
+                                            {activeHire.contactMobile}
+                                        </p>
+                                    )}
                                 </div>
                                 <Separator/>
+                                {/* Display lineup information if available */}
+                                {activeHire.lineup && (
+                                    <>
+                                        <div>
+                                            <h3 className="font-medium mb-1">Lineup</h3>
+                                            <p className="text-sm">
+                                                {activeHire.lineup === 'male_female_vocalists' ? 'Male & Female Vocalists' :
+                                                 activeHire.lineup === 'strings' ? 'Violinist, Cellist' :
+                                                 activeHire.lineup === 'wind' ? 'Saxophonist, Flutist' :
+                                                 activeHire.lineup === 'keys' ? 'Pianist, Keyboardist' :
+                                                 activeHire.lineup === 'percussion' ? 'Drummer, Live Percussionists' :
+                                                 activeHire.lineup === 'dj' ? 'DJ Music' :
+                                                 activeHire.lineup}
+                                            </p>
+                                        </div>
+                                        <Separator/>
+                                    </>
+                                )}
+                                {/* Display musical offering information if available */}
+                                {activeHire.musicalOffering && (
+                                    <>
+                                        <div>
+                                            <h3 className="font-medium mb-1">Musical Offering</h3>
+                                            <p className="text-sm">
+                                                {activeHire.musicalOffering === 'classical' ? 'Classical Music' :
+                                                 activeHire.musicalOffering === 'pop' ? 'Pop' :
+                                                 activeHire.musicalOffering === 'jazz' ? 'Jazz' :
+                                                 activeHire.musicalOffering === 'sri_lankan' ? 'Sri Lankan Classics & Instrumentals' :
+                                                 activeHire.musicalOffering === 'background' ? 'Background Music' :
+                                                 activeHire.musicalOffering === 'party' ? 'High-Energy Party Sets' :
+                                                 activeHire.musicalOffering === 'themed' ? 'Themed Music Nights' :
+                                                 activeHire.musicalOffering === 'meditation' ? 'Meditation Music Therapy' :
+                                                 activeHire.musicalOffering}
+                                            </p>
+                                        </div>
+                                        <Separator/>
+                                    </>
+                                )}
                                 <div>
                                     <h3 className="font-medium mb-1">Preferred Date</h3>
                                     <p className="flex items-center text-sm">

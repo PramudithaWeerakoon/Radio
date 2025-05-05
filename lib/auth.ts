@@ -41,11 +41,11 @@ export const createUserSession = (user: UserPayload) => {
   
   const encrypted = encrypt(data);
   
-  // Set cookie options - updated for Netlify compatibility
+  // Set cookie options - updated for development and production compatibility
   const cookieOptions = {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'none' as const, // Changed from 'lax' to 'none' for cross-domain
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' as const : 'lax' as const,
     maxAge: 60 * 60 * 24 * 7, // 7 days
     path: '/',
   };
@@ -59,7 +59,7 @@ export const clearUserSession = () => {
   return serialize('authUser', '', {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'none' as const, // Changed from 'lax' to 'none' for cross-domain
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' as const : 'lax' as const,
     maxAge: -1,
     path: '/',
   });
