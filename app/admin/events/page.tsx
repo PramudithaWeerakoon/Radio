@@ -11,8 +11,7 @@ import { toast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
 
 export default function AdminEventsPage() {
-  const [searchQuery, setSearchQuery] = useState("");
-  interface Event {
+  const [searchQuery, setSearchQuery] = useState("");  interface Event {
     id: string;
     title: string;
     date: string;
@@ -23,6 +22,7 @@ export default function AdminEventsPage() {
     imageData?: string;
     imageUrl?: string | null;
     hasImage?: boolean;
+    category?: string;
   }
 
   const [events, setEvents] = useState<Event[]>([]);
@@ -121,26 +121,40 @@ export default function AdminEventsPage() {
     }
   };
 
+  // Format category name
+  const formatCategory = (categoryId: string) => {
+    const categories = {
+      "hotel-lounges": "Hotel Lounges & Bars",
+      "theme-nights": "Weekly Theme Nights",
+      "private-corporate": "Private & Corporate Functions",
+      "weddings": "Wedding Receptions",
+      "seasonal": "Seasonal Festivals",
+      "others": "Other Events"
+    };
+    return categories[categoryId as keyof typeof categories] || "Other Events";
+  };
+
   const filteredEvents = events.filter(event =>
     event.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center space-x-4">
-        <Link href="/admin">
+      <div className="flex items-center space-x-4">        <Link href="/admin">
           <Button variant="ghost" size="icon">
             <ArrowLeft className="h-4 w-4" />
           </Button>
         </Link>
-        <h1 className="text-3xl font-bold">Events</h1>
+        <div>
+          <h1 className="text-3xl font-bold">Event Portfolio</h1>
+          <p className="text-muted-foreground mt-1">Past events and performances</p>
+        </div>
       </div>
 
-      <div className="flex justify-end">
-        <Link href="/admin/events/new">
+      <div className="flex justify-end">        <Link href="/admin/events/new">
           <Button>
             <Plus className="mr-2 h-4 w-4" />
-            Add Event
+            Document Event
           </Button>
         </Link>
       </div>
@@ -200,20 +214,20 @@ export default function AdminEventsPage() {
                     <div className="space-y-4">
                       <div className="flex justify-between items-start">
                         <div>
-                          <h3 className="text-xl font-semibold">{event.title}</h3>
-                          <div className="grid grid-cols-2 gap-4 mt-2">
-                            <div className="flex items-center text-muted-foreground">
+                          <h3 className="text-xl font-semibold">{event.title}</h3>                          <div className="grid grid-cols-2 gap-4 mt-2">                            <div className="flex items-center text-muted-foreground">
                               <Calendar className="mr-2 h-4 w-4" />
-                              {formatEventDate(event.date)} at {extractTimeFromDate(event.date)}
+                              {formatEventDate(event.date)}
                             </div>
                             <div className="flex items-center text-muted-foreground">
                               <MapPin className="mr-2 h-4 w-4" />
                               {event.venue}
                             </div>
-                            <div className="flex items-center text-muted-foreground">
-                              <DollarSign className="mr-2 h-4 w-4" />
-                              ${event.price.toFixed(2)}
-                            </div>
+                            {event.category && (
+                              <div className="flex items-center text-muted-foreground">
+                                <span className="inline-block h-3 w-3 rounded-full bg-primary mr-2"></span>
+                                {formatCategory(event.category)}
+                              </div>
+                            )}
                           </div>
                         </div>
                         <div className="flex gap-2">
@@ -236,10 +250,9 @@ export default function AdminEventsPage() {
                             )}
                           </Button>
                         </div>
-                      </div>
-                      <div className="flex justify-between items-center pt-4 border-t">
+                      </div>                      <div className="flex justify-between items-center pt-4 border-t">
                         <span className="text-sm text-muted-foreground">
-                          {event.availableSeats} seats available
+                          {formatCategory(event.category || 'others')}
                         </span>
                         <Link href={`/events/${event.id}`}>
                           <Button variant="outline">View Details</Button>

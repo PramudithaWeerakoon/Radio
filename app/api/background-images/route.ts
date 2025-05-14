@@ -3,11 +3,14 @@ import { prisma } from '@/lib/db';
 import { optimizeImage, generateBlurPlaceholder } from '@/lib/image-utils';
 
 // Get all background images
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const showAll = searchParams.get('all') === 'true'; // Get 'all' query parameter
+    
     const backgroundImages = await prisma.backgroundImage.findMany({
       where: {
-        isActive: true
+        isActive: showAll ? undefined : true // Only filter by isActive if we're not showing all
       },
       orderBy: {
         order: 'asc'
@@ -50,7 +53,18 @@ export async function GET() {
       }
     }));
     
-    return NextResponse.json({ success: true, images: formattedImages });
+    return NextResponse.json({ 
+      success: true, 
+      images: formattedImages,
+      count: formattedImages.length,
+      timestamp: new Date().toISOString() 
+    }, {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
+    });
   } catch (error) {
     console.error('Failed to fetch background images:', error);
     return NextResponse.json(
@@ -77,13 +91,15 @@ export async function POST(request: Request) {
 
     // Process the uploaded image
     const imageBuffer = Buffer.from(await image.arrayBuffer());
-    
-    // Optimize image before saving to database
+      // Optimize image before saving to database
     const optimizedImageBuffer = await optimizeImage(imageBuffer, {
       width: 1920,
       format: 'jpeg',
       quality: 85
     });
+
+    // Generate blur placeholder for progressive loading
+    const blurPlaceholder = await generateBlurPlaceholder(imageBuffer);
 
     const backgroundImage = await prisma.backgroundImage.create({
       data: {
@@ -95,6 +111,9 @@ export async function POST(request: Request) {
       }
     });
     
+    // Create a data URL to return to the client for immediate display
+    const imageUrl = `data:image/jpeg;base64,${optimizedImageBuffer.toString('base64')}`;
+    
     return NextResponse.json({ 
       success: true, 
       message: 'Background image uploaded successfully',
@@ -103,7 +122,15 @@ export async function POST(request: Request) {
         title: backgroundImage.title,
         order: backgroundImage.order,
         isActive: backgroundImage.isActive,
-        createdAt: backgroundImage.createdAt
+        createdAt: backgroundImage.createdAt,
+        imageUrl, // Return the data URL for immediate use
+        blurDataUrl: blurPlaceholder
+      }
+    }, {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
       }
     });
   } catch (error) {

@@ -73,31 +73,29 @@ export async function PUT(
     
     // Parse FormData
     const formData = await request.formData();
-    
-    // Extract basic event info from form data
+      // Extract basic event info from form data
     const title = formData.get('title') as string;
     const date = formData.get('date') as string;
-    const time = formData.get('time') as string;
     const venue = formData.get('venue') as string;
-    const price = parseFloat(formData.get('price') as string);
-    const availableSeats = parseInt(formData.get('availableSeats') as string);
     const description = formData.get('description') as string;
+    const category = formData.get('category') as string || 'others'; // Default to 'others' if not provided
     const imageRemoved = formData.get('imageRemoved') === 'true';
     
     // Extract image file if it exists
     const imageFile = formData.get('image') as File | null;
-    
-    // Combine date and time into a single DateTime
-    const eventDateTime = new Date(`${date}T${time || '00:00'}`);
+      // Combine date and time into a single DateTime
+    const eventDateTime = new Date(date);
     
     // Prepare the event data for database update
     const eventData: any = {
       title,
       date: eventDateTime,
       venue,
-      price,
-      availableSeats,
+      category,
       description,
+      // Set default values for removed fields
+      price: 0,
+      availableSeats: 0,
     };
     
     // Process image update

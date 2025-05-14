@@ -169,7 +169,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Upcoming Events Section */}
+      {/* Latest Events Section */}
       <section className="py-24 bg-muted">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -180,7 +180,7 @@ export default function Home() {
             className="text-center mb-12"
           >
             <motion.h2 variants={fadeInUp} className="text-4xl font-bold mb-4">
-              Upcoming Events
+              Latest Events
             </motion.h2>
             <motion.p variants={fadeInUp} className="text-xl text-muted-foreground">
               Join us at our next performance
@@ -198,7 +198,7 @@ export default function Home() {
             </div>
           ) : events.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-muted-foreground">No upcoming events found.</p>
+              <p className="text-muted-foreground">No Latest Events found.</p>
             </div>
           ) : (
             <EventScroller events={events} />
@@ -265,7 +265,7 @@ export default function Home() {
                       <p className="text-gray-200">{item.description}</p>
                       <Button
                         variant="outline"
-                        className="mt-4 text-white border-white hover:bg-white hover:text-black transition-colors"
+                        className="mt-4 text-black border-black hover:bg-black hover:text-white transition-colors"
                       >
                         Learn More
                         <ArrowRight className="ml-2 h-4 w-4" />

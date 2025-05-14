@@ -79,7 +79,7 @@ export function EventScroller({ events = [] }: { events?: Event[] }) {
                   <span>{event.venue}</span>
                 </div>
                 <Button asChild className="w-full">
-                  <Link href={`/booking/${event.id}`}>Book Now</Link>
+                  <Link href={`${event.id}`}>View</Link>
                 </Button>
               </div>
             </CardContent>

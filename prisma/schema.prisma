@@ -121,6 +121,7 @@ model Event {
   imageData      Bytes? // Store the actual binary image data
   imageMimeType  String? // Store the image MIME type
   description    String?
+  category       String?  // Added this field for event categories
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }

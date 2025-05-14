@@ -20,6 +20,9 @@ import {
     Download
 } from 'lucide-react';
 import { format } from 'date-fns';
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Button } from "@/components/ui/button";
 
 interface HireData {
     id: number;
@@ -49,10 +52,10 @@ const HireList = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [showImageModal, setShowImageModal] = useState(false);
-    const [selectedImages, setSelectedImages] = useState<{names: string[], urls: string[]}>({names: [], urls: []});
-    const [expandedHireId, setExpandedHireId] = useState<number | null>(null);
+    const [selectedImages, setSelectedImages] = useState<{names: string[], urls: string[]}>({names: [], urls: []});    const [expandedHireId, setExpandedHireId] = useState<number | null>(null);
     const [selectedHire, setSelectedHire] = useState<HireData | null>(null);
     const [showDetailsModal, setShowDetailsModal] = useState(false);
+    const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
     
     // Filter states
     const [statusFilter, setStatusFilter] = useState<string>('all');

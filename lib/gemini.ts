@@ -27,7 +27,7 @@ async function getWebsiteData() {
         }
       }),
       
-      // Get upcoming events (limited to 5)
+      // Get Latest Events (limited to 5)
       prisma.event.findMany({
         where: { date: { gte: new Date() } },
         take: 5,

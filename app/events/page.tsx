@@ -41,37 +41,37 @@ export default function EventsPage() {
       id: "hotel-lounges",
       title: "Hotel Lounges & Bars",
       description: "Live music experiences in elegant hotel settings",
-      image: "https://placehold.co/600x400?text=Hotel+Lounges"
+      image: "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
     },
     {
       id: "theme-nights",
       title: "Weekly Theme Nights",
       description: "Exciting themed music events every week",
-      image: "https://placehold.co/600x400?text=Theme+Nights"
+      image: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
     },
     {
       id: "private-corporate",
       title: "Private & Corporate Functions",
       description: "Exclusive music experiences for your special events",
-      image: "https://placehold.co/600x400?text=Private+Functions"
+      image: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
     },
     {
       id: "weddings",
       title: "Wedding Receptions",
       description: "Make your special day unforgettable with live music",
-      image: "https://placehold.co/600x400?text=Weddings"
+      image: "https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
     },
     {
       id: "seasonal",
       title: "Seasonal Festivals",
       description: "Christmas, New Year, and other seasonal celebrations",
-      image: "https://placehold.co/600x400?text=Seasonal+Festivals"
+      image: "https://images.unsplash.com/photo-1513151233558-d860c5398176?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
     },
     {
       id: "others",
       title: "Others",
       description: "Discover more unique and special music events",
-      image: "https://placehold.co/600x400?text=Other+Events"
+      image: "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
     }
   ];
 

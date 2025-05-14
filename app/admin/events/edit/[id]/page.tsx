@@ -27,23 +27,29 @@ export default function EditEventPage({ params }: EditEventPageProps) {
   const unwrappedParams = use(params);
   const eventId = unwrappedParams.id;
   
-  const router = useRouter();
-  const { toast } = useToast();
+  const router = useRouter();  const { toast } = useToast();
   const [date, setDate] = useState<Date | undefined>();
   const [formData, setFormData] = useState({
     title: "",
-    time: "",
     venue: "",
-    price: "",
-    availableSeats: "",
     description: "",
   });
+  const [category, setCategory] = useState<string>(""); // Track category separately
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Event category definitions - kept in sync with frontend display
+  const eventCategories = [
+    { id: "hotel-lounges", title: "Hotel Lounges & Bars" },
+    { id: "theme-nights", title: "Weekly Theme Nights" },
+    { id: "private-corporate", title: "Private & Corporate Functions" },
+    { id: "weddings", title: "Wedding Receptions" },
+    { id: "seasonal", title: "Seasonal Festivals" },
+    { id: "others", title: "Others" },
+  ];
 
   // Fetch the event data when the page loads
   useEffect(() => {
@@ -57,25 +63,19 @@ export default function EditEventPage({ params }: EditEventPageProps) {
         }
         
         const eventData = await response.json().then(data => data.event);
-        
-        // Format the date and time
+          // Format the date and time
         const eventDate = new Date(eventData.date);
         setDate(eventDate);
-
-        // Extract hours and minutes for the time input, ensuring it works correctly with timezones
-        const hours = eventDate.getHours().toString().padStart(2, '0');
-        const minutes = eventDate.getMinutes().toString().padStart(2, '0');
-        const timeString = `${hours}:${minutes}`;
         
         // Set the form data
         setFormData({
           title: eventData.title,
-          time: timeString,
           venue: eventData.venue,
-          price: eventData.price.toString(),
-          availableSeats: eventData.availableSeats.toString(),
           description: eventData.description || "",
         });
+        
+        // Set category if available
+        setCategory(eventData.category || "others");
         
         // Check if there's an existing image
         if (eventData.imageName) {
@@ -132,7 +132,6 @@ export default function EditEventPage({ params }: EditEventPageProps) {
       fileInputRef.current.value = '';
     }
   };
-
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     
@@ -140,6 +139,15 @@ export default function EditEventPage({ params }: EditEventPageProps) {
       toast({
         title: "Error",
         description: "Please select a date for the event",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!category) {
+      toast({
+        title: "Error",
+        description: "Please select a category for the event",
         variant: "destructive",
       });
       return;
@@ -158,6 +166,9 @@ export default function EditEventPage({ params }: EditEventPageProps) {
       
       // Add date in the required format
       submitData.append("date", date.toISOString().split('T')[0]);
+      
+      // Add category
+      submitData.append("category", category);
       
       // Add image file if selected (a new image)
       if (imageFile) {
@@ -204,14 +215,15 @@ export default function EditEventPage({ params }: EditEventPageProps) {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center space-x-4">
+    <div className="space-y-6">      <div className="flex items-center space-x-4">
         <Link href="/admin/events">
           <Button variant="ghost" size="icon">
             <ArrowLeft className="h-4 w-4" />
           </Button>
         </Link>
-        <h1 className="text-3xl font-bold">Edit Event</h1>
+        <div>          <h1 className="text-3xl font-bold">Edit Event</h1>
+          <p className="text-muted-foreground mt-1">Update your event portfolio entry (past dates are allowed)</p>
+        </div>
       </div>
 
       <Card>
@@ -227,9 +239,7 @@ export default function EditEventPage({ params }: EditEventPageProps) {
                 onChange={handleChange}
                 required
               />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            </div>            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label>Date</Label>
                 <Popover>
@@ -244,31 +254,38 @@ export default function EditEventPage({ params }: EditEventPageProps) {
                         : <span>Pick a date</span>}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
+                  <PopoverContent className="w-auto p-0">                    <Calendar
                       mode="single"
                       selected={date}
                       onSelect={setDate}
                       initialFocus
+                      fromYear={2000}
+                      toYear={2030}
+                      captionLayout="dropdown-buttons"
                     />
                   </PopoverContent>
                 </Popover>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="time">Time</Label>
-                <Input 
-                  id="time" 
-                  name="time" 
-                  type="time"
-                  value={formData.time}
-                  onChange={handleChange}
+                <Label htmlFor="category">Category</Label>
+                <select
+                  id="category"
+                  name="category"
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
                   required
-                />
+                >
+                  <option value="" disabled>Select a category</option>
+                  {eventCategories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.title}
+                    </option>
+                  ))}
+                </select>
               </div>
-            </div>
-
-            <div className="space-y-2">
+            </div>            <div className="space-y-2">
               <Label htmlFor="venue">Venue</Label>
               <Input 
                 id="venue"
@@ -278,35 +295,6 @@ export default function EditEventPage({ params }: EditEventPageProps) {
                 onChange={handleChange}
                 required
               />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="price">Price</Label>
-                <Input 
-                  id="price"
-                  name="price"
-                  type="number"
-                  step="0.01"
-                  placeholder="Enter ticket price"
-                  value={formData.price}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="availableSeats">Available Seats</Label>
-                <Input 
-                  id="availableSeats"
-                  name="availableSeats"
-                  type="number"
-                  placeholder="Enter number of available seats"
-                  value={formData.availableSeats}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
             </div>
 
             <div className="space-y-2">
