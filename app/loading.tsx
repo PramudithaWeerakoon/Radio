@@ -1,8 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Image from "next/image";
-import radioLogo from "../public/radioo.png";
+import { Music } from "lucide-react";
 
 export default function Loading() {
   return (
@@ -18,7 +17,7 @@ export default function Loading() {
           }}
           className="mb-4"
         >
-          <Image src={radioLogo} alt="Radioo Logo" className="h-16 w-16" width={64} height={64} />
+          <Music className="h-12 w-12" />
         </motion.div>
         <motion.p
           initial={{ opacity: 0 }}

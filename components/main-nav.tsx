@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
-import radioLogo from "../public/radioo.png";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { 
@@ -102,7 +101,20 @@ export function MainNav({ user }: MainNavProps) {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">          <Link href="/" className="flex items-center space-x-2">
-            <Image src={radioLogo} alt="Radioo Logo" width={64} height={64} className="h-16 w-16" />
+            <div className="relative h-16 w-16">
+              <Image 
+                src="/radioo.png" 
+                alt="Radioo Logo" 
+                width={64} 
+                height={64} 
+                className="h-full w-full" 
+                priority 
+                onError={(e) => {
+                  // Fallback to a text logo if the image fails to load
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+            </div>
             <span className="font-bold text-xl">Radioo Music</span>
           </Link>
           <div className="hidden md:flex items-center space-x-4">
