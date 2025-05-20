@@ -13,14 +13,24 @@ module.exports = {
     );
 
     return config;
-  },
-  // Optimize CSS loading
+  },  // Optimize CSS loading
   optimizeFonts: true,
   swcMinify: true,  // Image optimization
   images: {
     formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 60,
-    domains: ['images.unsplash.com', 'placehold.co'],
+    domains: ['images.unsplash.com', 'placehold.co', 'www.radioomusic.com', 'radioomusic.com'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
+      {
+        protocol: 'http',
+        hostname: '**',
+      },
+    ],
+    unoptimized: process.env.NODE_ENV === 'production' ? true : false, // Disable optimization in production to ensure static file reference works
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
     imageSizes: [16, 32, 64, 96, 128, 256, 384],
   },
