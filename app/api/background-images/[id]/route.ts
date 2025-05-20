@@ -116,15 +116,21 @@ export async function DELETE(
         { status: 404 }
       );
     }
-    
-    // Then try to delete it
+      // Then try to delete it
     await prisma.backgroundImage.delete({
       where: { id }
     });
     
     return NextResponse.json({ 
       success: true, 
-      message: 'Background image deleted successfully' 
+      message: 'Background image deleted successfully',
+      deletedImageId: id 
+    }, {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
     });
   } catch (error) {
     console.error('Failed to delete background image:', error);

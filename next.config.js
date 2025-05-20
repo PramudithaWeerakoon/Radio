@@ -16,8 +16,7 @@ module.exports = {
   },
   // Optimize CSS loading
   optimizeFonts: true,
-  swcMinify: true,
-  // Image optimization
+  swcMinify: true,  // Image optimization
   images: {
     formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 60,
@@ -39,6 +38,24 @@ module.exports = {
         source: '/_next/image/:path*',
         headers: [
           { key: 'Cache-Control', value: 'public, max-age=86400, s-maxage=31536000, stale-while-revalidate=31536000' }
+        ],
+      },
+      {
+        // Set no-cache headers for all API routes
+        source: '/api/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' },
+          { key: 'Pragma', value: 'no-cache' },
+          { key: 'Expires', value: '0' }
+        ],
+      },
+      {
+        // Specific no-cache headers for background images API
+        source: '/api/background-images/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' },
+          { key: 'Pragma', value: 'no-cache' },
+          { key: 'Expires', value: '0' }
         ],
       }
     ];

@@ -65,13 +65,8 @@ export async function POST(request: Request) {
           // Add a second cookie specifically for admin access - updated for Netlify compatibility
           const adminCookie = `admin_token=true; Path=/; HttpOnly; SameSite=None; Secure; Max-Age=${60 * 60 * 24 * 7}`;
           
-          // Append the admin cookie to existing cookies
-          const existingCookies = response.headers.get('Set-Cookie');
-          if (existingCookies) {
-            response.headers.set('Set-Cookie', [existingCookies, adminCookie].join(', '));
-          } else {
-            response.headers.set('Set-Cookie', adminCookie);
-          }
+          // Use append instead of set to add multiple cookies
+          response.headers.append('Set-Cookie', adminCookie);
         }
         
         return response;
@@ -124,13 +119,8 @@ export async function POST(request: Request) {
       // Add a second cookie specifically for admin access - updated for Netlify compatibility
       const adminCookie = `admin_token=true; Path=/; HttpOnly; SameSite=None; Secure; Max-Age=${60 * 60 * 24 * 7}`;
       
-      // Append the admin cookie to existing cookies
-      const existingCookies = response.headers.get('Set-Cookie');
-      if (existingCookies) {
-        response.headers.set('Set-Cookie', [existingCookies, adminCookie].join(', '));
-      } else {
-        response.headers.set('Set-Cookie', adminCookie);
-      }
+      // Use append instead of set to add multiple cookies
+      response.headers.append('Set-Cookie', adminCookie);
     }
     
     return response;

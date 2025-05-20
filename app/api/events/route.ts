@@ -26,34 +26,30 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     // Parse the form data instead of JSON
-    const formData = await request.formData();
-    
-    // Extract basic event info from form data
+    const formData = await request.formData();    // Extract basic event info from form data
     const title = formData.get('title') as string;
     const date = formData.get('date') as string;
-    const time = formData.get('time') as string;
     const venue = formData.get('venue') as string;
-    const price = parseFloat(formData.get('price') as string);
-    const availableSeats = parseInt(formData.get('availableSeats') as string);
     const description = formData.get('description') as string;
-    
-    // Extract image file if it exists
+    const category = formData.get('category') as string || 'others'; // Default to 'others' if not provided
+      // Extract image file if it exists
     const imageFile = formData.get('image') as File | null;
     
-    // Combine date and time into a single DateTime
-    const eventDateTime = new Date(`${date}T${time || '00:00'}`);
-    
+    // Set date as a DateTime object
+    const eventDateTime = new Date(date);
+      
     // Prepare the event data for database
     const eventData: any = {
       title,
       date: eventDateTime,
       venue,
-      price,
-      availableSeats,
       description,
+      category,
+      // Set default values for removed fields
+      price: 0,
+      availableSeats: 0,
     };
-    
-    // Process image if provided
+      // Process image if provided
     if (imageFile && imageFile instanceof File) {
       // Convert file to binary data for database storage
       const imageBuffer = Buffer.from(await imageFile.arrayBuffer());
@@ -64,14 +60,23 @@ export async function POST(request: Request) {
       eventData.imageMimeType = imageFile.type;
     }
     
+    console.log('Event data to create:', { 
+      ...eventData,
+      imageData: eventData.imageData ? 'Binary data' : null 
+    });
+    
     // Create the event with image data
     const event = await prisma.event.create({
       data: eventData,
     });
     
-    return NextResponse.json(event, { status: 201 });
-  } catch (error) {
+    return NextResponse.json(event, { status: 201 });  } catch (error) {
     console.error('Failed to create event:', error);
+    // Log the detailed error if it's a Prisma error
+    if (error instanceof Error) {
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+    }
     return NextResponse.json(
       { error: 'Failed to create event' },
       { status: 500 }

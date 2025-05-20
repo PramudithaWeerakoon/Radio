@@ -40,13 +40,13 @@ export default function BackgroundImagesPage() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [deleteInProgress, setDeleteInProgress] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
   // Fetch all background images
   useEffect(() => {
     async function fetchImages() {
       try {
         setIsLoading(true);
-        const response = await fetch('/api/background-images');
+        // Add all=true parameter to include inactive images and cache busting timestamp
+        const response = await fetch(`/api/background-images?all=true&t=${Date.now()}`);
         
         if (!response.ok) {
           throw new Error('Failed to fetch background images');
@@ -92,7 +92,6 @@ export default function BackgroundImagesPage() {
       fileInputRef.current.value = '';
     }
   };
-
   // Upload new image
   const handleUpload = async () => {
     if (!imageFile) {
@@ -128,10 +127,15 @@ export default function BackgroundImagesPage() {
         description: 'Background image uploaded successfully',
       });
       
-      // Refresh the image list
-      const updatedResponse = await fetch('/api/background-images');
+      // Refresh the image list with cache busting
+      const updatedResponse = await fetch(`/api/background-images?all=true&t=${Date.now()}`);
       const updatedData = await updatedResponse.json();
       setImages(updatedData.images || []);
+      
+      // Update the hero section
+      if (window.refreshHeroImages && typeof window.refreshHeroImages === 'function') {
+        window.refreshHeroImages();
+      }
       
       // Reset form
       handleRemoveImage();
@@ -147,7 +151,6 @@ export default function BackgroundImagesPage() {
       setIsUploading(false);
     }
   };
-
   // Handle image deletion
   const handleDelete = async (imageId: number) => {
     if (!confirm('Are you sure you want to delete this image? This action cannot be undone.')) {
@@ -158,14 +161,26 @@ export default function BackgroundImagesPage() {
     try {
       const response = await fetch(`/api/background-images/${imageId}`, {
         method: 'DELETE',
+        headers: {
+          'Cache-Control': 'no-cache'
+        }
       });
 
       if (!response.ok) {
         throw new Error('Failed to delete image');
       }
 
+      // Get the result
+      const result = await response.json();
+      
       // Remove the deleted image from state
       setImages((prev) => prev.filter((img) => img.id !== imageId));
+      
+      // Update the hero section by refreshing the window in hero-section.tsx
+      // This will force the hero component to refetch images from the API
+      if (window.refreshHeroImages && typeof window.refreshHeroImages === 'function') {
+        window.refreshHeroImages();
+      }
       
       toast({
         title: 'Success',
@@ -182,7 +197,6 @@ export default function BackgroundImagesPage() {
       setDeleteInProgress(null);
     }
   };
-
   // Toggle image active status
   const handleToggleActive = async (imageId: number, currentStatus: boolean) => {
     try {
@@ -190,6 +204,7 @@ export default function BackgroundImagesPage() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache',
         },
         body: JSON.stringify({
           isActive: !currentStatus,
@@ -209,6 +224,11 @@ export default function BackgroundImagesPage() {
         )
       );
       
+      // Refresh the hero section
+      if (window.refreshHeroImages && typeof window.refreshHeroImages === 'function') {
+        window.refreshHeroImages();
+      }
+      
       toast({
         title: 'Success',
         description: `Image ${!currentStatus ? 'activated' : 'deactivated'} successfully`,
@@ -222,7 +242,6 @@ export default function BackgroundImagesPage() {
       });
     }
   };
-
   // Change image order
   const handleChangeOrder = async (imageId: number, direction: 'up' | 'down') => {
     const currentIndex = images.findIndex(img => img.id === imageId);
@@ -242,6 +261,7 @@ export default function BackgroundImagesPage() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache',
         },
         body: JSON.stringify({
           order: targetImage.order,
@@ -253,6 +273,7 @@ export default function BackgroundImagesPage() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache',
         },
         body: JSON.stringify({
           order: images[currentIndex].order,
@@ -270,6 +291,11 @@ export default function BackgroundImagesPage() {
       }));
       
       setImages(reorderedImages);
+      
+      // Refresh the hero section to reflect the new order
+      if (window.refreshHeroImages && typeof window.refreshHeroImages === 'function') {
+        window.refreshHeroImages();
+      }
       
       toast({
         title: 'Success',
@@ -386,11 +412,9 @@ export default function BackgroundImagesPage() {
                 transition={{ delay: index * 0.1 }}
               >
                 <Card>
-                  <CardContent className="p-6">
-                    <div className="grid md:grid-cols-[200px,1fr] gap-6">
-                      <div
+                  <CardContent className="p-6">                    <div className="grid md:grid-cols-[200px,1fr] gap-6">                      <div
                         className="h-40 bg-cover bg-center rounded-lg"
-                        style={{ backgroundImage: `url(${image.imageUrl})` }}
+                        style={{ backgroundImage: `url(${image.imageUrl.startsWith('data:') ? image.imageUrl : `${image.imageUrl}${image.imageUrl.includes('?') ? '&' : '?'}t=${Date.now()}`})` }}
                       />
                       <div className="space-y-4">
                         <div className="flex justify-between items-start">

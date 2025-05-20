@@ -1,11 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+
+// Extend the Window interface to include refreshHeroImages
+declare global {
+  interface Window {
+    refreshHeroImages?: () => void;
+  }
+}
 
 interface BackgroundImage {
   id: number;
@@ -19,27 +26,64 @@ export function HeroSection() {
   const [backgroundImages, setBackgroundImages] = useState<BackgroundImage[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [timestamp, setTimestamp] = useState(Date.now());
 
-  // Fetch background images
-  useEffect(() => {
-    async function fetchBackgroundImages() {
-      try {
-        setIsLoading(true);
-        const response = await fetch('/api/background-images');
+  // Function to fetch background images with cache busting
+  const fetchBackgroundImages = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      // Add cache busting timestamp to the query
+      const response = await fetch(`/api/background-images?t=${Date.now()}`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Fetched background images:', data.images?.length || 0);
         
-        if (response.ok) {
-          const data = await response.json();
-          setBackgroundImages(data.images || []);
+        if (data.images && data.images.length > 0) {
+          // Ensure we don't modify the data URLs in any way
+          const processedImages = data.images.map((img: BackgroundImage) => ({
+            ...img,
+            // Remove any timestamp parameters that might have been appended to data URLs
+            imageUrl: img.imageUrl.startsWith('data:') && img.imageUrl.includes('?') 
+              ? img.imageUrl.split('?')[0] 
+              : img.imageUrl
+          }));
+          setBackgroundImages(processedImages);
+          setTimestamp(Date.now()); // Update timestamp for cache busting
+        } else {
+          console.warn('No background images returned from API');
         }
-      } catch (error) {
-        console.error('Error fetching background images:', error);
-      } finally {
-        setIsLoading(false);
+      } else {
+        console.error('Failed to fetch background images:', response.status, response.statusText);
       }
+    } catch (error) {
+      console.error('Error fetching background images:', error);
+    } finally {
+      setIsLoading(false);
     }
-
-    fetchBackgroundImages();
   }, []);
+
+  // Expose the refresh function to the window for cross-component access
+  useEffect(() => {
+    // Make the function available globally
+    window.refreshHeroImages = fetchBackgroundImages;
+    
+    return () => {
+      window.refreshHeroImages = undefined;
+    };
+  }, [fetchBackgroundImages]);
+
+  // Fetch background images on component mount and set up auto-refresh
+  useEffect(() => {
+    fetchBackgroundImages();
+    
+    // Set up an auto-refresh interval to check for new images every 30 seconds
+    const refreshInterval = setInterval(() => {
+      fetchBackgroundImages();
+    }, 30000);
+    
+    return () => clearInterval(refreshInterval);
+  }, [fetchBackgroundImages]);
 
   // Slideshow effect for multiple images
   useEffect(() => {
@@ -54,10 +98,11 @@ export function HeroSection() {
 
   // Default background image if none from database
   const defaultBackgroundImage = "https://images.unsplash.com/photo-1501612780327-45045538702b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=75";
-  
-  // Current background image
+    // Current background image with cache-busting timestamp - properly handle data URLs
   const currentBackground = backgroundImages.length > 0 
-    ? backgroundImages[currentImageIndex].imageUrl
+    ? backgroundImages[currentImageIndex].imageUrl.startsWith('data:') 
+      ? backgroundImages[currentImageIndex].imageUrl  // Don't add timestamp to data URLs
+      : `${backgroundImages[currentImageIndex].imageUrl}${backgroundImages[currentImageIndex].imageUrl.includes('?') ? '&' : '?'}t=${timestamp}`
     : defaultBackgroundImage;
 
   // Current blur placeholder
@@ -70,7 +115,7 @@ export function HeroSection() {
       {/* Background image with Next.js Image for optimization */}
       <div className="absolute inset-0 w-full h-full">
         <motion.div
-          key={currentImageIndex}
+          key={`${currentImageIndex}-${timestamp}`}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -113,7 +158,12 @@ export function HeroSection() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">  
             <Link href="/events">
-              <Button size="lg" variant="outline" className="text-black border-black hover:bg-white/20 w-full sm:w-auto">
+              <Button size="lg" className="bg-white text-black hover:bg-white/90 w-full sm:w-auto">
+                Upcoming Events
+              </Button>
+            </Link>
+            <Link href="/music">
+              <Button size="lg" variant="outline" className="text-white border-white hover:bg-white/20 w-full sm:w-auto">
                 Explore Our Music
               </Button>
             </Link>
