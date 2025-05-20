@@ -1,6 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
+import radioLogo from "../public/radioo.png";
 
 export default function Loading() {
   return (
@@ -16,7 +18,7 @@ export default function Loading() {
           }}
           className="mb-4"
         >
-          <img src="/radioo.png" alt="Radioo Logo" className="h-16 w-16" />
+          <Image src={radioLogo} alt="Radioo Logo" className="h-16 w-16" width={64} height={64} />
         </motion.div>
         <motion.p
           initial={{ opacity: 0 }}

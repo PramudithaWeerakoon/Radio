@@ -157,13 +157,9 @@ export function HeroSection() {
             Join us on a musical journey that transcends boundaries and connects souls.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">  
+            
             <Link href="/events">
-              <Button size="lg" className="bg-white text-black hover:bg-white/90 w-full sm:w-auto">
-                Upcoming Events
-              </Button>
-            </Link>
-            <Link href="/music">
-              <Button size="lg" variant="outline" className="text-white border-white hover:bg-white/20 w-full sm:w-auto">
+              <Button size="lg" variant="outline" className="text-black border-black hover:bg-white/20 w-full sm:w-auto">
                 Explore Our Music
               </Button>
             </Link>
