@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -26,7 +26,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { toast } from "@/components/ui/use-toast";
 import { motion } from "framer-motion";
 
 interface UserData {
@@ -34,6 +33,10 @@ interface UserData {
   name: string;
   email: string;
   role: string;
+}
+
+interface MainNavProps {
+  user: UserData | null;
 }
 
 const routes = [
@@ -64,111 +67,43 @@ const routes = [
   },
 ];
 
-export function MainNav() {
+export function MainNav({ user }: MainNavProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [user, setUser] = useState<UserData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [authChecked, setAuthChecked] = useState(false);
 
-  // Check authentication status whenever route changes
-  useEffect(() => {
-    fetchUser();
-  }, [pathname]); // Re-check when pathname changes
-
-  // Fetch user data
-  async function fetchUser() {
-    try {
-      setIsLoading(true);
-      const response = await fetch('/api/auth/me', {
-        method: 'GET',
-        headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0'
-        },
-        credentials: 'include', // Critical for sending cookies with the request
-        cache: 'no-store',
-        next: { revalidate: 0 }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setUser(data.user);
-        console.log("User authenticated:", data.user);
-      } else {
-        console.log("Authentication failed:", response.status);
-        setUser(null);
-      }
-    } catch (error) {
-      console.error('Error fetching user:', error);
-      setUser(null);
-    } finally {
-      setIsLoading(false);
-      setAuthChecked(true);
-    }
-  }
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
 
   // Handle logout
   const handleLogout = async () => {
     try {
       const response = await fetch('/api/auth/logout', {
         method: 'POST',
-        credentials: 'include', // Critical for including cookies with the request
+        credentials: 'include',
         headers: {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
         }
       });
-      
       if (response.ok) {
-        setUser(null);
-        toast({
-          title: "Success",
-          description: "You have been logged out",
-        });
+        // Optionally, you can refresh the page or redirect
         router.push('/');
         router.refresh();
       }
     } catch (error) {
-      console.error('Error logging out:', error);
-      toast({
-        title: "Error",
-        description: "Failed to log out",
-        variant: "destructive",
-      });
+      // Optionally, show a toast or error
     }
   };
-
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
-
-  // Add this function that can be called after successful login
-  const refreshUserData = () => {
-    fetchUser();
-  };
-
-  // Expose the refresh function to the window for cross-component access
-  useEffect(() => {
-    // @ts-ignore
-    window.refreshNavAuth = refreshUserData;
-    
-    return () => {
-      // @ts-ignore
-      window.refreshNavAuth = undefined;
-    };
-  }, []);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center space-x-2">
-            <Music className="h-6 w-6" />
+            <img src="/radioo.png" alt="Radioo Logo" className="h-16 w-16" />
             <span className="font-bold text-xl">Radioo Music</span>
           </Link>
-          
           <div className="hidden md:flex items-center space-x-4">
             {routes.map((route) => (
               <Button
@@ -186,58 +121,52 @@ export function MainNav() {
                 </Link>
               </Button>
             ))}
-
             {/* User Account Options */}
-            {!isLoading && (
-              user ? (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="gap-2 ml-2">
-                      <UserCircle className="h-4 w-4" />
-                      {user.name}
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => router.push('/account')}>
-                      <User className="mr-2 h-4 w-4" />
-                      <span>My Account</span>
-                    </DropdownMenuItem>
-                    
-                    {/* Only show My Reviews for non-admin users */}
-                    {user.role !== 'admin' && (
-                      <DropdownMenuItem onClick={() => router.push('/reviews/my-reviews')}>
-                        <Star className="mr-2 h-4 w-4" />
-                        <span>My Reviews</span>
-                      </DropdownMenuItem>
-                    )}
-                    
-                    {user.role === 'admin' && (
-                      <>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => router.push('/admin')}>
-                          <Settings className="mr-2 h-4 w-4" />
-                          <span>Admin Dashboard</span>
-                        </DropdownMenuItem>
-                      </>
-                    )}
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleLogout}>
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>Logout</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              ) : (
-                <Link href="/auth/login">
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="gap-2 ml-2">
-                    <LogIn className="h-4 w-4" />
-                    Login
+                    <UserCircle className="h-4 w-4" />
+                    {user.name}
                   </Button>
-                </Link>
-              )
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => router.push('/account')}>
+                    <User className="mr-2 h-4 w-4" />
+                    <span>My Account</span>
+                  </DropdownMenuItem>
+                  {/* Only show My Reviews for non-admin users */}
+                  {user.role !== 'admin' && (
+                    <DropdownMenuItem onClick={() => router.push('/reviews/my-reviews')}>
+                      <Star className="mr-2 h-4 w-4" />
+                      <span>My Reviews</span>
+                    </DropdownMenuItem>
+                  )}
+                  {user.role === 'admin' && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => router.push('/admin')}>
+                        <Settings className="mr-2 h-4 w-4" />
+                        <span>Admin Dashboard</span>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Logout</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Link href="/auth/login">
+                <Button variant="outline" className="gap-2 ml-2">
+                  <LogIn className="h-4 w-4" />
+                  Login
+                </Button>
+              </Link>
             )}
           </div>
-
           {/* Mobile menu button */}
           <div className="flex md:hidden">
             <Button 
@@ -251,7 +180,6 @@ export function MainNav() {
           </div>
         </div>
       </div>
-
       {/* Mobile Navigation */}
       {isMenuOpen && (
         <motion.div 
@@ -275,75 +203,70 @@ export function MainNav() {
                 <span>{route.label}</span>
               </Link>
             ))}
-            
             {/* User Account Options */}
-            {!isLoading && (
-              user ? (
-                <>
-                  <div className="border-t my-2"></div>
+            {user ? (
+              <>
+                <div className="border-t my-2"></div>
+                <Link 
+                  href="/account" 
+                  className="py-2 flex items-center space-x-2 hover:text-primary transition-colors" 
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <User className="h-4 w-4" />
+                  <span>My Account</span>
+                </Link>
+                {/* Only show My Reviews for non-admin users */}
+                {user.role !== 'admin' && (
                   <Link 
-                    href="/account" 
+                    href="/reviews/my-reviews" 
                     className="py-2 flex items-center space-x-2 hover:text-primary transition-colors" 
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    <User className="h-4 w-4" />
-                    <span>My Account</span>
+                    <Star className="h-4 w-4" />
+                    <span>My Reviews</span>
                   </Link>
-                  
-                  {/* Only show My Reviews for non-admin users */}
-                  {user.role !== 'admin' && (
-                    <Link 
-                      href="/reviews/my-reviews" 
-                      className="py-2 flex items-center space-x-2 hover:text-primary transition-colors" 
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      <Star className="h-4 w-4" />
-                      <span>My Reviews</span>
-                    </Link>
-                  )}
-                  
-                  {user.role === 'admin' && (
-                    <Link 
-                      href="/admin" 
-                      className="py-2 flex items-center space-x-2 hover:text-primary transition-colors" 
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      <Settings className="h-4 w-4" />
-                      <span>Admin Dashboard</span>
-                    </Link>
-                  )}
-                  <button 
-                    className="py-2 flex items-center space-x-2 text-left hover:text-primary transition-colors" 
-                    onClick={() => {
-                      handleLogout();
-                      setIsMenuOpen(false);
-                    }}
-                  >
-                    <LogOut className="h-4 w-4" />
-                    <span>Logout</span>
-                  </button>
-                </>
-              ) : (
-                <>
-                  <div className="border-t my-2"></div>
+                )}
+                {user.role === 'admin' && (
                   <Link 
-                    href="/auth/login" 
+                    href="/admin" 
                     className="py-2 flex items-center space-x-2 hover:text-primary transition-colors" 
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    <LogIn className="h-4 w-4" />
-                    <span>Login</span>
+                    <Settings className="h-4 w-4" />
+                    <span>Admin Dashboard</span>
                   </Link>
-                  <Link 
-                    href="/auth/signup" 
-                    className="py-2 flex items-center space-x-2 hover:text-primary transition-colors" 
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <User className="h-4 w-4" />
-                    <span>Sign up</span>
-                  </Link>
-                </>
-              )
+                )}
+                <button 
+                  className="py-2 flex items-center space-x-2 text-left hover:text-primary transition-colors" 
+                  onClick={() => {
+                    handleLogout();
+                    setIsMenuOpen(false);
+                  }}
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>Logout</span>
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="border-t my-2"></div>
+                <Link 
+                  href="/auth/login" 
+                  className="py-2 flex items-center space-x-2 hover:text-primary transition-colors" 
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <LogIn className="h-4 w-4" />
+                  <span>Login</span>
+                </Link>
+                <Link 
+                  href="/auth/signup" 
+                  className="py-2 flex items-center space-x-2 hover:text-primary transition-colors" 
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <User className="h-4 w-4" />
+                  <span>Sign up</span>
+                </Link>
+              </>
             )}
           </nav>
         </motion.div>

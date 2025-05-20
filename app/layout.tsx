@@ -1,10 +1,11 @@
 import './critical.css';
 import './globals.css';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
-import { MainNav } from '@/components/main-nav';
+import MainNavServer from '@/components/main-nav-server';
 import { Footer } from '@/components/footer';
 import Script from 'next/script';
+import ClientLayout from '@/components/ClientLayout';
 
 // Optimize font loading to reduce CLS
 const inter = Inter({ 
@@ -13,11 +14,16 @@ const inter = Inter({
   variable: '--font-inter',
 });
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: '#000000',
+};
+
 export const metadata: Metadata = {
   title: 'Radioo Music - Official Website',
   description: 'Experience the fusion of classical rock and modern elements',
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=5',
-  themeColor: '#000000',
 };
 
 export default function RootLayout({
@@ -30,16 +36,13 @@ export default function RootLayout({
       <head>
         {/* Preload critical assets */}
         <link rel="preconnect" href="https://images.unsplash.com" />
-        <link rel="dns-prefetch" href="https://images.unsplash.com" />
-      </head>
+        <link rel="dns-prefetch" href="https://images.unsplash.com" />      </head>
       <body className={inter.className}>
-        <MainNav />
+        <MainNavServer />
         <div className="pt-16">
           {children}
         </div>
         <Footer />
-        
-        {/* Load non-critical scripts after the page renders */}
         <Script
           src="https://unpkg.com/interactjs/dist/interact.min.js"
           strategy="lazyOnload"

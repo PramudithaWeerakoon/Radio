@@ -265,7 +265,7 @@ export default function Home() {
                       <p className="text-gray-200">{item.description}</p>
                       <Button
                         variant="outline"
-                        className="mt-4 text-white border-white hover:bg-white hover:text-black transition-colors"
+                        className="mt-4 text-black border-black hover:bg-black hover:text-white transition-colors"
                       >
                         Learn More
                         <ArrowRight className="ml-2 h-4 w-4" />
