@@ -87,7 +87,7 @@ export async function GET() {
           trend: getTrend(activeEvents, eventsLastMonth)
         },
         {
-          title: "Band Members",
+          title: "Team Members",
           value: bandMembers.toString(),
           change: membersChange,
           trend: getTrend(bandMembers, membersLastMonth)

@@ -28,6 +28,7 @@ export default function NewMemberPage() {
     },
     joinDate: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -64,6 +65,7 @@ export default function NewMemberPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
       // Create FormData for file upload
       const formDataToSend = new FormData();
@@ -92,7 +94,6 @@ export default function NewMemberPage() {
           title: "Success",
           description: "Member added successfully"
         });
-        // Redirect to the members list page
         router.push("/admin/music/members");
       } else {
         toast({
@@ -100,6 +101,7 @@ export default function NewMemberPage() {
           description: "Failed to add member",
           variant: "destructive"
         });
+        setIsSubmitting(false);
       }
     } catch (error) {
       console.error("Error adding member:", error);
@@ -108,6 +110,7 @@ export default function NewMemberPage() {
         description: "An error occurred. Please try again.",
         variant: "destructive"
       });
+      setIsSubmitting(false);
     }
   };
 
@@ -119,7 +122,7 @@ export default function NewMemberPage() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
         </Link>
-        <h1 className="text-3xl font-bold">Add New Band Member</h1>
+        <h1 className="text-3xl font-bold">Add New Team Member</h1>
       </div>
 
       <Card>
@@ -151,7 +154,7 @@ export default function NewMemberPage() {
               <Label>Role</Label>
               <Input
                 name="role"
-                placeholder="Enter band member role (e.g. Lead Vocals, Drummer)"
+                placeholder="Enter Team member role (e.g. Lead Vocals, Drummer)"
                 value={formData.role}
                 onChange={handleChange}
               />
@@ -233,7 +236,9 @@ export default function NewMemberPage() {
               <Button variant="outline" type="button">
                 Cancel
               </Button>
-              <Button type="submit">Add Member</Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Adding..." : "Add Member"}
+              </Button>
             </div>
           </form>
         </CardContent>

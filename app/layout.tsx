@@ -36,7 +36,9 @@ export default function RootLayout({
       <head>
         {/* Preload critical assets */}
         <link rel="preconnect" href="https://images.unsplash.com" />
-        <link rel="dns-prefetch" href="https://images.unsplash.com" />      </head>
+        <link rel="dns-prefetch" href="https://images.unsplash.com" />
+        <link rel="icon" type="image/png" href="/radioo.png" />
+      </head>
       <body className={inter.className}>
         <MainNavServer />
         <div className="pt-16">

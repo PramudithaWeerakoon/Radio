@@ -57,7 +57,7 @@ const defaultStats = [
     icon: Calendar,
   },
   {
-    title: "Band Members",
+    title: "Team Members",
     value: "0",
     change: "0%",
     trend: "neutral" as const,

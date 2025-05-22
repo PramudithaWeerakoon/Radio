@@ -244,7 +244,7 @@ export function BookingSection() {
           {[{
               icon: Music,
               title: "Versatile Performance",
-              description: "From acoustic sets to full band performances",
+              description: "From acoustic sets to full Team performances",
             },
             {
               icon: MapPin,

@@ -43,7 +43,7 @@ async function getWebsiteData() {
         }
       }),
       
-      // Get band members - using correct model name and fields
+      // Get Team members - using correct model name and fields
       prisma.member.findMany({
         take: 10,
         select: {
@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
         - Music and albums
         - Events and bookings
         - Blog posts and reviews
-        - Band members
+        - Team members
         - Merchandise
         - Contact information
         
@@ -166,7 +166,7 @@ export async function POST(request: NextRequest) {
             - Music and albums
             - Events and bookings
             - Blog posts and reviews
-            - Band members
+            - Team members
             - Merchandise
             - Contact information
             

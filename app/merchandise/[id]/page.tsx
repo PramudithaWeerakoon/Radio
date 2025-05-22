@@ -12,7 +12,7 @@ const product = {
   id: "classic-tee",
   name: "Classic Logo T-Shirt",
   price: 29.99,
-  description: "Our iconic band logo t-shirt, crafted from 100% organic cotton for ultimate comfort and style. Features the Radioo Music emblem in high-quality screen printing that stands the test of time.",
+  description: "Our iconic Team logo t-shirt, crafted from 100% organic cotton for ultimate comfort and style. Features the Radioo Music emblem in high-quality screen printing that stands the test of time.",
   images: [
     "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
     "https://images.unsplash.com/photo-1503342394128-c104d54dba01?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
