@@ -1,66 +1,47 @@
 'use client';
 
 import * as React from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { DayPicker } from 'react-day-picker';
-
+import { DayPicker, SelectSingleEventHandler, DayPickerSingleProps } from 'react-day-picker';
+import 'react-day-picker/dist/style.css';
 import { cn } from '@/lib/utils';
-import { buttonVariants } from '@/components/ui/button';
 
-export type CalendarProps = React.ComponentProps<typeof DayPicker>;
+export type CalendarProps = Omit<DayPickerSingleProps, 'classNames' | 'className'> & {
+  className?: string;
+};
 
-function Calendar({
-  className,
-  classNames,
-  showOutsideDays = true,
-  ...props
-}: CalendarProps) {
+export function Calendar({ className, ...props }: CalendarProps) {
   return (
-    <DayPicker
-      showOutsideDays={showOutsideDays}
-      className={cn('p-3', className)}
-      classNames={{
-        months: 'flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0',
-        month: 'space-y-4',
-        caption: 'flex justify-center pt-1 relative items-center',
-        caption_label: 'text-sm font-medium',
-        nav: 'space-x-1 flex items-center',
-        nav_button: cn(
-          buttonVariants({ variant: 'outline' }),
-          'h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100'
-        ),
-        nav_button_previous: 'absolute left-1',
-        nav_button_next: 'absolute right-1',
-        table: 'w-full border-collapse space-y-1',
-        head_row: 'flex',
-        head_cell:
-          'text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]',
-        row: 'flex w-full mt-2',
-        cell: 'h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20',
-        day: cn(
-          buttonVariants({ variant: 'ghost' }),
-          'h-9 w-9 p-0 font-normal aria-selected:opacity-100'
-        ),
-        day_range_end: 'day-range-end',
-        day_selected:
-          'bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground',
-        day_today: 'bg-accent text-accent-foreground',
-        day_outside:
-          'day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30',
-        day_disabled: 'text-muted-foreground opacity-50',
-        day_range_middle:
-          'aria-selected:bg-accent aria-selected:text-accent-foreground',
-        day_hidden: 'invisible',
-        ...classNames,
-      }}
-      components={{
-        IconLeft: ({ ...props }) => <ChevronLeft className="h-4 w-4" />,
-        IconRight: ({ ...props }) => <ChevronRight className="h-4 w-4" />,
-      }}
-      {...props}
-    />
+    <div className={cn('inline-block rounded-xl bg-white shadow-lg border border-gray-200 p-4', className)}>
+      <DayPicker
+        {...props}
+        classNames={{
+          months: 'flex flex-col',
+          month: 'space-y-2',
+          caption: 'flex justify-between items-center mb-2',
+          nav: 'flex gap-2',
+          nav_button: 'rounded-full p-1 hover:bg-blue-100 text-gray-600',
+          nav_button_previous: 'mr-1',
+          nav_button_next: 'ml-1',
+          table: 'w-full border-collapse',
+          head_row: 'flex',
+          head_cell: 'w-10 h-10 text-center text-xs font-semibold text-gray-400',
+          row: 'flex w-full',
+          cell: 'w-10 h-10 text-center p-0',
+          day: 'w-10 h-10 mx-auto my-1 flex items-center justify-center rounded-full transition-colors duration-150 text-base font-medium text-gray-700 hover:bg-blue-100 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400',
+          day_selected: 'bg-blue-600 text-white font-bold shadow',
+          day_today: 'border-2 border-blue-400',
+          day_outside: 'opacity-0 pointer-events-none',
+          day_disabled: 'text-gray-300 cursor-not-allowed',
+          day_hidden: 'invisible',
+        }}
+        style={{
+          width: '100%',
+          minWidth: 280,
+          maxWidth: 340,
+        }}
+      />
+    </div>
   );
 }
-Calendar.displayName = 'Calendar';
 
-export { Calendar };
+Calendar.displayName = 'Calendar';

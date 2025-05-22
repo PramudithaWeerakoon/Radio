@@ -230,7 +230,7 @@ export default function Home() {
           >
             {[
               {
-                title: "Meet the Band",
+                title: "Meet the Team",
                 description: "Get to know the talented musicians behind Radioo Music",
                 image: "https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
                 link: "/members"
@@ -242,7 +242,7 @@ export default function Home() {
                 link: "/blog"
               },
               {
-                title: "Hire Our Band",
+                title: "Hire Our Team",
                 description: "Book us for your next event and experience live music that will elevate any occasion",
                 image: "https://i.postimg.cc/25mVyPwq/Whats-App-Image-2025-04-15-at-21-31-10-2c838c59.jpg",
                 link: "/hire"

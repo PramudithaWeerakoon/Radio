@@ -111,14 +111,14 @@ export default function MembersPage() {
       // Show success toast
       toast({
         title: "Success",
-        description: "Band member deleted successfully",
+        description: "Team member deleted successfully",
       });
     } catch (err) {
       console.error('Error deleting member:', err);
       // Show error toast
       toast({
         title: "Error",
-        description: "Failed to delete band member",
+        description: "Failed to delete Team member",
         variant: "destructive",
       });
     } finally {
@@ -138,7 +138,7 @@ export default function MembersPage() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
         </Link>
-        <h1 className="text-3xl font-bold">Band Members</h1>
+        <h1 className="text-3xl font-bold">Team Members</h1>
       </div>
 
       <div className="flex justify-end">
@@ -170,7 +170,7 @@ export default function MembersPage() {
         </div>
       ) : filteredMembers.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground">
-          No members found. Add your first band member!
+          No members found. Add your first Team member!
         </div>
       ) : (
         <div className="grid gap-6">

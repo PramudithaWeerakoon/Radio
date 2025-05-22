@@ -119,7 +119,7 @@ export default function NewMemberPage() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
         </Link>
-        <h1 className="text-3xl font-bold">Add New Band Member</h1>
+        <h1 className="text-3xl font-bold">Add New Team Member</h1>
       </div>
 
       <Card>
@@ -151,7 +151,7 @@ export default function NewMemberPage() {
               <Label>Role</Label>
               <Input
                 name="role"
-                placeholder="Enter band member role (e.g. Lead Vocals, Drummer)"
+                placeholder="Enter Team member role (e.g. Lead Vocals, Drummer)"
                 value={formData.role}
                 onChange={handleChange}
               />

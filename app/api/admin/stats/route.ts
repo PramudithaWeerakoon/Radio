@@ -12,7 +12,7 @@ export async function GET() {
     const [
       totalAlbums,
       activeEvents,
-      bandMembers,
+      TeamMembers,
       albumsLastMonth,
       eventsLastMonth,
       membersLastMonth
@@ -62,7 +62,7 @@ export async function GET() {
 
     const albumChange = calculateChange(totalAlbums, albumsLastMonth);
     const eventsChange = calculateChange(activeEvents, eventsLastMonth);
-    const membersChange = calculateChange(bandMembers, membersLastMonth);
+    const membersChange = calculateChange(TeamMembers, membersLastMonth);
 
     // Determine trends
     const getTrend = (current: number, previous: number) => {
@@ -87,10 +87,10 @@ export async function GET() {
           trend: getTrend(activeEvents, eventsLastMonth)
         },
         {
-          title: "Band Members",
-          value: bandMembers.toString(),
+          title: "Team Members",
+          value: TeamMembers.toString(),
           change: membersChange,
-          trend: getTrend(bandMembers, membersLastMonth)
+          trend: getTrend(TeamMembers, membersLastMonth)
         }
       ]
     });

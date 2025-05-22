@@ -24,7 +24,7 @@ async function main() {
         duration: '4:32',
         track_number: 1,
         album_id: album.id,
-        artist: 'The Radio Band',
+        artist: 'The Radio Team',
         isInPlayer: true,
         addedToPlayer: new Date()
       }
@@ -36,7 +36,7 @@ async function main() {
         duration: '3:45',
         track_number: 2,
         album_id: album.id,
-        artist: 'The Radio Band',
+        artist: 'The Radio Team',
         isInPlayer: true,
         addedToPlayer: new Date()
       }
