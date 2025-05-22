@@ -47,7 +47,7 @@ const reviews: Review[] = [
     id: 3,
     user: "Marcus Rodriguez",
     avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-    review: "Been following the Team for years and they keep getting better. The new album is a masterpiece!",
+    review: "Been following the band for years and they keep getting better. The new album is a masterpiece!",
     rating: 5,
     timestamp: "2 weeks ago",
   },

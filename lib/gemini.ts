@@ -11,7 +11,7 @@ async function getWebsiteData() {
     const [
       albums,
       events,
-      TeamMembers,
+      bandMembers,
       blogPosts,
       tracks
     ] = await Promise.all([
@@ -41,7 +41,7 @@ async function getWebsiteData() {
         }
       }),
       
-      // Get Team members
+      // Get band members
       prisma.member.findMany({
         take: 10,
         select: {
@@ -83,7 +83,7 @@ async function getWebsiteData() {
     return JSON.stringify({
       albums,
       events,
-      TeamMembers,
+      bandMembers,
       blogPosts,
       tracks
     }, null, 2);
@@ -107,7 +107,7 @@ export async function getChatResponse(message: string): Promise<string> {
     - Music and albums
     - Events and bookings
     - Blog posts and reviews
-    - Team members
+    - Band members
     - Merchandise
     - Contact information
     

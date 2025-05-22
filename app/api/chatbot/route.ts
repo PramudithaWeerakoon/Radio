@@ -43,7 +43,7 @@ async function getWebsiteData() {
         }
       }),
       
-      // Get Team members - using correct model name and fields
+      // Get band members - using correct model name and fields
       prisma.member.findMany({
         take: 10,
         select: {
@@ -88,7 +88,7 @@ async function getWebsiteData() {
     return {
       albums,
       events,
-      TeamMembers: members.map(member => ({
+      bandMembers: members.map(member => ({
         id: member.id,
         name: `${member.firstName} ${member.lastName}`,
         role: member.role,
@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
         - Music and albums
         - Events and bookings
         - Blog posts and reviews
-        - Team members
+        - Band members
         - Merchandise
         - Contact information
         
@@ -166,7 +166,7 @@ export async function POST(request: NextRequest) {
             - Music and albums
             - Events and bookings
             - Blog posts and reviews
-            - Team members
+            - Band members
             - Merchandise
             - Contact information
             

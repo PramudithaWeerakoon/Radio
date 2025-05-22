@@ -150,13 +150,8 @@ export default function Home() {
                 &quot;Echoes of Tomorrow&quot; - Our most ambitious album yet, featuring a unique blend of classical rock and electronic elements.
               </p>
               <div className="flex gap-4">
-                <Link href="/albums/1">
-                  <Button size="lg" className="bg-white text-black hover:bg-white/90">
-                    Listen Now
-                  </Button>
-                </Link>
                 <Link href="/albums">
-                  <Button size="lg" variant="outline" className="text-white border-white hover:bg-white/20">
+                  <Button size="lg" variant="outline" className="text-black border-white hover:bg-white/20">
                     View All Albums
                   </Button>
                 </Link>
@@ -297,20 +292,20 @@ export default function Home() {
             </motion.p>
             <motion.form
               variants={fadeInUp}
-              className="max-w-md mx-auto flex gap-4"
+              className="max-w-md mx-auto flex flex-col gap-4 sm:flex-row"
               onSubmit={handleSubscribe}
             >
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="flex-1 px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white/50"
+                className="flex-1 px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white/50 min-w-0"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
               <Button 
                 type="submit" 
-                className="bg-white text-black hover:bg-white/90"
+                className="bg-white text-black hover:bg-white/90 w-full sm:w-auto"
                 disabled={isSubscribing}
               >
                 {isSubscribing ? (

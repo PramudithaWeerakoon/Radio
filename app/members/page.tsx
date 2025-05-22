@@ -44,7 +44,7 @@ const fallbackMembers: Member[] = [
     id: 1,
     name: "Alex Rivers",
     role: "Lead Vocals / Guitar",
-    bio: "With over a decade of experience in the music industry, Alex brings powerful vocals and electrifying guitar riffs to the Team. His songwriting has been instrumental in shaping the Team's signature sound.",
+    bio: "With over a decade of experience in the music industry, Alex brings powerful vocals and electrifying guitar riffs to the band. His songwriting has been instrumental in shaping the band's signature sound.",
     image: "https://images.unsplash.com/photo-1463453091185-61582044d556?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
     social: {
       facebook: "https://facebook.com",
@@ -56,7 +56,7 @@ const fallbackMembers: Member[] = [
     id: 2,
     name: "Sarah Chen",
     role: "Lead Guitar",
-    bio: "A classically trained musician turned rock virtuoso, Sarah's innovative guitar techniques and melodic solos have become a cornerstone of the Team's musical identity.",
+    bio: "A classically trained musician turned rock virtuoso, Sarah's innovative guitar techniques and melodic solos have become a cornerstone of the band's musical identity.",
     image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
     social: {
       facebook: "https://facebook.com",
@@ -68,7 +68,7 @@ const fallbackMembers: Member[] = [
     id: 3,
     name: "Marcus Thompson",
     role: "Drums",
-    bio: "The rhythmic foundation of Radioo Music, Marcus brings both power and precision to the drums. His dynamic playing style drives the Team's high-energy performances.",
+    bio: "The rhythmic foundation of Radioo Music, Marcus brings both power and precision to the drums. His dynamic playing style drives the band's high-energy performances.",
     image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
     social: {
       facebook: "https://facebook.com",
@@ -100,7 +100,7 @@ export default function MembersPage() {
           id: member.id,
           name: `${member.firstName} ${member.lastName}`,
           role: member.role,
-          bio: member.bio || "Team member of Radioo Music",
+          bio: member.bio || "Band member of Radioo Music",
           // Add timestamp to prevent caching
           image: `/api/members/${member.id}/image?t=${Date.now()}`,
           social: {
@@ -129,7 +129,7 @@ export default function MembersPage() {
       <div className="min-h-screen bg-background py-12 flex justify-center items-center">
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
-          <p className="text-xl">Loading Team members...</p>
+          <p className="text-xl">Loading band members...</p>
         </div>
       </div>
     );
@@ -144,7 +144,7 @@ export default function MembersPage() {
           className="text-center mb-12"
         >
           <h1 className="text-4xl font-bold tracking-tight text-primary sm:text-5xl mb-4">
-            Meet the Team
+            Meet the Band
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             The talented musicians behind Radioo Music&apos;s unique sound

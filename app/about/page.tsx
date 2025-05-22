@@ -95,7 +95,7 @@ export default function AboutPage() {
               <h3 className="text-2xl font-bold">Our Beginning</h3>
               <p className="text-muted-foreground">
                 What started as jam sessions in a garage quickly evolved into something more.
-                The unique chemistry between Team members and our shared vision for creating
+                The unique chemistry between band members and our shared vision for creating
                 meaningful music set us on an incredible journey.
               </p>
               <p className="text-muted-foreground">
