@@ -267,8 +267,8 @@ export default function EventsPage() {
                               </div>
                             </div>
                             <div className="mt-3 sm:mt-4">
-                              <Button variant="ghost" className="w-full text-sm sm:text-base">
-                                View Details
+                              <Button variant="ghost" className="w-full text-sm sm:text-base" asChild>
+                                <Link href={`/events/${event.id}`}>View Details</Link>
                               </Button>
                             </div>
                           </CardContent>
@@ -312,12 +312,7 @@ export default function EventsPage() {
                               </div>
                             </div>
                             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0 pt-2">
-                              <p className="text-xs sm:text-sm text-muted-foreground order-2 sm:order-1">
-                                {event.availableSeats} seats available
-                              </p>
-                              <Button className="w-full sm:w-auto order-1 sm:order-2" asChild>
-                                <Link href={`/booking/${event.id}`}>Book Tickets</Link>
-                              </Button>
+                           
                             </div>
                           </div>
                         </div>

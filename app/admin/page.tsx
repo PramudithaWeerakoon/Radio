@@ -87,7 +87,7 @@ const quickActions = [
   {
     title: "Content",
     items: [
-      { label: "New Event", href: "/admin/events/new", icon: Calendar },
+      { label: "Categories", href: "/admin/events/new", icon: Calendar },
       
       { label: "New Post", href: "/admin/blog/new", icon: FileText },
       { label: "View Messages", href: "/admin/messages", icon: Mail },
