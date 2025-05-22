@@ -23,6 +23,7 @@ export default function AdminEventsPage() {
     imageUrl?: string | null;
     hasImage?: boolean;
     category?: string;
+    images?: Array<{ id: number; imageName?: string }>;
   }
 
   const [events, setEvents] = useState<Event[]>([]);
@@ -41,15 +42,28 @@ export default function AdminEventsPage() {
         }
         
         const data = await response.json();
-        
-        // Process events to add image URLs for those with database images
-        const eventsWithImages = data.events.map((event: Event) => ({
-          ...event,
-          // If the event has image data, use the API endpoint to fetch it
-          hasImage: !!event.imageName || !!event.imageData,
-          // Add a timestamp to prevent caching issues
-          imageUrl: event.imageName ? `/api/events/${event.id}/image?t=${Date.now()}` : null
-        }));
+          // Process events to add image URLs for those with database images
+        const eventsWithImages = data.events.map((event: Event) => {
+          // Check if the event has gallery images
+          const hasGalleryImages = event.images && Array.isArray(event.images) && event.images.length > 0;
+          
+          let imageUrl = null;
+          // First try to use a gallery image if available
+          if (hasGalleryImages && event.images && event.images[0] && event.images[0].id) {
+            imageUrl = `/api/events/${event.id}/images/${event.images[0].id}?t=${Date.now()}`;
+          } 
+          // Fall back to the main event image if available
+          else if (event.imageName) {
+            imageUrl = `/api/events/${event.id}/image?t=${Date.now()}`;
+          }
+          
+          return {
+            ...event,
+            // If the event has any kind of image data
+            hasImage: !!event.imageName || !!event.imageData || hasGalleryImages,
+            imageUrl
+          };
+        });
         
         setEvents(eventsWithImages || []);
       } catch (error) {
@@ -196,8 +210,7 @@ export default function AdminEventsPage() {
             >
               <Card>
                 <CardContent className="p-6">
-                  <div className="grid md:grid-cols-[200px,1fr] gap-6">
-                    <div
+                  <div className="grid md:grid-cols-[200px,1fr] gap-6">                    <div
                       className="h-40 bg-cover bg-center rounded-lg relative"
                       style={{ 
                         backgroundImage: event.imageUrl 

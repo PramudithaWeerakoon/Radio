@@ -34,12 +34,17 @@ export default function EditEventPage({ params }: EditEventPageProps) {
     venue: "",
     description: "",
   });
-  const [category, setCategory] = useState<string>(""); // Track category separately
-  const [isLoading, setIsLoading] = useState(false);
+  const [category, setCategory] = useState<string>(""); // Track category separately  const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
-  const [imageFile, setImageFile] = useState<File | null>(null);  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
+  const [galleryImages, setGalleryImages] = useState<Array<{ id: number, url: string }>>([]);
+  const [imagesToDelete, setImagesToDelete] = useState<number[]>([]);
+  const [newGalleryImages, setNewGalleryImages] = useState<File[]>([]);
+  const [newGalleryPreviews, setNewGalleryPreviews] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
 
   // Event category definitions - kept in sync with frontend display
   const eventCategories = [
@@ -76,14 +81,23 @@ export default function EditEventPage({ params }: EditEventPageProps) {
         
         // Set category if available
         setCategory(eventData.category || "others");
-        
-        // Check if there's an existing image
+          // Check if there's an existing image
         if (eventData.imageName) {
           // Add timestamp to prevent image caching issues
           const timestamp = Date.now();
           // Set the current image URL to display the existing image
           setCurrentImageUrl(`/api/events/${eventId}/image?t=${timestamp}`);
           setImagePreview(`/api/events/${eventId}/image?t=${timestamp}`);
+        }
+        
+        // Check if there are gallery images
+        if (eventData.images && eventData.images.length > 0) {
+          // Map the gallery images to include URLs
+          const galleryImagesWithUrls = eventData.images.map((img: any) => ({
+            id: img.id,
+            url: `/api/events/${eventId}/images/${img.id}?t=${Date.now()}`
+          }));
+          setGalleryImages(galleryImagesWithUrls);
         }
       } catch (error) {
         console.error('Error fetching event:', error);
@@ -106,7 +120,6 @@ export default function EditEventPage({ params }: EditEventPageProps) {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -122,6 +135,39 @@ export default function EditEventPage({ params }: EditEventPageProps) {
       // Clear the current image URL as we're replacing it
       setCurrentImageUrl(null);
     }
+  };
+
+  const handleGalleryFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const filesArray = Array.from(e.target.files);
+      setNewGalleryImages((prev) => [...prev, ...filesArray]);
+      
+      // Create preview URLs for each file
+      const newPreviews: string[] = [];
+      filesArray.forEach(file => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          newPreviews.push(reader.result as string);
+          if (newPreviews.length === filesArray.length) {
+            setNewGalleryPreviews((prev) => [...prev, ...newPreviews]);
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+  };
+
+  const handleRemoveGalleryImage = (index: number) => {
+    // For new images being uploaded
+    setNewGalleryImages((prev) => prev.filter((_, i) => i !== index));
+    setNewGalleryPreviews((prev) => prev.filter((_, i) => i !== index));
+  };
+  
+  const handleRemoveExistingImage = (imageId: number) => {
+    // Mark image for deletion
+    setImagesToDelete((prev) => [...prev, imageId]);
+    // Remove from displayed gallery
+    setGalleryImages((prev) => prev.filter(img => img.id !== imageId));
   };
 
   const handleRemoveImage = () => {
@@ -169,10 +215,21 @@ export default function EditEventPage({ params }: EditEventPageProps) {
       
       // Add category
       submitData.append("category", category);
-      
-      // Add image file if selected (a new image)
+        // Add image file if selected (a new image)
       if (imageFile) {
         submitData.append("image", imageFile);
+      }
+      
+      // Add gallery images if selected
+      if (newGalleryImages.length > 0) {
+        newGalleryImages.forEach(file => {
+          submitData.append("images", file);
+        });
+      }
+      
+      // Add IDs of images to delete
+      if (imagesToDelete.length > 0) {
+        submitData.append("imagesToDelete", JSON.stringify(imagesToDelete));
       }
       
       // Flag to indicate if image was removed
@@ -295,10 +352,8 @@ export default function EditEventPage({ params }: EditEventPageProps) {
                 onChange={handleChange}
                 required
               />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="image">Event Image</Label>
+            </div>            <div className="space-y-2">
+              <Label htmlFor="image">Main Event Image</Label>
               {imagePreview ? (
                 <div className="relative w-full h-48 bg-slate-100 rounded-md overflow-hidden">
                   <img 
@@ -322,7 +377,7 @@ export default function EditEventPage({ params }: EditEventPageProps) {
                   onClick={() => fileInputRef.current?.click()}
                 >
                   <Upload className="h-8 w-8 text-gray-400" />
-                  <p className="mt-2 text-sm text-gray-500">Click to upload an image</p>
+                  <p className="mt-2 text-sm text-gray-500">Click to upload a main image</p>
                 </div>
               )}
               <Input
@@ -332,6 +387,83 @@ export default function EditEventPage({ params }: EditEventPageProps) {
                 accept="image/*"
                 className="hidden"
                 onChange={handleFileChange}
+              />
+            </div>
+
+            {/* Gallery Images Section */}
+            <div className="space-y-2">
+              <Label htmlFor="gallery-images">Gallery Images</Label>
+              
+              {/* Existing Gallery Images */}
+              {galleryImages.length > 0 && (
+                <div className="mb-4">
+                  <p className="text-sm text-muted-foreground mb-2">Existing Gallery Images:</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    {galleryImages.map((img) => (
+                      <div key={img.id} className="relative h-32 w-full bg-slate-100 rounded-md overflow-hidden">
+                        <img 
+                          src={img.url} 
+                          alt="Gallery image" 
+                          className="w-full h-full object-cover" 
+                        />
+                        <Button 
+                          variant="destructive" 
+                          size="icon" 
+                          className="absolute top-2 right-2 h-6 w-6 rounded-full"
+                          onClick={() => handleRemoveExistingImage(img.id)}
+                          type="button"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* New Gallery Image Previews */}
+              {newGalleryPreviews.length > 0 && (
+                <div className="mb-4">
+                  <p className="text-sm text-muted-foreground mb-2">New Images to Upload:</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    {newGalleryPreviews.map((preview, index) => (
+                      <div key={index} className="relative h-32 w-full bg-slate-100 rounded-md overflow-hidden">
+                        <img 
+                          src={preview} 
+                          alt={`New gallery image ${index}`} 
+                          className="w-full h-full object-cover" 
+                        />
+                        <Button 
+                          variant="destructive" 
+                          size="icon" 
+                          className="absolute top-2 right-2 h-6 w-6 rounded-full"
+                          onClick={() => handleRemoveGalleryImage(index)}
+                          type="button"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Upload New Gallery Images */}
+              <div 
+                className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:bg-gray-50"
+                onClick={() => galleryInputRef.current?.click()}
+              >
+                <Upload className="h-6 w-6 text-gray-400" />
+                <p className="mt-1 text-sm text-gray-500">Click to upload gallery images</p>
+              </div>
+              <Input
+                id="gallery-images"
+                ref={galleryInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={handleGalleryFileChange}
               />
             </div>
 

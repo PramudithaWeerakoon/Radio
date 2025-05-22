@@ -117,13 +117,26 @@ model Event {
   venue          String
   price          Float
   availableSeats Int
-  imageName      String? // Store the uploaded image filename
-  imageData      Bytes? // Store the actual binary image data
-  imageMimeType  String? // Store the image MIME type
+  imageName      String? // Store the uploaded image filename (deprecated, use EventImage)
+  imageData      Bytes? // Store the actual binary image data (deprecated, use EventImage)
+  imageMimeType  String? // Store the image MIME type (deprecated, use EventImage)
   description    String?
   category       String?  // Added this field for event categories
+  youtubeId      String?  // YouTube video ID for the event
+  images         EventImage[] // Relation to multiple images
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+}
+
+model EventImage {
+  id           Int      @id @default(autoincrement())
+  event        Event    @relation(fields: [eventId], references: [id])
+  eventId      Int
+  imageName    String?
+  imageData    Bytes?
+  imageMimeType String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model Blog {

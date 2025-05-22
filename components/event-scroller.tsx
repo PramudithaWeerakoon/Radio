@@ -14,6 +14,7 @@ interface Event {
   venue: string;
   image?: string;
   imageUrl?: string;
+  images?: Array<{ id: number; imageName?: string }>;
 }
 
 // Update the component to accept events as props
@@ -52,12 +53,24 @@ export function EventScroller({ events = [] }: { events?: Event[] }) {
   }, [events]);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {displayEvents.map((event) => {
-        // Prepare the image URL with cache busting if needed
-        const imageUrl = event.imageUrl 
-          ? `${event.imageUrl}${event.imageUrl.includes('?') ? '&' : '?'}t=${imageTimestamp}`
-          : event.image || "https://placehold.co/600x400?text=No+Image";
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">      {displayEvents.map((event) => {
+        // Determine the best image URL to use:
+        // 1. First, try to use the first image from the images collection
+        // 2. If not available, try the main event imageUrl 
+        // 3. Fall back to the generic image or placeholder
+        const hasGalleryImages = event.images && Array.isArray(event.images) && event.images.length > 0;
+        
+        let imageUrl;
+        if (hasGalleryImages && event.images && event.images[0] && event.images[0].id) {
+          // Use the first gallery image
+          imageUrl = `/api/events/${event.id}/images/${event.images[0].id}?t=${imageTimestamp}`;
+        } else if (event.imageUrl) {
+          // Use the main event image
+          imageUrl = `${event.imageUrl}${event.imageUrl.includes('?') ? '&' : '?'}t=${imageTimestamp}`;
+        } else {
+          // Fall back to generic image or placeholder
+          imageUrl = event.image || "https://placehold.co/600x400?text=No+Image";
+        }
           
         return (
           <Card key={event.id} className="overflow-hidden">
@@ -73,13 +86,12 @@ export function EventScroller({ events = [] }: { events?: Event[] }) {
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Calendar className="h-4 w-4" />
                   <span>{new Date(event.date).toLocaleDateString()}</span>
-                </div>
-                <div className="flex items-center gap-2 text-muted-foreground">
+                </div>                <div className="flex items-center gap-2 text-muted-foreground">
                   <MapPin className="h-4 w-4" />
                   <span>{event.venue}</span>
                 </div>
                 <Button asChild className="w-full">
-                  <Link href={`${event.id}`}>View</Link>
+                  <Link href={`/events/${event.id}`}>View</Link>
                 </Button>
               </div>
             </CardContent>

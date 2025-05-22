@@ -1,23 +1,25 @@
-// @ts-nocheck - Ignoring type errors during build
-
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 
 export async function GET(
   request: Request,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string, imageId: string }> }
 ) {
   try {
-    // Get the params directly since Next.js App Router already awaits them
-    const { id } = context.params;
+    // Await context.params before accessing the properties
+    const { id, imageId } = await context.params;
     const eventId = parseInt(id);
+    const imageId2 = parseInt(imageId);
     
-    if (isNaN(eventId)) {
-      return new NextResponse('Invalid event ID', { status: 400 });
+    if (isNaN(eventId) || isNaN(imageId2)) {
+      return new NextResponse('Invalid event or image ID', { status: 400 });
     }
 
-    const event = await prisma.event.findUnique({
-      where: { id: eventId },
+    const eventImage = await prisma.eventImage.findFirst({
+      where: { 
+        id: imageId2,
+        eventId: eventId 
+      },
       select: {
         imageData: true,
         imageMimeType: true,
@@ -25,7 +27,7 @@ export async function GET(
       }
     });
 
-    if (!event || !event.imageData) {
+    if (!eventImage || !eventImage.imageData) {
       return new NextResponse('Image not found', { status: 404 });
     }
 
@@ -34,9 +36,9 @@ export async function GET(
     const timestamp = url.searchParams.get('t');
 
     // Return the image with the appropriate content type
-    const response = new NextResponse(event.imageData);
-    response.headers.set('Content-Type', event.imageMimeType || 'image/jpeg');
-    response.headers.set('Content-Disposition', `inline; filename="${event.imageName || 'event-image'}"`);
+    const response = new NextResponse(eventImage.imageData);
+    response.headers.set('Content-Type', eventImage.imageMimeType || 'image/jpeg');
+    response.headers.set('Content-Disposition', `inline; filename="${eventImage.imageName || 'event-image'}"`);
     
     // Set no-cache headers to prevent browsers from caching images
     response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');

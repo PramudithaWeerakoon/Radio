@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/popover";
 import { format } from "date-fns";
 import Link from "next/link";
-import { useState, FormEvent, useRef } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "@/components/ui/use-toast";
 
@@ -37,8 +37,9 @@ export default function NewEventPage() {
   });
   const [category, setCategory] = useState<string>(""); // Track category separately
   const [isLoading, setIsLoading] = useState(false);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [youtubeId, setYoutubeId] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Event category definitions - kept in sync with frontend display
@@ -59,27 +60,28 @@ export default function NewEventPage() {
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setImageFile(file);
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      setImageFiles(files);
 
-      // Create preview URL
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      // Create previews for all images
+      const readers = files.map((file) => {
+        return new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(file);
+        });
+      });
+      Promise.all(readers).then(setImagePreviews);
     }
   };
 
-  const handleRemoveImage = () => {
-    setImageFile(null);
-    setImagePreview(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
+  const handleRemoveImage = (index: number) => {
+    setImageFiles((prev) => prev.filter((_, i) => i !== index));
+    setImagePreviews((prev) => prev.filter((_, i) => i !== index));
   };
-  const handleSubmit = async (e: FormEvent) => {
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!date) {
@@ -116,10 +118,13 @@ export default function NewEventPage() {
       // Add category
       submitData.append("category", category);
 
-      // Add image file if selected
-      if (imageFile) {
-        submitData.append("image", imageFile);
-      }
+      // Add YouTube ID
+      submitData.append("youtubeId", youtubeId);
+
+      // Add all image files
+      imageFiles.forEach((file, idx) => {
+        submitData.append("images", file, file.name);
+      });
 
       const response = await fetch("/api/events", {
         method: "POST",
@@ -229,44 +234,54 @@ export default function NewEventPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="image">Event Image</Label>
-              {imagePreview ? (
-                <div className="relative w-full h-48 bg-slate-100 rounded-md overflow-hidden">
-                  <img
-                    src={imagePreview}
-                    alt="Event preview"
-                    className="w-full h-full object-cover"
-                  />
-                  <Button
-                    variant="destructive"
-                    size="icon"
-                    className="absolute top-2 right-2 h-6 w-6 rounded-full"
-                    onClick={handleRemoveImage}
-                    type="button"
+              <Label htmlFor="images">Event Images</Label>
+              <div className="flex flex-wrap gap-2">
+                {imagePreviews.map((src, idx) => (
+                  <div
+                    key={idx}
+                    className="relative w-32 h-20 bg-slate-100 rounded-md overflow-hidden"
                   >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ) : (
-                <div
-                  className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:bg-gray-50"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <Upload className="h-8 w-8 text-gray-400" />
-                  <p className="mt-2 text-sm text-gray-500">
-                    Click to upload an image
-                  </p>
-                </div>
-              )}
+                    <img
+                      src={src}
+                      alt={`Event preview ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-1 right-1 h-5 w-5 rounded-full"
+                      onClick={() => handleRemoveImage(idx)}
+                      type="button"
+                    >
+                      <span className="sr-only">Remove</span>
+                      X
+                    </Button>
+                  </div>
+                ))}
+              </div>
               <Input
-                id="image"
+                id="images"
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
+                multiple
                 className="hidden"
                 onChange={handleFileChange}
               />
-            </div>{" "}
+              <Button type="button" onClick={() => fileInputRef.current?.click()}>
+                Select Images
+              </Button>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="youtubeId">YouTube Video ID</Label>
+              <Input
+                id="youtubeId"
+                name="youtubeId"
+                placeholder="e.g. mruBJuLSRvQ"
+                value={youtubeId}
+                onChange={(e) => setYoutubeId(e.target.value)}
+              />
+            </div>
             <div className="space-y-2">
               <Label htmlFor="description">Event Details</Label>
               <Textarea

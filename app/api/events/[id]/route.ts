@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/db";
 
 // Get event by ID
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    // Correctly await the params object before accessing its properties
-    const { id: paramId } = await params;
+    // Access the params directly
+    const { id: paramId } = params;
     const id = parseInt(paramId);
 
     if (isNaN(id)) {
@@ -16,10 +16,11 @@ export async function GET(
         { success: false, message: "Invalid event ID" },
         { status: 400 }
       );
-    }
-
-    const event = await prisma.event.findUnique({
+    }    const event = await prisma.event.findUnique({
       where: { id },
+      include: {
+        images: true, // Include the associated EventImage records
+      }
     });
 
     if (!event) {
@@ -45,11 +46,11 @@ export async function GET(
 // Update an event
 export async function PUT(
   request: Request,
-  context: { params: Promise<{ id: string }> }
+  context: { params: { id: string } }
 ) {
   try {
-    // Correctly await the params object before accessing its properties
-    const { id: idParam } = await context.params;
+    // Get the params directly since Next.js App Router already awaits them
+    const { id: idParam } = context.params;
     const id = parseInt(idParam);
     
     if (isNaN(id)) {
@@ -80,10 +81,24 @@ export async function PUT(
     const description = formData.get('description') as string;
     const category = formData.get('category') as string || 'others'; // Default to 'others' if not provided
     const imageRemoved = formData.get('imageRemoved') === 'true';
-    
-    // Extract image file if it exists
+      // Extract image file if it exists
     const imageFile = formData.get('image') as File | null;
-      // Combine date and time into a single DateTime
+      // Extract gallery images if they exist
+    const galleryFiles: File[] = [];
+    // FormData can contain multiple values for the same key
+    // Use getAll to retrieve all files with the key 'images'
+    const formDataImages = formData.getAll('images');
+    formDataImages.forEach(value => {
+      if (value instanceof File) {
+        galleryFiles.push(value);
+      }
+    });
+    
+    // Check for images to delete
+    const imagesToDeleteStr = formData.get('imagesToDelete') as string;
+    const imagesToDelete = imagesToDeleteStr ? JSON.parse(imagesToDeleteStr) as number[] : [];
+      
+    // Combine date and time into a single DateTime
     const eventDateTime = new Date(date);
     
     // Prepare the event data for database update
@@ -101,7 +116,7 @@ export async function PUT(
     // Process image update
     if (imageFile && imageFile instanceof File) {
       // Add a new image
-      const imageBuffer = Buffer.from(await imageFile.arrayBuffer());
+      const imageBuffer = new Uint8Array(await imageFile.arrayBuffer());
       eventData.imageName = imageFile.name;
       eventData.imageData = imageBuffer;
       eventData.imageMimeType = imageFile.type;
@@ -112,12 +127,35 @@ export async function PUT(
       eventData.imageMimeType = null;
     }
     // If neither condition is met, keep the existing image
-    
-    // Update the event
+      // Update the event
     const updatedEvent = await prisma.event.update({
       where: { id },
       data: eventData,
     });
+    
+    // Process gallery images
+    if (galleryFiles.length > 0) {
+      for (const file of galleryFiles) {
+        const imageBuffer = new Uint8Array(await file.arrayBuffer());
+          await prisma.eventImage.create({
+            data: {
+              eventId: id,
+              imageName: file.name,
+              imageData: imageBuffer,
+              imageMimeType: file.type,
+            },
+          });
+      }
+    }
+    
+    // Delete any images that were marked for deletion
+    if (imagesToDelete.length > 0) {
+      for (const imageId of imagesToDelete) {
+        await prisma.eventImage.delete({
+          where: { id: imageId },
+        });
+      }
+    }
     
     return NextResponse.json(updatedEvent);
   } catch (error) {
@@ -132,11 +170,11 @@ export async function PUT(
 // Delete an event
 export async function DELETE(
   request: Request,
-  context: { params: Promise<{ id: string }> }
+  context: { params: { id: string } }
 ) {
   try {
-    // Correctly await the params object before accessing its properties
-    const { id: idParam } = await context.params;
+    // Get the params directly since Next.js App Router already awaits them
+    const { id: idParam } = context.params;
     const id = parseInt(idParam);
     
     if (isNaN(id)) {

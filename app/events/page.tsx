@@ -77,8 +77,7 @@ export default function EventsPage() {
 
   // Fetch events from the database
   useEffect(() => {
-    async function fetchData() {
-      try {
+    async function fetchData() {      try {
         setIsLoading(true);
         
         // Fetch events
@@ -89,13 +88,23 @@ export default function EventsPage() {
         const eventsData = await eventsResponse.json();
         
         // Process events to include image URLs
-        const processedEvents = eventsData.events.map((event: any) => ({
-          ...event,
-          imageUrl: event.imageName ? `/api/events/${event.id}/image?t=${Date.now()}` : null,
-          image: event.image || "https://placehold.co/600x400?text=No+Image",
-          // Assign default categories based on title/description if not present
-          category: event.category || assignDefaultCategory(event)
-        }));
+        const processedEvents = eventsData.events.map((event: any) => {
+          // Check if the event has images collection
+          const hasGalleryImages = event.images && event.images.length > 0;
+          
+          return {
+            ...event,
+            // For the main image URL, prioritize the first gallery image if available
+            imageUrl: hasGalleryImages 
+              ? `/api/events/${event.id}/images/${event.images[0].id}?t=${Date.now()}`
+              : event.imageName 
+                ? `/api/events/${event.id}/image?t=${Date.now()}` 
+                : null,
+            image: event.image || "https://placehold.co/600x400?text=No+Image",
+            // Assign default categories based on title/description if not present
+            category: event.category || assignDefaultCategory(event)
+          };
+        });
         setEvents(processedEvents || []);
         
       } catch (err) {
